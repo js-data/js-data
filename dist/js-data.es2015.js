@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-rc.7 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-rc.8 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -1935,6 +1935,7 @@ function Component(opts) {
    * {@link Component#on} and {@link Component#off} instead.
    *
    * @name Component#_listeners
+   * @private
    * @instance
    * @since 3.0.0
    * @type {Object}
@@ -3239,6 +3240,1354 @@ var Query$1 = Component$1.extend({
  * @since 3.0.0
  */
 
+// TODO: remove this when the rest of the project is cleaned
+var belongsToType = 'belongsTo';
+var hasManyType = 'hasMany';
+var hasOneType = 'hasOne';
+
+var DOMAIN$4 = 'Relation';
+
+function Relation(relatedMapper) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  utils.classCallCheck(this, Relation);
+
+  options.type = this.constructor.TYPE_NAME;
+  this.validateOptions(relatedMapper, options);
+
+  if ((typeof relatedMapper === 'undefined' ? 'undefined' : _typeof(relatedMapper)) === 'object') {
+    Object.defineProperty(this, 'relatedMapper', { value: relatedMapper });
+  }
+
+  Object.defineProperty(this, 'inverse', { writable: true });
+  utils.fillIn(this, options);
+}
+
+Relation.extend = utils.extend;
+
+utils.addHiddenPropsToTarget(Relation.prototype, {
+  get canAutoAddLinks() {
+    return this.add === undefined || !!this.add;
+  },
+
+  get relatedCollection() {
+    return this.mapper.datastore.getCollection(this.relation);
+  },
+
+  validateOptions: function validateOptions(related, opts) {
+    var DOMAIN_ERR = 'new ' + DOMAIN$4;
+
+    var localField = opts.localField;
+    if (!localField) {
+      throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField);
+    }
+
+    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
+    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
+      throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey);
+    }
+
+    if (utils.isString(related)) {
+      opts.relation = related;
+      if (!utils.isFunction(opts.getRelation)) {
+        throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation);
+      }
+    } else if (related) {
+      opts.relation = related.name;
+    } else {
+      throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related);
+    }
+  },
+  assignTo: function assignTo(mapper) {
+    this.name = mapper.name;
+    Object.defineProperty(this, 'mapper', { value: mapper });
+
+    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
+    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
+    mapper.relationList.push(this);
+    mapper.relationFields.push(this.localField);
+  },
+  canFindLinkFor: function canFindLinkFor() {
+    return !!(this.foreignKey || this.localKey);
+  },
+  getRelation: function getRelation() {
+    return this.relatedMapper;
+  },
+  getForeignKey: function getForeignKey(record) {
+    return utils.get(record, this.mapper.idAttribute);
+  },
+  setForeignKey: function setForeignKey(record, relatedRecord) {
+    if (!record || !relatedRecord) {
+      return;
+    }
+
+    this._setForeignKey(record, relatedRecord);
+  },
+  _setForeignKey: function _setForeignKey(record, relatedRecords) {
+    var _this = this;
+
+    var idAttribute = this.mapper.idAttribute;
+
+    if (!utils.isArray(relatedRecords)) {
+      relatedRecords = [relatedRecords];
+    }
+
+    relatedRecords.forEach(function (relatedRecord) {
+      utils.set(relatedRecord, _this.foreignKey, utils.get(record, idAttribute));
+    });
+  },
+  getLocalField: function getLocalField(record) {
+    return utils.get(record, this.localField);
+  },
+  setLocalField: function setLocalField(record, relatedData) {
+    return utils.set(record, this.localField, relatedData);
+  },
+  getInverse: function getInverse(mapper) {
+    if (!this.inverse) {
+      this.findInverseRelation(mapper);
+    }
+
+    return this.inverse;
+  },
+  findInverseRelation: function findInverseRelation(mapper) {
+    var _this2 = this;
+
+    this.getRelation().relationList.forEach(function (def) {
+      if (def.getRelation() === mapper && _this2.isInversedTo(def)) {
+        _this2.inverse = def;
+        return true;
+      }
+    });
+  },
+  isInversedTo: function isInversedTo(def) {
+    return !def.foreignKey || def.foreignKey === this.foreignKey;
+  },
+  addLinkedRecords: function addLinkedRecords(records) {
+    var _this3 = this;
+
+    var datastore = this.mapper.datastore;
+
+    records.forEach(function (record) {
+      var relatedData = _this3.getLocalField(record);
+
+      if (utils.isFunction(_this3.add)) {
+        relatedData = _this3.add(datastore, _this3, record);
+      } else if (relatedData) {
+        relatedData = _this3.linkRecord(record, relatedData);
+      }
+
+      var isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length;
+
+      if (isEmptyLinks && _this3.canFindLinkFor(record)) {
+        relatedData = _this3.findExistingLinksFor(record);
+      }
+
+      if (relatedData) {
+        _this3.setLocalField(record, relatedData);
+      }
+    });
+  },
+  removeLinkedRecords: function removeLinkedRecords(relatedMapper, records) {
+    var localField = this.localField;
+    records.forEach(function (record) {
+      utils.set(record, localField, undefined);
+    });
+  },
+  linkRecord: function linkRecord(record, relatedRecord) {
+    var relatedId = utils.get(relatedRecord, this.mapper.idAttribute);
+
+    if (relatedId === undefined) {
+      var unsaved = this.relatedCollection.unsaved();
+      if (unsaved.indexOf(relatedRecord) === -1) {
+        if (this.canAutoAddLinks) {
+          relatedRecord = this.relatedCollection.add(relatedRecord);
+        }
+      }
+    } else {
+      if (relatedRecord !== this.relatedCollection.get(relatedId)) {
+        this.setForeignKey(record, relatedRecord);
+
+        if (this.canAutoAddLinks) {
+          relatedRecord = this.relatedCollection.add(relatedRecord);
+        }
+      }
+    }
+
+    return relatedRecord;
+  },
+
+
+  // e.g. user hasMany post via "foreignKey", so find all posts of user
+  findExistingLinksByForeignKey: function findExistingLinksByForeignKey(id) {
+    if (id === undefined || id === null) {
+      return;
+    }
+    return this.relatedCollection.filter(defineProperty({}, this.foreignKey, id));
+  }
+});
+
+var BelongsToRelation = Relation.extend({
+  getForeignKey: function getForeignKey(record) {
+    return utils.get(record, this.foreignKey);
+  },
+  _setForeignKey: function _setForeignKey(record, relatedRecord) {
+    utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute));
+  },
+  findExistingLinksFor: function findExistingLinksFor(record) {
+    // console.log('\tBelongsTo#findExistingLinksFor', record)
+    if (!record) {
+      return;
+    }
+    var relatedId = utils.get(record, this.foreignKey);
+    if (relatedId !== undefined && relatedId !== null) {
+      return this.relatedCollection.get(relatedId);
+    }
+  }
+}, {
+  TYPE_NAME: 'belongsTo'
+});
+
+var HasManyRelation = Relation.extend({
+  validateOptions: function validateOptions(related, opts) {
+    Relation.prototype.validateOptions.call(this, related, opts);
+
+    var localKeys = opts.localKeys,
+        foreignKeys = opts.foreignKeys,
+        foreignKey = opts.foreignKey;
+
+
+    if (!foreignKey && !localKeys && !foreignKeys) {
+      throw utils.err('new Relation', 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey);
+    }
+  },
+  canFindLinkFor: function canFindLinkFor(record) {
+    var hasForeignKeys = this.foreignKey || this.foreignKeys;
+    return !!(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys));
+  },
+  linkRecord: function linkRecord(record, relatedRecords) {
+    var _this = this;
+
+    var relatedCollection = this.relatedCollection;
+    var canAutoAddLinks = this.canAutoAddLinks;
+    var foreignKey = this.foreignKey;
+    var unsaved = this.relatedCollection.unsaved();
+
+    return relatedRecords.map(function (relatedRecord) {
+      var relatedId = relatedCollection.recordId(relatedRecord);
+
+      if (relatedId === undefined && unsaved.indexOf(relatedRecord) === -1 || relatedRecord !== relatedCollection.get(relatedId)) {
+        if (foreignKey) {
+          // TODO: slow, could be optimized? But user loses hook
+          _this.setForeignKey(record, relatedRecord);
+        }
+        if (canAutoAddLinks) {
+          relatedRecord = relatedCollection.add(relatedRecord);
+        }
+      }
+
+      return relatedRecord;
+    });
+  },
+  findExistingLinksFor: function findExistingLinksFor(record) {
+    var id = utils.get(record, this.mapper.idAttribute);
+    var ids = this.localKeys ? utils.get(record, this.localKeys) : null;
+    var records = void 0;
+
+    if (id !== undefined && this.foreignKey) {
+      records = this.findExistingLinksByForeignKey(id);
+    } else if (this.localKeys && ids) {
+      records = this.findExistingLinksByLocalKeys(ids);
+    } else if (id !== undefined && this.foreignKeys) {
+      records = this.findExistingLinksByForeignKeys(id);
+    }
+
+    if (records && records.length) {
+      return records;
+    }
+  },
+
+
+  // e.g. user hasMany group via "foreignKeys", so find all users of a group
+  findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(ids) {
+    return this.relatedCollection.filter({
+      where: defineProperty({}, this.mapper.idAttribute, {
+        'in': ids
+      })
+    });
+  },
+
+
+  // e.g. group hasMany user via "localKeys", so find all groups that own a user
+  findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(id) {
+    return this.relatedCollection.filter({
+      where: defineProperty({}, this.foreignKeys, {
+        'contains': id
+      })
+    });
+  }
+}, {
+  TYPE_NAME: 'hasMany'
+});
+
+var HasOneRelation = Relation.extend({
+  findExistingLinksFor: function findExistingLinksFor(relatedMapper, record) {
+    var recordId = utils.get(record, relatedMapper.idAttribute);
+    var records = this.findExistingLinksByForeignKey(recordId);
+
+    if (records && records.length) {
+      return records[0];
+    }
+  }
+}, {
+  TYPE_NAME: 'hasOne'
+});
+
+[BelongsToRelation, HasManyRelation, HasOneRelation].forEach(function (RelationType) {
+  Relation[RelationType.TYPE_NAME] = function (related, options) {
+    return new RelationType(related, options);
+  };
+});
+
+/**
+ * BelongsTo relation decorator. You probably won't use this directly.
+ *
+ * @name module:js-data.belongsTo
+ * @method
+ * @param {Mapper} related The relation the target belongs to.
+ * @param {Object} opts Configuration options.
+ * @param {string} opts.foreignKey The field that holds the primary key of the
+ * related record.
+ * @param {string} opts.localField The field that holds a reference to the
+ * related record object.
+ * @returns {Function} Invocation function, which accepts the target as the only
+ * parameter.
+ */
+var belongsTo = function belongsTo(related, opts) {
+  return function (mapper) {
+    Relation.belongsTo(related, opts).assignTo(mapper);
+  };
+};
+
+/**
+ * HasMany relation decorator. You probably won't use this directly.
+ *
+ * @name module:js-data.hasMany
+ * @method
+ * @param {Mapper} related The relation of which the target has many.
+ * @param {Object} opts Configuration options.
+ * @param {string} [opts.foreignKey] The field that holds the primary key of the
+ * related record.
+ * @param {string} opts.localField The field that holds a reference to the
+ * related record object.
+ * @returns {Function} Invocation function, which accepts the target as the only
+ * parameter.
+ */
+var hasMany = function hasMany(related, opts) {
+  return function (mapper) {
+    Relation.hasMany(related, opts).assignTo(mapper);
+  };
+};
+
+/**
+ * HasOne relation decorator. You probably won't use this directly.
+ *
+ * @name module:js-data.hasOne
+ * @method
+ * @param {Mapper} related The relation of which the target has one.
+ * @param {Object} opts Configuration options.
+ * @param {string} [opts.foreignKey] The field that holds the primary key of the
+ * related record.
+ * @param {string} opts.localField The field that holds a reference to the
+ * related record object.
+ * @returns {Function} Invocation function, which accepts the target as the only
+ * parameter.
+ */
+var hasOne = function hasOne(related, opts) {
+  return function (mapper) {
+    Relation.hasOne(related, opts).assignTo(mapper);
+  };
+};
+
+var DOMAIN$3 = 'Record';
+
+var superMethod = function superMethod(mapper, name) {
+  var store = mapper.datastore;
+  if (store && store[name]) {
+    return function () {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return store[name].apply(store, [mapper.name].concat(args));
+    };
+  }
+  return mapper[name].bind(mapper);
+};
+
+// Cache these strings
+var creatingPath = 'creating';
+var noValidatePath$1 = 'noValidate';
+var keepChangeHistoryPath = 'keepChangeHistory';
+var previousPath = 'previous';
+
+/**
+ * js-data's Record class. An instance of `Record` corresponds to an in-memory
+ * representation of a single row or document in a database, Firebase,
+ * localstorage, etc. Basically, a `Record` instance represents whatever kind of
+ * entity in your persistence layer that has a primary key.
+ *
+ * ```javascript
+ * import {Record} from 'js-data'
+ * ```
+ *
+ * @example <caption>Record#constructor</caption>
+ * // Normally you would do: import {Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-rc.4')
+ * const {Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Instantiate a plain record
+ * let record = new Record()
+ * console.log('record: ' + JSON.stringify(record))
+ *
+ * // You can supply properties on instantiation
+ * record = new Record({ name: 'John' })
+ * console.log('record: ' + JSON.stringify(record))
+ *
+ * @example <caption>Record#constructor2</caption>
+ * // Normally you would do: import {Mapper} from 'js-data'
+ * const JSData = require('js-data@3.0.0-rc.4')
+ * const {Mapper} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Instantiate a record that's associated with a Mapper:
+ * const UserMapper = new Mapper({ name: 'user' })
+ * const User = UserMapper.recordClass
+ * const user = UserMapper.createRecord({ name: 'John' })
+ * const user2 = new User({ name: 'Sally' })
+ * console.log('user: ' + JSON.stringify(user))
+ * console.log('user2: ' + JSON.stringify(user2))
+ *
+ * @example <caption>Record#constructor3</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-rc.4')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user')
+ *
+ * // Instantiate a record that's associated with a store's Mapper
+ * const user = store.createRecord('user', { name: 'John' })
+ * console.log('user: ' + JSON.stringify(user))
+ *
+ * @example <caption>Record#constructor4</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-rc.4')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * })
+ *
+ * // Validate on instantiation
+ * const user = store.createRecord('user', { name: 1234 })
+ * console.log('user: ' + JSON.stringify(user))
+ *
+ * @example <caption>Record#constructor5</caption>
+ * // Normally you would do: import {Container} from 'js-data'
+ * const JSData = require('js-data@3.0.0-rc.4')
+ * const {Container} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * const store = new Container()
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * })
+ *
+ * // Skip validation on instantiation
+ * const user = store.createRecord('user', { name: 1234 }, { noValidate: true })
+ * console.log('user: ' + JSON.stringify(user))
+ * console.log('user.isValid(): ' + user.isValid())
+ *
+ * @class Record
+ * @extends Component
+ * @param {Object} [props] The initial properties of the new Record instance.
+ * @param {Object} [opts] Configuration options.
+ * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+ * initial properties.
+ * @param {boolean} [opts.validateOnSet=true] Whether to enable setter
+ * validation on properties after the Record has been initialized.
+ * @since 3.0.0
+ */
+function Record(props, opts) {
+  utils.classCallCheck(this, Record);
+  Settable.call(this);
+  props || (props = {});
+  opts || (opts = {});
+  var _set = this._set;
+  _set(creatingPath, true);
+  _set(noValidatePath$1, !!opts.noValidate);
+  _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? mapper ? mapper.keepChangeHistory : true : opts.keepChangeHistory);
+
+  // Set the idAttribute value first, if it exists.
+  var mapper = this.constructor.mapper;
+  var id = mapper ? utils.get(props, mapper.idAttribute) : undefined;
+  if (id !== undefined) {
+    utils.set(this, mapper.idAttribute, id);
+  }
+
+  utils.fillIn(this, props);
+  _set(creatingPath, false);
+  if (opts.validateOnSet !== undefined) {
+    _set(noValidatePath$1, !opts.validateOnSet);
+  } else if (mapper && mapper.validateOnSet !== undefined) {
+    _set(noValidatePath$1, !mapper.validateOnSet);
+  } else {
+    _set(noValidatePath$1, false);
+  }
+  _set(previousPath, mapper ? mapper.toJSON(props) : utils.plainCopy(props));
+}
+
+var Record$1 = Component$1.extend({
+  constructor: Record,
+
+  /**
+   * Returns the {@link Mapper} paired with this record's class, if any.
+   *
+   * @method Record#_mapper
+   * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
+   * @since 3.0.0
+   */
+  _mapper: function _mapper() {
+    var mapper = this.constructor.mapper;
+    if (!mapper) {
+      throw utils.err(DOMAIN$3 + '#_mapper', '')(404, 'mapper');
+    }
+    return mapper;
+  },
+
+
+  /**
+   * Lifecycle hook.
+   *
+   * @method Record#afterLoadRelations
+   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+   * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
+   * @since 3.0.0
+   */
+  afterLoadRelations: function afterLoadRelations() {},
+
+
+  /**
+   * Lifecycle hook.
+   *
+   * @method Record#beforeLoadRelations
+   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+   * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
+   * @since 3.0.0
+   */
+  beforeLoadRelations: function beforeLoadRelations() {},
+
+
+  /**
+   * Return the change history of this record since it was instantiated or
+   * {@link Record#commit} was called.
+   *
+   * @method Record#changeHistory
+   * @since 3.0.0
+   */
+  changeHistory: function changeHistory() {
+    return (this._get('history') || []).slice();
+  },
+
+
+  /**
+   * Return changes to this record since it was instantiated or
+   * {@link Record#commit} was called.
+   *
+   * @example <caption>Record#changes</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   * user.name = 'John'
+   * console.log('user changes: ' + JSON.stringify(user.changes()))
+   *
+   * @method Record#changes
+   * @param [opts] Configuration options.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {Object} Object describing the changes to this record since it was
+   * instantiated or its {@link Record#commit} method was last called.
+   * @since 3.0.0
+   */
+  changes: function changes(opts) {
+    opts || (opts = {});
+    return utils.diffObjects(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts);
+  },
+
+
+  /**
+   * Make the record's current in-memory state it's only state, with any
+   * previous property values being set to current values.
+   *
+   * @example <caption>Record#commit</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
+   *
+   * @method Record#commit
+   * @param {Object} [opts] Configuration options. Passed to {@link Record#toJSON}.
+   * @since 3.0.0
+   */
+  commit: function commit(opts) {
+    this._set('changed'); // unset
+    this._set('history', []); // clear history
+    this._set('previous', this.toJSON(opts));
+  },
+
+
+  /**
+   * Call {@link Mapper#destroy} using this record's primary key.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user')
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Destroy this user from the database
+   *   return user.destroy()
+   * })
+   *
+   * @method Record#destroy
+   * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
+   * @returns {Promise} The result of calling {@link Mapper#destroy} with the
+   * primary key of this record.
+   * @since 3.0.0
+   */
+  destroy: function destroy(opts) {
+    opts || (opts = {});
+    var mapper = this._mapper();
+    return superMethod(mapper, 'destroy')(utils.get(this, mapper.idAttribute), opts);
+  },
+
+
+  /**
+   * Return the value at the given path for this instance.
+   *
+   * @example <caption>Record#get</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', { name: 'Bob' })
+   * console.log('user.get("name"): ' + user.get('name'))
+   *
+   * @method Record#get
+   * @param {string} key Path of value to retrieve.
+   * @returns {*} Value at path.
+   * @since 3.0.0
+   */
+  'get': function get$$1(key) {
+    return utils.get(this, key);
+  },
+
+
+  /**
+   * Return whether this record has changed since it was instantiated or
+   * {@link Record#commit} was called.
+   *
+   * @example <caption>Record#hasChanges</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user')
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.name = 'John'
+   * console.log('user hasChanges: ' + user.hasChanges())
+   * user.commit()
+   * console.log('user hasChanges: ' + user.hasChanges())
+   *
+   * @method Record#hasChanges
+   * @param [opts] Configuration options.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {boolean} Return whether the record has changed since it was
+   * instantiated or since its {@link Record#commit} method was called.
+   * @since 3.0.0
+   */
+  hasChanges: function hasChanges(opts) {
+    var quickHasChanges = !!(this._get('changed') || []).length;
+    return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts);
+  },
+
+
+  /**
+   * Return whether the record is unsaved. Records that have primary keys are
+   * considered "saved". Records without primary keys are considered "unsaved".
+   *
+   * @example <caption>Record#isNew</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   id: 1234
+   * })
+   * const user2 = store.createRecord('user')
+   * console.log('user isNew: ' + user.isNew()) // false
+   * console.log('user2 isNew: ' + user2.isNew()) // true
+   *
+   * @method Record#isNew
+   * @returns {boolean} Whether the record is unsaved.
+   * @since 3.0.0
+   */
+  isNew: function isNew(opts) {
+    return utils.get(this, this._mapper().idAttribute) === undefined;
+  },
+
+
+  /**
+   * Return whether the record in its current state passes validation.
+   *
+   * @example <caption>Record#isValid</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user isValid: ' + user.isValid())
+   * user.name = 'John'
+   * console.log('user isValid: ' + user.isValid())
+   *
+   * @method Record#isValid
+   * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+   * @returns {boolean} Whether the record in its current state passes
+   * validation.
+   * @since 3.0.0
+   */
+  isValid: function isValid(opts) {
+    return !this._mapper().validate(this, opts);
+  },
+  removeInverseRelation: function removeInverseRelation(currentParent, id, inverseDef, idAttribute) {
+    var _this = this;
+
+    if (inverseDef.type === hasOneType) {
+      safeSetLink(currentParent, inverseDef.localField, undefined);
+    } else if (inverseDef.type === hasManyType) {
+      // e.g. remove comment from otherPost.comments
+      var children = utils.get(currentParent, inverseDef.localField);
+      if (id === undefined) {
+        utils.remove(children, function (child) {
+          return child === _this;
+        });
+      } else {
+        utils.remove(children, function (child) {
+          return child === _this || id === utils.get(child, idAttribute);
+        });
+      }
+    }
+  },
+  setupInverseRelation: function setupInverseRelation(record, id, inverseDef, idAttribute) {
+    var _this2 = this;
+
+    // Update (set) inverse relation
+    if (inverseDef.type === hasOneType) {
+      // e.g. someUser.profile = profile
+      safeSetLink(record, inverseDef.localField, this);
+    } else if (inverseDef.type === hasManyType) {
+      // e.g. add comment to somePost.comments
+      var children = utils.get(record, inverseDef.localField);
+      if (id === undefined) {
+        utils.noDupeAdd(children, this, function (child) {
+          return child === _this2;
+        });
+      } else {
+        utils.noDupeAdd(children, this, function (child) {
+          return child === _this2 || id === utils.get(child, idAttribute);
+        });
+      }
+    }
+  },
+
+
+  /**
+   * Lazy load relations of this record, to be attached to the record once their
+   * loaded.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       post: {
+   *         localField: 'posts',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.defineMapper('post', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * })
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id) // 1234
+   *
+   *   // Load the user's post relations
+   *   return user.loadRelations(['post'])
+   * }).then((user) => {
+   *   console.log(user.posts) // [{...}, {...}, ...]
+   * })
+   *
+   * @method Record#loadRelations
+   * @param {string[]} [relations] List of relations to load. Can use localField
+   * names or Mapper names to pick relations.
+   * @param {Object} [opts] Configuration options.
+   * @returns {Promise} Resolves with the record, with the loaded relations now
+   * attached.
+   * @since 3.0.0
+   */
+  loadRelations: function loadRelations(relations, opts) {
+    var _this3 = this;
+
+    var op = void 0;
+    var mapper = this._mapper();
+
+    // Default values for arguments
+    relations || (relations = []);
+    if (utils.isString(relations)) {
+      relations = [relations];
+    }
+    opts || (opts = {});
+    opts.with = relations;
+
+    // Fill in "opts" with the Model's configuration
+    utils._(opts, mapper);
+    opts.adapter = mapper.getAdapterName(opts);
+
+    // beforeLoadRelations lifecycle hook
+    op = opts.op = 'beforeLoadRelations';
+    return utils.resolve(this[op](relations, opts)).then(function () {
+      // Now delegate to the adapter
+      op = opts.op = 'loadRelations';
+      mapper.dbg(op, _this3, relations, opts);
+      var tasks = [];
+      var task = void 0;
+      utils.forEachRelation(mapper, opts, function (def, optsCopy) {
+        var relatedMapper = def.getRelation();
+        optsCopy.raw = false;
+        if (utils.isFunction(def.load)) {
+          task = def.load(mapper, def, _this3, opts);
+        } else if (def.type === 'hasMany' || def.type === 'hasOne') {
+          if (def.foreignKey) {
+            task = superMethod(relatedMapper, 'findAll')(defineProperty({}, def.foreignKey, utils.get(_this3, mapper.idAttribute)), optsCopy).then(function (relatedData) {
+              if (def.type === 'hasOne') {
+                return relatedData.length ? relatedData[0] : undefined;
+              }
+              return relatedData;
+            });
+          } else if (def.localKeys) {
+            task = superMethod(relatedMapper, 'findAll')({
+              where: defineProperty({}, relatedMapper.idAttribute, {
+                'in': utils.get(_this3, def.localKeys)
+              })
+            });
+          } else if (def.foreignKeys) {
+            task = superMethod(relatedMapper, 'findAll')({
+              where: defineProperty({}, def.foreignKeys, {
+                'contains': utils.get(_this3, mapper.idAttribute)
+              })
+            }, opts);
+          }
+        } else if (def.type === 'belongsTo') {
+          var key = utils.get(_this3, def.foreignKey);
+          if (utils.isSorN(key)) {
+            task = superMethod(relatedMapper, 'find')(key, optsCopy);
+          }
+        }
+        if (task) {
+          task = task.then(function (relatedData) {
+            def.setLocalField(_this3, relatedData);
+          });
+          tasks.push(task);
+        }
+      });
+      return Promise.all(tasks);
+    }).then(function () {
+      // afterLoadRelations lifecycle hook
+      op = opts.op = 'afterLoadRelations';
+      return utils.resolve(_this3[op](relations, opts)).then(function () {
+        return _this3;
+      });
+    });
+  },
+
+
+  /**
+   * Return the properties with which this record was instantiated.
+   *
+   * @example <caption>Record#previous</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.name = 'Bob'
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   * user.commit()
+   * console.log('user previous: ' + JSON.stringify(user.previous()))
+   *
+   * @method Record#previous
+   * @param {string} [key] If specified, return just the initial value of the
+   * given key.
+   * @returns {Object} The initial properties of this record.
+   * @since 3.0.0
+   */
+  previous: function previous(key) {
+    if (key) {
+      return this._get('previous.' + key);
+    }
+    return this._get('previous');
+  },
+
+
+  /**
+   * Revert changes to this record back to the properties it had when it was
+   * instantiated.
+   *
+   * @example <caption>Record#revert</caption>
+   * // import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   * user.name = 'Bob'
+   * console.log('user: ' + JSON.stringify(user))
+   * user.revert()
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * @method Record#revert
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.preserve] Array of strings or Regular Expressions
+   * denoting properties that should not be reverted.
+   * @since 3.0.0
+   */
+  revert: function revert(opts) {
+    var _this4 = this;
+
+    var previous = this._get('previous');
+    opts || (opts = {});
+    opts.preserve || (opts.preserve = []);
+    utils.forOwn(this, function (value, key) {
+      if (key !== _this4._mapper().idAttribute && !previous.hasOwnProperty(key) && _this4.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
+        delete _this4[key];
+      }
+    });
+    utils.forOwn(previous, function (value, key) {
+      if (opts.preserve.indexOf(key) === -1) {
+        _this4[key] = value;
+      }
+    });
+    this.commit();
+  },
+
+
+  /**
+   * Delegates to {@link Mapper#create} or {@link Mapper#update}.
+   *
+   * @example
+   * import {Container} from 'js-data'
+   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
+   *
+   * const store = new Container()
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
+   * store.defineMapper('session')
+   * const session = store.createRecord('session', { topic: 'Node.js' })
+   *
+   * // Create a new record in the database
+   * session.save().then(() => {
+   *   console.log(session.id) // 1234
+   *
+   *   session.skill_level = 'beginner'
+   *
+   *   // Update the record in the database
+   *   return session.save()
+   * })
+   *
+   * @method Record#save
+   * @param {Object} [opts] Configuration options. See {@link Mapper#create} and
+   * {@link Mapper#update}.
+   * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
+   * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
+   * `opts.changesOnly` is `true`.
+   * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
+   * `opts.changesOnly` is `true`.
+   * @returns {Promise} The result of calling {@link Mapper#create} or
+   * {@link Mapper#update}.
+   * @since 3.0.0
+   */
+  save: function save(opts) {
+    var _this5 = this;
+
+    opts || (opts = {});
+    var mapper = this._mapper();
+    var id = utils.get(this, mapper.idAttribute);
+    var props = this;
+
+    var postProcess = function postProcess(result) {
+      var record = opts.raw ? result.data : result;
+      if (record) {
+        utils.deepMixIn(_this5, record);
+        _this5.commit();
+      }
+      return result;
+    };
+
+    if (id === undefined) {
+      return superMethod(mapper, 'create')(props, opts).then(postProcess);
+    }
+    if (opts.changesOnly) {
+      var changes = this.changes(opts);
+      props = {};
+      utils.fillIn(props, changes.added);
+      utils.fillIn(props, changes.changed);
+    }
+    return superMethod(mapper, 'update')(id, props, opts).then(postProcess);
+  },
+
+
+  /**
+   * Set the value for a given key, or the values for the given keys if "key" is
+   * an object. Triggers change events on those properties that have `track: true`
+   * in {@link Mapper#schema}.
+   *
+   * @example <caption>Record#set</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set('name', 'Bob')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.set({ age: 30, role: 'admin' })
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * @fires Record#change
+   * @method Record#set
+   * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
+   * @param {*} [value] Value to set for the given key.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.silent=false] Whether to trigger change events.
+   * @since 3.0.0
+   */
+  'set': function set$$1(key, value, opts) {
+    if (utils.isObject(key)) {
+      opts = value;
+    }
+    opts || (opts = {});
+    if (opts.silent) {
+      this._set('silent', true);
+    }
+    utils.set(this, key, value);
+    if (!this._get('eventId')) {
+      this._set('silent'); // unset
+    }
+  },
+
+
+  /**
+   * Return a plain object representation of this record. If the class from
+   * which this record was created has a Mapper, then {@link Mapper#toJSON} will
+   * be called with this record instead.
+   *
+   * @example <caption>Record#toJSON</caption>
+   * // Normally you would do: import { Container } from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.8')
+   * const { Container } = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John',
+   *   $$hashKey: '1234'
+   * })
+   * console.log('user: ' + JSON.stringify(user.toJSON()))
+   *
+   * @method Record#toJSON
+   * @param {Object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Array of relation names or relation fields
+   * to include in the representation. Only available as an option if the class
+   * from which this record was created has a Mapper and this record resides in
+   * an instance of {@link DataStore}.
+   * @returns {Object} Plain object representation of this record.
+   * @since 3.0.0
+   */
+  toJSON: function toJSON(opts) {
+    var _this6 = this;
+
+    var mapper = this.constructor.mapper;
+    if (mapper) {
+      return mapper.toJSON(this, opts);
+    } else {
+      var _ret = function () {
+        var json = {};
+        utils.forOwn(_this6, function (prop, key) {
+          json[key] = utils.plainCopy(prop);
+        });
+        return {
+          v: json
+        };
+      }();
+
+      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+    }
+  },
+
+
+  /**
+   * Unset the value for a given key. Triggers change events on those properties
+   * that have `track: true` in {@link Mapper#schema}.
+   *
+   * @example <caption>Record#unset</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John'
+   * })
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * user.unset('name')
+   * console.log('user: ' + JSON.stringify(user))
+   *
+   * @method Record#unset
+   * @param {string} key Key to unset.
+   * @param {Object} [opts] Configuration options.
+   * @param {boolean} [opts.silent=false] Whether to trigger change events.
+   * @since 3.0.0
+   */
+  unset: function unset(key, opts) {
+    this.set(key, undefined, opts);
+  },
+
+
+  /**
+   * Validate this record based on its current properties.
+   *
+   * @example <caption>Record#validate</caption>
+   * // Normally you would do: import {Container} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Container} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   * const store = new Container()
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * })
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * })
+   * console.log('user validation: ' + JSON.stringify(user.validate()))
+   * user.name = 'John'
+   * console.log('user validation: ' + user.validate())
+   *
+   * @method Record#validate
+   * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+   * @returns {*} Array of errors or `undefined` if no errors.
+   * @since 3.0.0
+   */
+  validate: function validate(opts) {
+    return this._mapper().validate(this, opts);
+  }
+}, {
+  creatingPath: creatingPath,
+  noValidatePath: noValidatePath$1,
+  keepChangeHistoryPath: keepChangeHistoryPath,
+  previousPath: previousPath
+});
+
+/**
+ * Allow records to emit events.
+ *
+ * An record's registered listeners are stored in the record's private data.
+ */
+utils.eventify(Record.prototype, function () {
+  return this._get('events');
+}, function (value) {
+  this._set('events', value);
+});
+
+/**
+ * Fired when a record changes. Only works for records that have tracked fields.
+ * See {@link Record~changeListener} on how to listen for this event.
+ *
+ * @event Record#change
+ * @see Record~changeListener
+ */
+
+/**
+ * Callback signature for the {@link Record#event:change} event.
+ *
+ * @example
+ * function onChange (record, changes) {
+ *   // do something
+ * }
+ * record.on('change', onChange)
+ *
+ * @callback Record~changeListener
+ * @param {Record} The Record that changed.
+ * @param {Object} The changes.
+ * @see Record#event:change
+ * @since 3.0.0
+ */
+
+/**
+ * Create a subclass of this Record:
+ * @example <caption>Record.extend</caption>
+ * // Normally you would do: import {Record} from 'js-data'
+ * const JSData = require('js-data@3.0.0-rc.4')
+ * const {Record} = JSData
+ * console.log('Using JSData v' + JSData.version.full)
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomRecordClass extends Record {
+ *   foo () { return 'bar' }
+ *   static beep () { return 'boop' }
+ * }
+ * const customRecord = new CustomRecordClass()
+ * console.log(customRecord.foo())
+ * console.log(CustomRecordClass.beep())
+ *
+ * // Extend the class using alternate method.
+ * const OtherRecordClass = Record.extend({
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const otherRecord = new OtherRecordClass()
+ * console.log(otherRecord.foo())
+ * console.log(OtherRecordClass.beep())
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherRecordClass () {
+ *   Record.call(this)
+ *   this.created_at = new Date().getTime()
+ * }
+ * Record.extend({
+ *   constructor: AnotherRecordClass,
+ *   foo () { return 'bar' }
+ * }, {
+ *   beep () { return 'boop' }
+ * })
+ * const anotherRecord = new AnotherRecordClass()
+ * console.log(anotherRecord.created_at)
+ * console.log(anotherRecord.foo())
+ * console.log(AnotherRecordClass.beep())
+ *
+ * @method Record.extend
+ * @param {Object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {Object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
+ * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Record class.
+ * @since 3.0.0
+ */
+
 function sort(a, b, hashCode) {
   // Short-circuit comparison if a and b are strictly equal
   // This is absolutely necessary for indexed objects that
@@ -3618,6 +4967,9 @@ utils.addHiddenPropsToTarget(Index.prototype, {
   }
 });
 
+var noValidatePath = Record$1.noValidatePath;
+
+
 var DOMAIN$1 = 'Collection';
 
 var COLLECTION_DEFAULTS = {
@@ -3828,6 +5180,7 @@ var Collection$1 = Component$1.extend({
    * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
    * @param {Object} [opts] Configuration options.
    * @param {boolean} [opts.commitOnMerge=true] See {@link Collection#commitOnMerge}.
+   * @param {boolean} [opts.noValidate] See {@link Record#noValidate}.
    * @param {string} [opts.onConflict] See {@link Collection#onConflict}.
    * @returns {(Object|Object[]|Record|Record[])} The added record or records.
    */
@@ -3871,6 +5224,14 @@ var Collection$1 = Component$1.extend({
         // Here, the currently visited record corresponds to a record already
         // in the collection, so we need to merge them
         var onConflict = opts.onConflict || _this.onConflict;
+        if (onConflict !== 'merge' && onConflict !== 'replace') {
+          throw utils.err(DOMAIN$1 + '#add', 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true);
+        }
+        var existingNoValidate = existing._get(noValidatePath);
+        if (opts.noValidate) {
+          // Disable validation
+          existing._set(noValidatePath, true);
+        }
         if (onConflict === 'merge') {
           utils.deepMixIn(existing, record);
         } else if (onConflict === 'replace') {
@@ -3880,8 +5241,10 @@ var Collection$1 = Component$1.extend({
             }
           });
           existing.set(record);
-        } else {
-          throw utils.err(DOMAIN$1 + '#add', 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true);
+        }
+        if (opts.noValidate) {
+          // Restore previous `noValidate` value
+          existing._set(noValidatePath, existingNoValidate);
         }
         record = existing;
         if (opts.commitOnMerge && utils.isFunction(record.commit)) {
@@ -4604,1347 +5967,6 @@ var Collection$1 = Component$1.extend({
  * @since 3.0.0
  */
 
-// TODO: remove this when the rest of the project is cleaned
-var belongsToType = 'belongsTo';
-var hasManyType = 'hasMany';
-var hasOneType = 'hasOne';
-
-var DOMAIN$6 = 'Relation';
-
-function Relation(relatedMapper) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-  utils.classCallCheck(this, Relation);
-
-  options.type = this.constructor.TYPE_NAME;
-  this.validateOptions(relatedMapper, options);
-
-  if ((typeof relatedMapper === 'undefined' ? 'undefined' : _typeof(relatedMapper)) === 'object') {
-    Object.defineProperty(this, 'relatedMapper', { value: relatedMapper });
-  }
-
-  Object.defineProperty(this, 'inverse', { writable: true });
-  utils.fillIn(this, options);
-}
-
-Relation.extend = utils.extend;
-
-utils.addHiddenPropsToTarget(Relation.prototype, {
-  get canAutoAddLinks() {
-    return this.add === undefined || !!this.add;
-  },
-
-  get relatedCollection() {
-    return this.mapper.datastore.getCollection(this.relation);
-  },
-
-  validateOptions: function validateOptions(related, opts) {
-    var DOMAIN_ERR = 'new ' + DOMAIN$6;
-
-    var localField = opts.localField;
-    if (!localField) {
-      throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField);
-    }
-
-    var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
-    if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
-      throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey);
-    }
-
-    if (utils.isString(related)) {
-      opts.relation = related;
-      if (!utils.isFunction(opts.getRelation)) {
-        throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation);
-      }
-    } else if (related) {
-      opts.relation = related.name;
-    } else {
-      throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related);
-    }
-  },
-  assignTo: function assignTo(mapper) {
-    this.name = mapper.name;
-    Object.defineProperty(this, 'mapper', { value: mapper });
-
-    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
-    mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
-    mapper.relationList.push(this);
-    mapper.relationFields.push(this.localField);
-  },
-  canFindLinkFor: function canFindLinkFor() {
-    return !!(this.foreignKey || this.localKey);
-  },
-  getRelation: function getRelation() {
-    return this.relatedMapper;
-  },
-  getForeignKey: function getForeignKey(record) {
-    return utils.get(record, this.mapper.idAttribute);
-  },
-  setForeignKey: function setForeignKey(record, relatedRecord) {
-    if (!record || !relatedRecord) {
-      return;
-    }
-
-    this._setForeignKey(record, relatedRecord);
-  },
-  _setForeignKey: function _setForeignKey(record, relatedRecords) {
-    var _this = this;
-
-    var idAttribute = this.mapper.idAttribute;
-
-    if (!utils.isArray(relatedRecords)) {
-      relatedRecords = [relatedRecords];
-    }
-
-    relatedRecords.forEach(function (relatedRecord) {
-      utils.set(relatedRecord, _this.foreignKey, utils.get(record, idAttribute));
-    });
-  },
-  getLocalField: function getLocalField(record) {
-    return utils.get(record, this.localField);
-  },
-  setLocalField: function setLocalField(record, relatedData) {
-    return utils.set(record, this.localField, relatedData);
-  },
-  getInverse: function getInverse(mapper) {
-    if (!this.inverse) {
-      this.findInverseRelation(mapper);
-    }
-
-    return this.inverse;
-  },
-  findInverseRelation: function findInverseRelation(mapper) {
-    var _this2 = this;
-
-    this.getRelation().relationList.forEach(function (def) {
-      if (def.getRelation() === mapper && _this2.isInversedTo(def)) {
-        _this2.inverse = def;
-        return true;
-      }
-    });
-  },
-  isInversedTo: function isInversedTo(def) {
-    return !def.foreignKey || def.foreignKey === this.foreignKey;
-  },
-  addLinkedRecords: function addLinkedRecords(records) {
-    var _this3 = this;
-
-    var datastore = this.mapper.datastore;
-
-    records.forEach(function (record) {
-      var relatedData = _this3.getLocalField(record);
-
-      if (utils.isFunction(_this3.add)) {
-        relatedData = _this3.add(datastore, _this3, record);
-      } else if (relatedData) {
-        relatedData = _this3.linkRecord(record, relatedData);
-      }
-
-      var isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length;
-
-      if (isEmptyLinks && _this3.canFindLinkFor(record)) {
-        relatedData = _this3.findExistingLinksFor(record);
-      }
-
-      if (relatedData) {
-        _this3.setLocalField(record, relatedData);
-      }
-    });
-  },
-  removeLinkedRecords: function removeLinkedRecords(relatedMapper, records) {
-    var localField = this.localField;
-    records.forEach(function (record) {
-      utils.set(record, localField, undefined);
-    });
-  },
-  linkRecord: function linkRecord(record, relatedRecord) {
-    var relatedId = utils.get(relatedRecord, this.mapper.idAttribute);
-
-    if (relatedId === undefined) {
-      var unsaved = this.relatedCollection.unsaved();
-      if (unsaved.indexOf(relatedRecord) === -1) {
-        if (this.canAutoAddLinks) {
-          relatedRecord = this.relatedCollection.add(relatedRecord);
-        }
-      }
-    } else {
-      if (relatedRecord !== this.relatedCollection.get(relatedId)) {
-        this.setForeignKey(record, relatedRecord);
-
-        if (this.canAutoAddLinks) {
-          relatedRecord = this.relatedCollection.add(relatedRecord);
-        }
-      }
-    }
-
-    return relatedRecord;
-  },
-
-
-  // e.g. user hasMany post via "foreignKey", so find all posts of user
-  findExistingLinksByForeignKey: function findExistingLinksByForeignKey(id) {
-    if (id === undefined || id === null) {
-      return;
-    }
-    return this.relatedCollection.filter(defineProperty({}, this.foreignKey, id));
-  }
-});
-
-var BelongsToRelation = Relation.extend({
-  getForeignKey: function getForeignKey(record) {
-    return utils.get(record, this.foreignKey);
-  },
-  _setForeignKey: function _setForeignKey(record, relatedRecord) {
-    utils.set(record, this.foreignKey, utils.get(relatedRecord, this.getRelation().idAttribute));
-  },
-  findExistingLinksFor: function findExistingLinksFor(record) {
-    // console.log('\tBelongsTo#findExistingLinksFor', record)
-    if (!record) {
-      return;
-    }
-    var relatedId = utils.get(record, this.foreignKey);
-    if (relatedId !== undefined && relatedId !== null) {
-      return this.relatedCollection.get(relatedId);
-    }
-  }
-}, {
-  TYPE_NAME: 'belongsTo'
-});
-
-var HasManyRelation = Relation.extend({
-  validateOptions: function validateOptions(related, opts) {
-    Relation.prototype.validateOptions.call(this, related, opts);
-
-    var localKeys = opts.localKeys,
-        foreignKeys = opts.foreignKeys,
-        foreignKey = opts.foreignKey;
-
-
-    if (!foreignKey && !localKeys && !foreignKeys) {
-      throw utils.err('new Relation', 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey);
-    }
-  },
-  canFindLinkFor: function canFindLinkFor(record) {
-    var hasForeignKeys = this.foreignKey || this.foreignKeys;
-    return !!(hasForeignKeys || this.localKeys && utils.get(record, this.localKeys));
-  },
-  linkRecord: function linkRecord(record, relatedRecords) {
-    var _this = this;
-
-    var relatedCollection = this.relatedCollection;
-    var canAutoAddLinks = this.canAutoAddLinks;
-    var foreignKey = this.foreignKey;
-    var unsaved = this.relatedCollection.unsaved();
-
-    return relatedRecords.map(function (relatedRecord) {
-      var relatedId = relatedCollection.recordId(relatedRecord);
-
-      if (relatedId === undefined && unsaved.indexOf(relatedRecord) === -1 || relatedRecord !== relatedCollection.get(relatedId)) {
-        if (foreignKey) {
-          // TODO: slow, could be optimized? But user loses hook
-          _this.setForeignKey(record, relatedRecord);
-        }
-        if (canAutoAddLinks) {
-          relatedRecord = relatedCollection.add(relatedRecord);
-        }
-      }
-
-      return relatedRecord;
-    });
-  },
-  findExistingLinksFor: function findExistingLinksFor(record) {
-    var id = utils.get(record, this.mapper.idAttribute);
-    var ids = this.localKeys ? utils.get(record, this.localKeys) : null;
-    var records = void 0;
-
-    if (id !== undefined && this.foreignKey) {
-      records = this.findExistingLinksByForeignKey(id);
-    } else if (this.localKeys && ids) {
-      records = this.findExistingLinksByLocalKeys(ids);
-    } else if (id !== undefined && this.foreignKeys) {
-      records = this.findExistingLinksByForeignKeys(id);
-    }
-
-    if (records && records.length) {
-      return records;
-    }
-  },
-
-
-  // e.g. user hasMany group via "foreignKeys", so find all users of a group
-  findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(ids) {
-    return this.relatedCollection.filter({
-      where: defineProperty({}, this.mapper.idAttribute, {
-        'in': ids
-      })
-    });
-  },
-
-
-  // e.g. group hasMany user via "localKeys", so find all groups that own a user
-  findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(id) {
-    return this.relatedCollection.filter({
-      where: defineProperty({}, this.foreignKeys, {
-        'contains': id
-      })
-    });
-  }
-}, {
-  TYPE_NAME: 'hasMany'
-});
-
-var HasOneRelation = Relation.extend({
-  findExistingLinksFor: function findExistingLinksFor(relatedMapper, record) {
-    var recordId = utils.get(record, relatedMapper.idAttribute);
-    var records = this.findExistingLinksByForeignKey(recordId);
-
-    if (records && records.length) {
-      return records[0];
-    }
-  }
-}, {
-  TYPE_NAME: 'hasOne'
-});
-
-[BelongsToRelation, HasManyRelation, HasOneRelation].forEach(function (RelationType) {
-  Relation[RelationType.TYPE_NAME] = function (related, options) {
-    return new RelationType(related, options);
-  };
-});
-
-/**
- * BelongsTo relation decorator. You probably won't use this directly.
- *
- * @name module:js-data.belongsTo
- * @method
- * @param {Mapper} related The relation the target belongs to.
- * @param {Object} opts Configuration options.
- * @param {string} opts.foreignKey The field that holds the primary key of the
- * related record.
- * @param {string} opts.localField The field that holds a reference to the
- * related record object.
- * @returns {Function} Invocation function, which accepts the target as the only
- * parameter.
- */
-var belongsTo = function belongsTo(related, opts) {
-  return function (mapper) {
-    Relation.belongsTo(related, opts).assignTo(mapper);
-  };
-};
-
-/**
- * HasMany relation decorator. You probably won't use this directly.
- *
- * @name module:js-data.hasMany
- * @method
- * @param {Mapper} related The relation of which the target has many.
- * @param {Object} opts Configuration options.
- * @param {string} [opts.foreignKey] The field that holds the primary key of the
- * related record.
- * @param {string} opts.localField The field that holds a reference to the
- * related record object.
- * @returns {Function} Invocation function, which accepts the target as the only
- * parameter.
- */
-var hasMany = function hasMany(related, opts) {
-  return function (mapper) {
-    Relation.hasMany(related, opts).assignTo(mapper);
-  };
-};
-
-/**
- * HasOne relation decorator. You probably won't use this directly.
- *
- * @name module:js-data.hasOne
- * @method
- * @param {Mapper} related The relation of which the target has one.
- * @param {Object} opts Configuration options.
- * @param {string} [opts.foreignKey] The field that holds the primary key of the
- * related record.
- * @param {string} opts.localField The field that holds a reference to the
- * related record object.
- * @returns {Function} Invocation function, which accepts the target as the only
- * parameter.
- */
-var hasOne = function hasOne(related, opts) {
-  return function (mapper) {
-    Relation.hasOne(related, opts).assignTo(mapper);
-  };
-};
-
-var DOMAIN$5 = 'Record';
-
-var superMethod = function superMethod(mapper, name) {
-  var store = mapper.datastore;
-  if (store && store[name]) {
-    return function () {
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return store[name].apply(store, [mapper.name].concat(args));
-    };
-  }
-  return mapper[name].bind(mapper);
-};
-
-// Cache these strings
-var creatingPath = 'creating';
-var noValidatePath = 'noValidate';
-var keepChangeHistoryPath = 'keepChangeHistory';
-var previousPath = 'previous';
-
-/**
- * js-data's Record class. An instance of `Record` corresponds to an in-memory
- * representation of a single row or document in a database, Firebase,
- * localstorage, etc. Basically, a `Record` instance represents whatever kind of
- * entity in your persistence layer that has a primary key.
- *
- * ```javascript
- * import {Record} from 'js-data'
- * ```
- *
- * @example <caption>Record#constructor</caption>
- * // Normally you would do: import {Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Record} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * // Instantiate a plain record
- * let record = new Record()
- * console.log('record: ' + JSON.stringify(record))
- *
- * // You can supply properties on instantiation
- * record = new Record({ name: 'John' })
- * console.log('record: ' + JSON.stringify(record))
- *
- * @example <caption>Record#constructor2</caption>
- * // Normally you would do: import {Mapper} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Mapper} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * // Instantiate a record that's associated with a Mapper:
- * const UserMapper = new Mapper({ name: 'user' })
- * const User = UserMapper.recordClass
- * const user = UserMapper.createRecord({ name: 'John' })
- * const user2 = new User({ name: 'Sally' })
- * console.log('user: ' + JSON.stringify(user))
- * console.log('user2: ' + JSON.stringify(user2))
- *
- * @example <caption>Record#constructor3</caption>
- * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Container} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * const store = new Container()
- * store.defineMapper('user')
- *
- * // Instantiate a record that's associated with a store's Mapper
- * const user = store.createRecord('user', { name: 'John' })
- * console.log('user: ' + JSON.stringify(user))
- *
- * @example <caption>Record#constructor4</caption>
- * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Container} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * const store = new Container()
- * store.defineMapper('user', {
- *   schema: {
- *     properties: {
- *       name: { type: 'string' }
- *     }
- *   }
- * })
- *
- * // Validate on instantiation
- * const user = store.createRecord('user', { name: 1234 })
- * console.log('user: ' + JSON.stringify(user))
- *
- * @example <caption>Record#constructor5</caption>
- * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Container} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * const store = new Container()
- * store.defineMapper('user', {
- *   schema: {
- *     properties: {
- *       name: { type: 'string' }
- *     }
- *   }
- * })
- *
- * // Skip validation on instantiation
- * const user = store.createRecord('user', { name: 1234 }, { noValidate: true })
- * console.log('user: ' + JSON.stringify(user))
- * console.log('user.isValid(): ' + user.isValid())
- *
- * @class Record
- * @extends Component
- * @param {Object} [props] The initial properties of the new Record instance.
- * @param {Object} [opts] Configuration options.
- * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
- * initial properties.
- * @since 3.0.0
- */
-function Record(props, opts) {
-  utils.classCallCheck(this, Record);
-  Settable.call(this);
-  props || (props = {});
-  opts || (opts = {});
-  var _set = this._set;
-  _set(creatingPath, true);
-  if (opts.noValidate) {
-    _set(noValidatePath, opts.noValidate === undefined ? true : opts.noValidate);
-  }
-  _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? mapper ? mapper.keepChangeHistory : true : opts.keepChangeHistory);
-
-  // Set the idAttribute value first, if it exists.
-  var mapper = this.constructor.mapper;
-  var id = mapper ? utils.get(props, mapper.idAttribute) : undefined;
-  if (id !== undefined) {
-    utils.set(this, mapper.idAttribute, id);
-  }
-
-  utils.fillIn(this, props);
-  _set(creatingPath, false);
-  var validateOnSet = opts.validateOnSet === undefined ? mapper ? mapper.validateOnSet : true : opts.validateOnSet;
-  _set(noValidatePath, !validateOnSet);
-  _set(previousPath, mapper ? mapper.toJSON(props) : utils.plainCopy(props));
-}
-
-var Record$1 = Component$1.extend({
-  constructor: Record,
-
-  /**
-   * Returns the {@link Mapper} paired with this record's class, if any.
-   *
-   * @method Record#_mapper
-   * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
-   * @since 3.0.0
-   */
-  _mapper: function _mapper() {
-    var mapper = this.constructor.mapper;
-    if (!mapper) {
-      throw utils.err(DOMAIN$5 + '#_mapper', '')(404, 'mapper');
-    }
-    return mapper;
-  },
-
-
-  /**
-   * Lifecycle hook.
-   *
-   * @method Record#afterLoadRelations
-   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
-   * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
-   * @since 3.0.0
-   */
-  afterLoadRelations: function afterLoadRelations() {},
-
-
-  /**
-   * Lifecycle hook.
-   *
-   * @method Record#beforeLoadRelations
-   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
-   * @param {Object} opts The `opts` argument passed to {@link Record#loadRelations}.
-   * @since 3.0.0
-   */
-  beforeLoadRelations: function beforeLoadRelations() {},
-
-
-  /**
-   * Return the change history of this record since it was instantiated or
-   * {@link Record#commit} was called.
-   *
-   * @method Record#changeHistory
-   * @since 3.0.0
-   */
-  changeHistory: function changeHistory() {
-    return (this._get('history') || []).slice();
-  },
-
-
-  /**
-   * Return changes to this record since it was instantiated or
-   * {@link Record#commit} was called.
-   *
-   * @example <caption>Record#changes</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   *
-   * const store = new Container()
-   * store.defineMapper('user')
-   * const user = store.createRecord('user')
-   * console.log('user changes: ' + JSON.stringify(user.changes()))
-   * user.name = 'John'
-   * console.log('user changes: ' + JSON.stringify(user.changes()))
-   *
-   * @method Record#changes
-   * @param [opts] Configuration options.
-   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
-   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
-   * @returns {Object} Object describing the changes to this record since it was
-   * instantiated or its {@link Record#commit} method was last called.
-   * @since 3.0.0
-   */
-  changes: function changes(opts) {
-    opts || (opts = {});
-    return utils.diffObjects(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts);
-  },
-
-
-  /**
-   * Make the record's current in-memory state it's only state, with any
-   * previous property values being set to current values.
-   *
-   * @example <caption>Record#commit</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   *
-   * const store = new Container()
-   * store.defineMapper('user')
-   * const user = store.createRecord('user')
-   * console.log('user hasChanges: ' + user.hasChanges())
-   * user.name = 'John'
-   * console.log('user hasChanges: ' + user.hasChanges())
-   * user.commit()
-   * console.log('user hasChanges: ' + user.hasChanges())
-   *
-   * @method Record#commit
-   * @param {Object} [opts] Configuration options. Passed to {@link Record#toJSON}.
-   * @since 3.0.0
-   */
-  commit: function commit(opts) {
-    this._set('changed'); // unset
-    this._set('history', []); // clear history
-    this._set('previous', this.toJSON(opts));
-  },
-
-
-  /**
-   * Call {@link Mapper#destroy} using this record's primary key.
-   *
-   * @example
-   * import {Container} from 'js-data'
-   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
-   *
-   * const store = new Container()
-   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('user')
-   * store.find('user', 1234).then((user) => {
-   *   console.log(user.id) // 1234
-   *
-   *   // Destroy this user from the database
-   *   return user.destroy()
-   * })
-   *
-   * @method Record#destroy
-   * @param {Object} [opts] Configuration options passed to {@link Mapper#destroy}.
-   * @returns {Promise} The result of calling {@link Mapper#destroy} with the
-   * primary key of this record.
-   * @since 3.0.0
-   */
-  destroy: function destroy(opts) {
-    opts || (opts = {});
-    var mapper = this._mapper();
-    return superMethod(mapper, 'destroy')(utils.get(this, mapper.idAttribute), opts);
-  },
-
-
-  /**
-   * Return the value at the given path for this instance.
-   *
-   * @example <caption>Record#get</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user')
-   *
-   * const user = store.createRecord('user', { name: 'Bob' })
-   * console.log('user.get("name"): ' + user.get('name'))
-   *
-   * @method Record#get
-   * @param {string} key Path of value to retrieve.
-   * @returns {*} Value at path.
-   * @since 3.0.0
-   */
-  'get': function get$$1(key) {
-    return utils.get(this, key);
-  },
-
-
-  /**
-   * Return whether this record has changed since it was instantiated or
-   * {@link Record#commit} was called.
-   *
-   * @example <caption>Record#hasChanges</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user')
-   * const user = store.createRecord('user')
-   * console.log('user hasChanges: ' + user.hasChanges())
-   * user.name = 'John'
-   * console.log('user hasChanges: ' + user.hasChanges())
-   * user.commit()
-   * console.log('user hasChanges: ' + user.hasChanges())
-   *
-   * @method Record#hasChanges
-   * @param [opts] Configuration options.
-   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
-   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
-   * @returns {boolean} Return whether the record has changed since it was
-   * instantiated or since its {@link Record#commit} method was called.
-   * @since 3.0.0
-   */
-  hasChanges: function hasChanges(opts) {
-    var quickHasChanges = !!(this._get('changed') || []).length;
-    return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts);
-  },
-
-
-  /**
-   * Return whether the record is unsaved. Records that have primary keys are
-   * considered "saved". Records without primary keys are considered "unsaved".
-   *
-   * @example <caption>Record#isNew</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user')
-   * const user = store.createRecord('user', {
-   *   id: 1234
-   * })
-   * const user2 = store.createRecord('user')
-   * console.log('user isNew: ' + user.isNew()) // false
-   * console.log('user2 isNew: ' + user2.isNew()) // true
-   *
-   * @method Record#isNew
-   * @returns {boolean} Whether the record is unsaved.
-   * @since 3.0.0
-   */
-  isNew: function isNew(opts) {
-    return utils.get(this, this._mapper().idAttribute) === undefined;
-  },
-
-
-  /**
-   * Return whether the record in its current state passes validation.
-   *
-   * @example <caption>Record#isValid</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user', {
-   *   schema: {
-   *     properties: {
-   *       name: { type: 'string' }
-   *     }
-   *   }
-   * })
-   * const user = store.createRecord('user', {
-   *   name: 1234
-   * }, {
-   *   noValidate: true // this allows us to put the record into an invalid state
-   * })
-   * console.log('user isValid: ' + user.isValid())
-   * user.name = 'John'
-   * console.log('user isValid: ' + user.isValid())
-   *
-   * @method Record#isValid
-   * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
-   * @returns {boolean} Whether the record in its current state passes
-   * validation.
-   * @since 3.0.0
-   */
-  isValid: function isValid(opts) {
-    return !this._mapper().validate(this, opts);
-  },
-  removeInverseRelation: function removeInverseRelation(currentParent, id, inverseDef, idAttribute) {
-    var _this = this;
-
-    if (inverseDef.type === hasOneType) {
-      safeSetLink(currentParent, inverseDef.localField, undefined);
-    } else if (inverseDef.type === hasManyType) {
-      // e.g. remove comment from otherPost.comments
-      var children = utils.get(currentParent, inverseDef.localField);
-      if (id === undefined) {
-        utils.remove(children, function (child) {
-          return child === _this;
-        });
-      } else {
-        utils.remove(children, function (child) {
-          return child === _this || id === utils.get(child, idAttribute);
-        });
-      }
-    }
-  },
-  setupInverseRelation: function setupInverseRelation(record, id, inverseDef, idAttribute) {
-    var _this2 = this;
-
-    // Update (set) inverse relation
-    if (inverseDef.type === hasOneType) {
-      // e.g. someUser.profile = profile
-      safeSetLink(record, inverseDef.localField, this);
-    } else if (inverseDef.type === hasManyType) {
-      // e.g. add comment to somePost.comments
-      var children = utils.get(record, inverseDef.localField);
-      if (id === undefined) {
-        utils.noDupeAdd(children, this, function (child) {
-          return child === _this2;
-        });
-      } else {
-        utils.noDupeAdd(children, this, function (child) {
-          return child === _this2 || id === utils.get(child, idAttribute);
-        });
-      }
-    }
-  },
-
-
-  /**
-   * Lazy load relations of this record, to be attached to the record once their
-   * loaded.
-   *
-   * @example
-   * import {Container} from 'js-data'
-   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
-   *
-   * const store = new Container()
-   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('user', {
-   *   relations: {
-   *     hasMany: {
-   *       post: {
-   *         localField: 'posts',
-   *         foreignKey: 'user_id'
-   *       }
-   *     }
-   *   }
-   * })
-   * store.defineMapper('post', {
-   *   relations: {
-   *     belongsTo: {
-   *       user: {
-   *         localField: 'user',
-   *         foreignKey: 'user_id'
-   *       }
-   *     }
-   *   }
-   * })
-   * store.find('user', 1234).then((user) => {
-   *   console.log(user.id) // 1234
-   *
-   *   // Load the user's post relations
-   *   return user.loadRelations(['post'])
-   * }).then((user) => {
-   *   console.log(user.posts) // [{...}, {...}, ...]
-   * })
-   *
-   * @method Record#loadRelations
-   * @param {string[]} [relations] List of relations to load. Can use localField
-   * names or Mapper names to pick relations.
-   * @param {Object} [opts] Configuration options.
-   * @returns {Promise} Resolves with the record, with the loaded relations now
-   * attached.
-   * @since 3.0.0
-   */
-  loadRelations: function loadRelations(relations, opts) {
-    var _this3 = this;
-
-    var op = void 0;
-    var mapper = this._mapper();
-
-    // Default values for arguments
-    relations || (relations = []);
-    if (utils.isString(relations)) {
-      relations = [relations];
-    }
-    opts || (opts = {});
-    opts.with = relations;
-
-    // Fill in "opts" with the Model's configuration
-    utils._(opts, mapper);
-    opts.adapter = mapper.getAdapterName(opts);
-
-    // beforeLoadRelations lifecycle hook
-    op = opts.op = 'beforeLoadRelations';
-    return utils.resolve(this[op](relations, opts)).then(function () {
-      // Now delegate to the adapter
-      op = opts.op = 'loadRelations';
-      mapper.dbg(op, _this3, relations, opts);
-      var tasks = [];
-      var task = void 0;
-      utils.forEachRelation(mapper, opts, function (def, optsCopy) {
-        var relatedMapper = def.getRelation();
-        optsCopy.raw = false;
-        if (utils.isFunction(def.load)) {
-          task = def.load(mapper, def, _this3, opts);
-        } else if (def.type === 'hasMany' || def.type === 'hasOne') {
-          if (def.foreignKey) {
-            task = superMethod(relatedMapper, 'findAll')(defineProperty({}, def.foreignKey, utils.get(_this3, mapper.idAttribute)), optsCopy).then(function (relatedData) {
-              if (def.type === 'hasOne') {
-                return relatedData.length ? relatedData[0] : undefined;
-              }
-              return relatedData;
-            });
-          } else if (def.localKeys) {
-            task = superMethod(relatedMapper, 'findAll')({
-              where: defineProperty({}, relatedMapper.idAttribute, {
-                'in': utils.get(_this3, def.localKeys)
-              })
-            });
-          } else if (def.foreignKeys) {
-            task = superMethod(relatedMapper, 'findAll')({
-              where: defineProperty({}, def.foreignKeys, {
-                'contains': utils.get(_this3, mapper.idAttribute)
-              })
-            }, opts);
-          }
-        } else if (def.type === 'belongsTo') {
-          var key = utils.get(_this3, def.foreignKey);
-          if (utils.isSorN(key)) {
-            task = superMethod(relatedMapper, 'find')(key, optsCopy);
-          }
-        }
-        if (task) {
-          task = task.then(function (relatedData) {
-            def.setLocalField(_this3, relatedData);
-          });
-          tasks.push(task);
-        }
-      });
-      return Promise.all(tasks);
-    }).then(function () {
-      // afterLoadRelations lifecycle hook
-      op = opts.op = 'afterLoadRelations';
-      return utils.resolve(_this3[op](relations, opts)).then(function () {
-        return _this3;
-      });
-    });
-  },
-
-
-  /**
-   * Return the properties with which this record was instantiated.
-   *
-   * @example <caption>Record#previous</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user')
-   * const user = store.createRecord('user', {
-   *   name: 'William'
-   * })
-   * console.log('user previous: ' + JSON.stringify(user.previous()))
-   * user.name = 'Bob'
-   * console.log('user previous: ' + JSON.stringify(user.previous()))
-   * user.commit()
-   * console.log('user previous: ' + JSON.stringify(user.previous()))
-   *
-   * @method Record#previous
-   * @param {string} [key] If specified, return just the initial value of the
-   * given key.
-   * @returns {Object} The initial properties of this record.
-   * @since 3.0.0
-   */
-  previous: function previous(key) {
-    if (key) {
-      return this._get('previous.' + key);
-    }
-    return this._get('previous');
-  },
-
-
-  /**
-   * Revert changes to this record back to the properties it had when it was
-   * instantiated.
-   *
-   * @example <caption>Record#revert</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user')
-   * const user = store.createRecord('user', {
-   *   name: 'William'
-   * })
-   * console.log('user: ' + JSON.stringify(user))
-   * user.name = 'Bob'
-   * console.log('user: ' + JSON.stringify(user))
-   * user.revert()
-   * console.log('user: ' + JSON.stringify(user))
-   *
-   * @method Record#revert
-   * @param {Object} [opts] Configuration options.
-   * @param {string[]} [opts.preserve] Array of strings or Regular Expressions
-   * denoting properties that should not be reverted.
-   * @since 3.0.0
-   */
-  revert: function revert(opts) {
-    var _this4 = this;
-
-    var previous = this._get('previous');
-    opts || (opts = {});
-    opts.preserve || (opts.preserve = []);
-    utils.forOwn(this, function (value, key) {
-      if (key !== _this4._mapper().idAttribute && !previous.hasOwnProperty(key) && _this4.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
-        delete _this4[key];
-      }
-    });
-    utils.forOwn(previous, function (value, key) {
-      if (opts.preserve.indexOf(key) === -1) {
-        _this4[key] = value;
-      }
-    });
-    this.commit();
-  },
-
-
-  /**
-   * Delegates to {@link Mapper#create} or {@link Mapper#update}.
-   *
-   * @example
-   * import {Container} from 'js-data'
-   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
-   *
-   * const store = new Container()
-   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('session')
-   * const session = store.createRecord('session', { topic: 'Node.js' })
-   *
-   * // Create a new record in the database
-   * session.save().then(() => {
-   *   console.log(session.id) // 1234
-   *
-   *   session.skill_level = 'beginner'
-   *
-   *   // Update the record in the database
-   *   return session.save()
-   * })
-   *
-   * @method Record#save
-   * @param {Object} [opts] Configuration options. See {@link Mapper#create} and
-   * {@link Mapper#update}.
-   * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
-   * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
-   * `opts.changesOnly` is `true`.
-   * @param {Array} [opts.ignore] Passed to {@link Record#changes} when
-   * `opts.changesOnly` is `true`.
-   * @returns {Promise} The result of calling {@link Mapper#create} or
-   * {@link Mapper#update}.
-   * @since 3.0.0
-   */
-  save: function save(opts) {
-    var _this5 = this;
-
-    opts || (opts = {});
-    var mapper = this._mapper();
-    var id = utils.get(this, mapper.idAttribute);
-    var props = this;
-
-    var postProcess = function postProcess(result) {
-      var record = opts.raw ? result.data : result;
-      if (record) {
-        utils.deepMixIn(_this5, record);
-        _this5.commit();
-      }
-      return result;
-    };
-
-    if (id === undefined) {
-      return superMethod(mapper, 'create')(props, opts).then(postProcess);
-    }
-    if (opts.changesOnly) {
-      var changes = this.changes(opts);
-      props = {};
-      utils.fillIn(props, changes.added);
-      utils.fillIn(props, changes.changed);
-    }
-    return superMethod(mapper, 'update')(id, props, opts).then(postProcess);
-  },
-
-
-  /**
-   * Set the value for a given key, or the values for the given keys if "key" is
-   * an object. Triggers change events on those properties that have `track: true`
-   * in {@link Mapper#schema}.
-   *
-   * @example <caption>Record#set</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user')
-   *
-   * const user = store.createRecord('user')
-   * console.log('user: ' + JSON.stringify(user))
-   *
-   * user.set('name', 'Bob')
-   * console.log('user: ' + JSON.stringify(user))
-   *
-   * user.set({ age: 30, role: 'admin' })
-   * console.log('user: ' + JSON.stringify(user))
-   *
-   * @fires Record#change
-   * @method Record#set
-   * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
-   * @param {*} [value] Value to set for the given key.
-   * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.silent=false] Whether to trigger change events.
-   * @since 3.0.0
-   */
-  'set': function set$$1(key, value, opts) {
-    if (utils.isObject(key)) {
-      opts = value;
-    }
-    opts || (opts = {});
-    if (opts.silent) {
-      this._set('silent', true);
-    }
-    utils.set(this, key, value);
-    if (!this._get('eventId')) {
-      this._set('silent'); // unset
-    }
-  },
-
-
-  /**
-   * Return a plain object representation of this record. If the class from
-   * which this record was created has a Mapper, then {@link Mapper#toJSON} will
-   * be called with this record instead.
-   *
-   * @example <caption>Record#toJSON</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user', {
-   *   schema: {
-   *     properties: {
-   *       name: { type: 'string' }
-   *     }
-   *   }
-   * })
-   *
-   * const user = store.createRecord('user', {
-   *   name: 'John',
-   *   $$hashKey: '1234'
-   * })
-   * console.log('user: ' + JSON.stringify(user.toJSON()))
-   * console.log('user: ' + JSON.stringify(user.toJSON({ strict: true })))
-   *
-   * @method Record#toJSON
-   * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to exclude properties that are not
-   * defined in {@link Mapper#schema}.
-   * @param {string[]} [opts.with] Array of relation names or relation fields
-   * to include in the representation. Only available as an option if the class
-   * from which this record was created has a Mapper and this record resides in
-   * an instance of {@link DataStore}.
-   * @returns {Object} Plain object representation of this record.
-   * @since 3.0.0
-   */
-  toJSON: function toJSON(opts) {
-    var _this6 = this;
-
-    var mapper = this.constructor.mapper;
-    if (mapper) {
-      return mapper.toJSON(this, opts);
-    } else {
-      var _ret = function () {
-        var json = {};
-        utils.forOwn(_this6, function (prop, key) {
-          json[key] = utils.plainCopy(prop);
-        });
-        return {
-          v: json
-        };
-      }();
-
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-    }
-  },
-
-
-  /**
-   * Unset the value for a given key. Triggers change events on those properties
-   * that have `track: true` in {@link Mapper#schema}.
-   *
-   * @example <caption>Record#unset</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user')
-   *
-   * const user = store.createRecord('user', {
-   *   name: 'John'
-   * })
-   * console.log('user: ' + JSON.stringify(user))
-   *
-   * user.unset('name')
-   * console.log('user: ' + JSON.stringify(user))
-   *
-   * @method Record#unset
-   * @param {string} key Key to unset.
-   * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.silent=false] Whether to trigger change events.
-   * @since 3.0.0
-   */
-  unset: function unset(key, opts) {
-    this.set(key, undefined, opts);
-  },
-
-
-  /**
-   * Validate this record based on its current properties.
-   *
-   * @example <caption>Record#validate</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
-   * const store = new Container()
-   * store.defineMapper('user', {
-   *   schema: {
-   *     properties: {
-   *       name: { type: 'string' }
-   *     }
-   *   }
-   * })
-   * const user = store.createRecord('user', {
-   *   name: 1234
-   * }, {
-   *   noValidate: true // this allows us to put the record into an invalid state
-   * })
-   * console.log('user validation: ' + JSON.stringify(user.validate()))
-   * user.name = 'John'
-   * console.log('user validation: ' + user.validate())
-   *
-   * @method Record#validate
-   * @param {Object} [opts] Configuration options. Passed to {@link Mapper#validate}.
-   * @returns {*} Array of errors or `undefined` if no errors.
-   * @since 3.0.0
-   */
-  validate: function validate(opts) {
-    return this._mapper().validate(this, opts);
-  }
-});
-
-/**
- * Allow records to emit events.
- *
- * An record's registered listeners are stored in the record's private data.
- */
-utils.eventify(Record.prototype, function () {
-  return this._get('events');
-}, function (value) {
-  this._set('events', value);
-});
-
-/**
- * Fired when a record changes. Only works for records that have tracked fields.
- * See {@link Record~changeListener} on how to listen for this event.
- *
- * @event Record#change
- * @see Record~changeListener
- */
-
-/**
- * Callback signature for the {@link Record#event:change} event.
- *
- * @example
- * function onChange (record, changes) {
- *   // do something
- * }
- * record.on('change', onChange)
- *
- * @callback Record~changeListener
- * @param {Record} The Record that changed.
- * @param {Object} The changes.
- * @see Record#event:change
- * @since 3.0.0
- */
-
-/**
- * Create a subclass of this Record:
- * @example <caption>Record.extend</caption>
- * // Normally you would do: import {Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Record} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * // Extend the class using ES2015 class syntax.
- * class CustomRecordClass extends Record {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
- * }
- * const customRecord = new CustomRecordClass()
- * console.log(customRecord.foo())
- * console.log(CustomRecordClass.beep())
- *
- * // Extend the class using alternate method.
- * const OtherRecordClass = Record.extend({
- *   foo () { return 'bar' }
- * }, {
- *   beep () { return 'boop' }
- * })
- * const otherRecord = new OtherRecordClass()
- * console.log(otherRecord.foo())
- * console.log(OtherRecordClass.beep())
- *
- * // Extend the class, providing a custom constructor.
- * function AnotherRecordClass () {
- *   Record.call(this)
- *   this.created_at = new Date().getTime()
- * }
- * Record.extend({
- *   constructor: AnotherRecordClass,
- *   foo () { return 'bar' }
- * }, {
- *   beep () { return 'boop' }
- * })
- * const anotherRecord = new AnotherRecordClass()
- * console.log(anotherRecord.created_at)
- * console.log(anotherRecord.foo())
- * console.log(AnotherRecordClass.beep())
- *
- * @method Record.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
- * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Record class.
- * @since 3.0.0
- */
-
 var DOMAIN$7 = 'Schema';
 
 /**
@@ -6472,7 +6494,6 @@ var validationKeywords = {
       utils.forOwn(toValidate, function (undef, prop) {
         if (prop.match(pattern)) {
           opts.prop = prop;
-          // console.log(_schema)
           errors = errors.concat(_validate(value[prop], _schema, opts) || []);
           validated.push(prop);
         }
@@ -6614,10 +6635,70 @@ var runOps = function runOps(ops, value, schema, opts) {
   return errors.length ? errors : undefined;
 };
 
+/**
+ * Validation keywords validated for any type:
+ *
+ * - `enum`
+ * - `type`
+ * - `allOf`
+ * - `anyOf`
+ * - `oneOf`
+ * - `not`
+ *
+ * @name Schema.ANY_OPS
+ * @type {string[]}
+ */
 var ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not'];
+
+/**
+ * Validation keywords validated for array types:
+ *
+ * - `items`
+ * - `maxItems`
+ * - `minItems`
+ * - `uniqueItems`
+ *
+ * @name Schema.ARRAY_OPS
+ * @type {string[]}
+ */
 var ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems'];
+
+/**
+ * Validation keywords validated for numeric (number and integer) types:
+ *
+ * - `multipleOf`
+ * - `maximum`
+ * - `minimum`
+ *
+ * @name Schema.NUMERIC_OPS
+ * @type {string[]}
+ */
 var NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum'];
+
+/**
+ * Validation keywords validated for object types:
+ *
+ * - `maxProperties`
+ * - `minProperties`
+ * - `required`
+ * - `properties`
+ * - `dependencies`
+ *
+ * @name Schema.OBJECT_OPS
+ * @type {string[]}
+ */
 var OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies'];
+
+/**
+ * Validation keywords validated for string types:
+ *
+ * - `maxLength`
+ * - `minLength`
+ * - `pattern`
+ *
+ * @name Schema.STRING_OPS
+ * @type {string[]}
+ */
 var STRING_OPS = ['maxLength', 'minLength', 'pattern'];
 
 /**
@@ -6701,7 +6782,7 @@ var creatingPath$1 = 'creating';
 // number - The setTimeout change event id of a Record, if any
 var eventIdPath = 'eventId';
 // boolean - Whether to skip validation for a Record's currently changing property
-var noValidatePath$1 = 'noValidate';
+var noValidatePath$2 = 'noValidate';
 // boolean - Whether to preserve Change History for a Record
 var keepChangeHistoryPath$1 = 'keepChangeHistory';
 // boolean - Whether to skip change notification for a Record's currently
@@ -6753,7 +6834,7 @@ var makeDescriptor = function makeDescriptor(prop, schema, opts) {
     var _set = this[setter];
     var _unset = this[unsetter];
     // Optionally check that the new value passes validation
-    if (!_get(noValidatePath$1)) {
+    if (!_get(noValidatePath$2)) {
       var errors = schema.validate(value, { path: [prop] });
       if (errors) {
         // Immediately throw an error, preventing the record from getting into
@@ -7033,7 +7114,7 @@ var Schema$1 = Component$1.extend({
    * this Schema, which makes possible change tracking and validation on
    * property assignment.
    *
-   * @name Schema#validate
+   * @name Schema#apply
    * @method
    * @param {Object} target The prototype to which to apply this schema.
    */
@@ -7099,16 +7180,27 @@ var Schema$1 = Component$1.extend({
     var _this3 = this;
 
     if (this.type === 'object') {
+      var key;
+
       var _ret4 = function () {
         value || (value = {});
         var copy = {};
-        if (_this3.properties) {
-          utils.forOwn(_this3.properties, function (_definition, prop) {
+        var properties = _this3.properties;
+        if (properties) {
+          utils.forOwn(properties, function (_definition, prop) {
             copy[prop] = _definition.pick(value[prop]);
           });
         }
         if (_this3.extends) {
           utils.fillIn(copy, _this3.extends.pick(value));
+        }
+        // Conditionally copy properties not defined in "properties"
+        if (_this3.additionalProperties) {
+          for (key in value) {
+            if (!properties[key]) {
+              copy[key] = utils.plainCopy(value[key]);
+            }
+          }
         }
         return {
           v: copy
@@ -7207,7 +7299,7 @@ var Schema$1 = Component$1.extend({
  * @since 3.0.0
  */
 
-var DOMAIN$4 = 'Mapper';
+var DOMAIN$6 = 'Mapper';
 var applyDefaultsHooks = ['beforeCreate', 'beforeCreateMany'];
 var validatingHooks = ['beforeCreate', 'beforeCreateMany', 'beforeUpdate', 'beforeUpdateAll', 'beforeUpdateMany'];
 var makeNotify = function makeNotify(num) {
@@ -7658,15 +7750,15 @@ function Mapper(opts) {
    * @type {string}
    */
   if (!this.name) {
-    throw utils.err('new ' + DOMAIN$4, 'opts.name')(400, 'string', this.name);
+    throw utils.err('new ' + DOMAIN$6, 'opts.name')(400, 'string', this.name);
   }
 
   // Setup schema, with an empty default schema if necessary
   if (this.schema) {
     this.schema.type || (this.schema.type = 'object');
-  }
-  if (!(this.schema instanceof Schema$1)) {
-    this.schema = new Schema$1(this.schema || { type: 'object' });
+    if (!(this.schema instanceof Schema$1)) {
+      this.schema = new Schema$1(this.schema || { type: 'object' });
+    }
   }
 
   // Create a subclass of Record that's tied to this Mapper
@@ -8593,7 +8685,7 @@ var Mapper$1 = Component$1.extend({
       });
     }
     if (!utils.isObject(props)) {
-      throw utils.err(DOMAIN$4 + '#createRecord', 'props')(400, 'array or object', props);
+      throw utils.err(DOMAIN$6 + '#createRecord', 'props')(400, 'array or object', props);
     }
     var RecordCtor = this.recordClass;
     var relationList = this.relationList || [];
@@ -8633,7 +8725,7 @@ var Mapper$1 = Component$1.extend({
 
     var config = this.lifecycleMethods[method];
     if (!config) {
-      throw utils.err(DOMAIN$4 + '#crud', method)(404, 'method');
+      throw utils.err(DOMAIN$6 + '#crud', method)(404, 'method');
     }
 
     var upper = '' + method.charAt(0).toUpperCase() + method.substr(1);
@@ -9071,7 +9163,7 @@ var Mapper$1 = Component$1.extend({
     this.dbg('getAdapter', 'name:', name);
     var adapter = this.getAdapterName(name);
     if (!adapter) {
-      throw utils.err(DOMAIN$4 + '#getAdapter', 'name')(400, 'string', name);
+      throw utils.err(DOMAIN$6 + '#getAdapter', 'name')(400, 'string', name);
     }
     return this.getAdapters()[adapter];
   },
@@ -9246,7 +9338,7 @@ var Mapper$1 = Component$1.extend({
    * be optionally be included. Non-schema properties can be excluded.
    *
    * @example
-   * import {Mapper, Schema} from 'js-data'
+   * import { Mapper, Schema } from 'js-data'
    * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: {
@@ -9257,15 +9349,27 @@ var Mapper$1 = Component$1.extend({
    *   }
    * })
    * const person = PersonMapper.createRecord({ id: 1, name: 'John', foo: 'bar' })
-   * console.log(PersonMapper.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
-   * console.log(PersonMapper.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
+   * // "foo" is stripped by toJSON()
+   * console.log(PersonMapper.toJSON(person)) // {"id":1,"name":"John"}
+   *
+   * const PersonRelaxedMapper = new Mapper({
+   *   name: 'personRelaxed',
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' },
+   *       id: { type: 'string' }
+   *     },
+   *     additionalProperties: true
+   *   }
+   * })
+   * const person2 = PersonRelaxedMapper.createRecord({ id: 1, name: 'John', foo: 'bar' })
+   * // "foo" is not stripped by toJSON
+   * console.log(PersonRelaxedMapper.toJSON(person2)) // {"id":1,"name":"John","foo":"bar"}
    *
    * @method Mapper#toJSON
    * @param {Record|Record[]} records Record or records from which to create a
    * POJO representation.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to exclude properties that are not
-   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the POJO representation.
    * @param {boolean} [opts.withAll] Whether to simply include all relations in
@@ -9287,19 +9391,13 @@ var Mapper$1 = Component$1.extend({
     }
     var relationFields = (this ? this.relationFields : []) || [];
     var json = {};
-    var properties = void 0;
 
     // Copy properties defined in the schema
     if (this && this.schema) {
       json = this.schema.pick(record);
-      properties = this.schema.properties;
-    }
-    properties || (properties = {});
-
-    // Optionally copy properties not defined in the schema
-    if (!opts.strict) {
+    } else {
       for (var key in record) {
-        if (!properties[key] && relationFields.indexOf(key) === -1) {
+        if (relationFields.indexOf(key) === -1) {
           json[key] = utils.plainCopy(record[key]);
         }
       }
@@ -9631,6 +9729,9 @@ var Mapper$1 = Component$1.extend({
   validate: function validate(record, opts) {
     opts || (opts = {});
     var schema = this.getSchema();
+    if (!schema) {
+      return;
+    }
     var _opts = utils.pick(opts, ['existingOnly']);
     if (utils.isArray(record)) {
       var errors = record.map(function (_record) {
@@ -9711,7 +9812,7 @@ var Mapper$1 = Component$1.extend({
           };
 
           if (typeof Relation[type] !== 'function') {
-            throw utils.err(DOMAIN$4, 'defineRelations')(400, 'relation type (hasOne, hasMany, etc)', type, true);
+            throw utils.err(DOMAIN$6, 'defineRelations')(400, 'relation type (hasOne, hasMany, etc)', type, true);
           }
 
           _this8[type](relatedMapper, def);
@@ -9775,7 +9876,7 @@ var Mapper$1 = Component$1.extend({
  * @since 3.0.0
  */
 
-var DOMAIN$3 = 'Container';
+var DOMAIN$5 = 'Container';
 
 var proxiedMapperMethods = [
 /**
@@ -10365,7 +10466,7 @@ var proxiedMapperMethods = [
  * Wrapper for {@link Mapper#toJSON}.
  *
  * @example
- * import {Container} from 'js-data'
+ * import { Container } from 'js-data'
  * import RethinkDBAdapter from 'js-data-rethinkdb'
  * const store = new Container()
  * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
@@ -10378,8 +10479,21 @@ var proxiedMapperMethods = [
  *   }
  * })
  * const person = store.createRecord('person', { id: 1, name: 'John', foo: 'bar' })
- * console.log(store.toJSON('person', person)) // {"id":1,"name":"John","foo":"bar"}
- * console.log(store.toJSON('person', person), { strict: true }) // {"id":1,"name":"John"}
+ * // "foo" is stripped by toJSON()
+ * console.log(store.toJSON('person', person)) // {"id":1,"name":"John"}
+ *
+ * store.defineMapper('personRelaxed', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' },
+ *       id: { type: 'string' }
+ *     },
+ *     additionalProperties: true
+ *   }
+ * })
+ * const person2 = store.createRecord('personRelaxed', { id: 1, name: 'John', foo: 'bar' })
+ * // "foo" is not stripped by toJSON
+ * console.log(store.toJSON('personRelaxed', person2)) // {"id":1,"name":"John","foo":"bar"}
  *
  * @method Container#toJSON
  * @param {string} name Name of the {@link Mapper} to target.
@@ -10920,7 +11034,7 @@ var props = {
       name = opts.name;
     }
     if (!utils.isString(name)) {
-      throw utils.err(DOMAIN$3 + '#defineMapper', 'name')(400, 'string', name);
+      throw utils.err(DOMAIN$5 + '#defineMapper', 'name')(400, 'string', name);
     }
 
     // Default values for arguments
@@ -10975,7 +11089,7 @@ var props = {
   getAdapter: function getAdapter(name) {
     var adapter = this.getAdapterName(name);
     if (!adapter) {
-      throw utils.err(DOMAIN$3 + '#getAdapter', 'name')(400, 'string', name);
+      throw utils.err(DOMAIN$5 + '#getAdapter', 'name')(400, 'string', name);
     }
     return this.getAdapters()[adapter];
   },
@@ -11036,7 +11150,7 @@ var props = {
   getMapper: function getMapper(name) {
     var mapper = this.getMapperByName(name);
     if (!mapper) {
-      throw utils.err(DOMAIN$3 + '#getMapper', name)(404, 'mapper');
+      throw utils.err(DOMAIN$5 + '#getMapper', name)(404, 'mapper');
     }
     return mapper;
   },
@@ -14069,7 +14183,7 @@ var DataStore$1 = SimpleStore$1.extend(props$1);
  * @type {Object}
  */
 var version = {
-  full: '3.0.0-rc.7',
+  full: '3.0.0-rc.8',
   major: 3,
   minor: 0,
   patch: 0
