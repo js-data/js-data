@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-# [js-data v3](http://www.js-data.io/) [![Slack][1]][2] [![NPM][3]][4] [![Downloads][5]][6] [![Coverage][7]][8]
+# [js-data v3](http://www.js-data.io/) [![Slack][1]][2] [![NPM][3]][4] [![npm version](https://img.shields.io/badge/npm-v3.0.0--rc.8-yellow.svg?style=flat)](https://www.npmjs.org/package/js-data) [![Downloads][5]][6] [![Coverage][7]][8]
 
 | __Browser tests__ | __Node.js tests__ |
 | ---------------------------------|----|

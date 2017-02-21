@@ -1,4 +1,4 @@
-##### 3.0.0-rc.8 - 20 February 2017
+##### 3.0.0-rc.8 - 21 February 2017
 
 ###### Breaking changes
 - #445

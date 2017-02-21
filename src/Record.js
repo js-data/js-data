@@ -746,7 +746,7 @@ export default Component.extend({
    *
    * @example <caption>Record#toJSON</caption>
    * // Normally you would do: import { Container } from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.7')
+   * const JSData = require('js-data@3.0.0-rc.8')
    * const { Container } = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
