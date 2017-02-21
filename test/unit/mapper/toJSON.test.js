@@ -15,6 +15,7 @@ describe('Mapper#toJSON', function () {
       name: 'user',
       schema: {
         properties: {
+          id: { type: 'number' },
           name: { type: 'string' }
         }
       }

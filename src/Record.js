@@ -120,6 +120,8 @@ const previousPath = 'previous'
  * @param {Object} [opts] Configuration options.
  * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
  * initial properties.
+ * @param {boolean} [opts.validateOnSet=true] Whether to enable setter
+ * validation on properties after the Record has been initialized.
  * @since 3.0.0
  */
 function Record (props, opts) {
@@ -129,9 +131,7 @@ function Record (props, opts) {
   opts || (opts = {})
   const _set = this._set
   _set(creatingPath, true)
-  if (opts.noValidate) {
-    _set(noValidatePath, opts.noValidate === undefined ? true : opts.noValidate)
-  }
+  _set(noValidatePath, !!opts.noValidate)
   _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? (mapper ? mapper.keepChangeHistory : true) : opts.keepChangeHistory)
 
   // Set the idAttribute value first, if it exists.
@@ -143,8 +143,13 @@ function Record (props, opts) {
 
   utils.fillIn(this, props)
   _set(creatingPath, false)
-  const validateOnSet = opts.validateOnSet === undefined ? (mapper ? mapper.validateOnSet : true) : opts.validateOnSet
-  _set(noValidatePath, !validateOnSet)
+  if (opts.validateOnSet !== undefined) {
+    _set(noValidatePath, !opts.validateOnSet)
+  } else if (mapper && mapper.validateOnSet !== undefined) {
+    _set(noValidatePath, !mapper.validateOnSet)
+  } else {
+    _set(noValidatePath, false)
+  }
   _set(previousPath, mapper ? mapper.toJSON(props) : utils.plainCopy(props))
 }
 
@@ -740,9 +745,9 @@ export default Component.extend({
    * be called with this record instead.
    *
    * @example <caption>Record#toJSON</caption>
-   * // Normally you would do: import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
+   * // Normally you would do: import { Container } from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.8')
+   * const { Container } = JSData
    * console.log('Using JSData v' + JSData.version.full)
    * const store = new Container()
    * store.defineMapper('user', {
@@ -758,12 +763,9 @@ export default Component.extend({
    *   $$hashKey: '1234'
    * })
    * console.log('user: ' + JSON.stringify(user.toJSON()))
-   * console.log('user: ' + JSON.stringify(user.toJSON({ strict: true })))
    *
    * @method Record#toJSON
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to exclude properties that are not
-   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation. Only available as an option if the class
    * from which this record was created has a Mapper and this record resides in
@@ -777,7 +779,7 @@ export default Component.extend({
       return mapper.toJSON(this, opts)
     } else {
       const json = {}
-      utils.forOwn(this, function (prop, key) {
+      utils.forOwn(this, (prop, key) => {
         json[key] = utils.plainCopy(prop)
       })
       return json
@@ -847,6 +849,11 @@ export default Component.extend({
   validate (opts) {
     return this._mapper().validate(this, opts)
   }
+}, {
+  creatingPath,
+  noValidatePath,
+  keepChangeHistoryPath,
+  previousPath
 })
 
 /**

@@ -463,9 +463,9 @@ function Mapper (opts) {
   // Setup schema, with an empty default schema if necessary
   if (this.schema) {
     this.schema.type || (this.schema.type = 'object')
-  }
-  if (!(this.schema instanceof Schema)) {
-    this.schema = new Schema(this.schema || { type: 'object' })
+    if (!(this.schema instanceof Schema)) {
+      this.schema = new Schema(this.schema || { type: 'object' })
+    }
   }
 
   // Create a subclass of Record that's tied to this Mapper
@@ -1995,7 +1995,7 @@ export default Component.extend({
    * be optionally be included. Non-schema properties can be excluded.
    *
    * @example
-   * import {Mapper, Schema} from 'js-data'
+   * import { Mapper, Schema } from 'js-data'
    * const PersonMapper = new Mapper({
    *   name: 'person',
    *   schema: {
@@ -2006,15 +2006,27 @@ export default Component.extend({
    *   }
    * })
    * const person = PersonMapper.createRecord({ id: 1, name: 'John', foo: 'bar' })
-   * console.log(PersonMapper.toJSON(person)) // {"id":1,"name":"John","foo":"bar"}
-   * console.log(PersonMapper.toJSON(person), { strict: true }) // {"id":1,"name":"John"}
+   * // "foo" is stripped by toJSON()
+   * console.log(PersonMapper.toJSON(person)) // {"id":1,"name":"John"}
+   *
+   * const PersonRelaxedMapper = new Mapper({
+   *   name: 'personRelaxed',
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' },
+   *       id: { type: 'string' }
+   *     },
+   *     additionalProperties: true
+   *   }
+   * })
+   * const person2 = PersonRelaxedMapper.createRecord({ id: 1, name: 'John', foo: 'bar' })
+   * // "foo" is not stripped by toJSON
+   * console.log(PersonRelaxedMapper.toJSON(person2)) // {"id":1,"name":"John","foo":"bar"}
    *
    * @method Mapper#toJSON
    * @param {Record|Record[]} records Record or records from which to create a
    * POJO representation.
    * @param {Object} [opts] Configuration options.
-   * @param {boolean} [opts.strict] Whether to exclude properties that are not
-   * defined in {@link Mapper#schema}.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the POJO representation.
    * @param {boolean} [opts.withAll] Whether to simply include all relations in
@@ -2032,19 +2044,13 @@ export default Component.extend({
     }
     const relationFields = (this ? this.relationFields : []) || []
     let json = {}
-    let properties
 
     // Copy properties defined in the schema
     if (this && this.schema) {
       json = this.schema.pick(record)
-      properties = this.schema.properties
-    }
-    properties || (properties = {})
-
-    // Optionally copy properties not defined in the schema
-    if (!opts.strict) {
+    } else {
       for (var key in record) {
-        if (!properties[key] && relationFields.indexOf(key) === -1) {
+        if (relationFields.indexOf(key) === -1) {
           json[key] = utils.plainCopy(record[key])
         }
       }
@@ -2372,6 +2378,9 @@ export default Component.extend({
   validate (record, opts) {
     opts || (opts = {})
     const schema = this.getSchema()
+    if (!schema) {
+      return
+    }
     const _opts = utils.pick(opts, ['existingOnly'])
     if (utils.isArray(record)) {
       const errors = record.map((_record) => schema.validate(_record, utils.pick(_opts, ['existingOnly'])))

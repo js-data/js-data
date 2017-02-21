@@ -1,3 +1,14 @@
+##### 3.0.0-rc.8 - 21 February 2017
+
+###### Breaking changes
+- #445
+  - The `strict` option has been removed from the `toJSON` methods. The methods now rely wholly on `Schema#pick` for strictness, and assumes the original `strict: false` behavior if no schema is defined.
+  - `Schema#pick` now copies properties not defined in the "properties" keyword if the "additionalProperties" keyword is present and truthy.
+  - Mappers are no longer given an empty schema if no schema is provided
+
+###### Bug fixes
+- #446 - fix(Collection): Add noValidate option to Collection#add, by @ivanvoznyakovsky
+
 ##### 3.0.0-rc.7 - 29 January 2017
 
 ###### Bug fixes

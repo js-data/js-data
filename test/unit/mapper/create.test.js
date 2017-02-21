@@ -366,8 +366,12 @@ describe('Mapper#create', function () {
       }
     }
 
+    clear()
+
+    let user
+
     // when props are a Record
-    let user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: [] })
+    user = await store.create('user', store.createRecord('user', JSData.utils.plainCopy(userProps)), { pass: [] })
     assert(store.is('user', user), 'user should be a user record')
     assert.strictEqual(store.get('user', user.id), user, 'user should be in the store')
     assert.objectsEqual(user.comments, [
@@ -435,7 +439,6 @@ describe('Mapper#create', function () {
         userId: user.id
       }
     ], 'user.comments should be there')
-    // return
     assert.objectsEqual(store.getAll('comment'), [
       {
         content: 'foo',
