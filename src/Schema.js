@@ -1183,8 +1183,10 @@ export default Component.extend({
    * @returns {*} The copy.
    */
   pick (value) {
+    if (value === undefined) {
+      return
+    }
     if (this.type === 'object') {
-      value || (value = {})
       let copy = {}
       const properties = this.properties
       if (properties) {
@@ -1205,7 +1207,6 @@ export default Component.extend({
       }
       return copy
     } else if (this.type === 'array') {
-      value || (value = [])
       return value.map((item) => {
         const _copy = this.items ? this.items.pick(item) : {}
         if (this.extends) {
