@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-rc.8 - Homepage <http://www.js-data.io/>
+* @version 3.0.0-rc.9 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -7179,11 +7179,13 @@ var Schema$1 = Component$1.extend({
   pick: function pick(value) {
     var _this3 = this;
 
+    if (value === undefined) {
+      return;
+    }
     if (this.type === 'object') {
       var key;
 
       var _ret4 = function () {
-        value || (value = {});
         var copy = {};
         var properties = _this3.properties;
         if (properties) {
@@ -7209,7 +7211,6 @@ var Schema$1 = Component$1.extend({
 
       if ((typeof _ret4 === 'undefined' ? 'undefined' : _typeof(_ret4)) === "object") return _ret4.v;
     } else if (this.type === 'array') {
-      value || (value = []);
       return value.map(function (item) {
         var _copy = _this3.items ? _this3.items.pick(item) : {};
         if (_this3.extends) {
@@ -14183,7 +14184,7 @@ var DataStore$1 = SimpleStore$1.extend(props$1);
  * @type {Object}
  */
 var version = {
-  full: '3.0.0-rc.8',
+  full: '3.0.0-rc.9',
   major: 3,
   minor: 0,
   patch: 0
