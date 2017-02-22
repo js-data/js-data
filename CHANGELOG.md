@@ -1,3 +1,8 @@
+##### 3.0.0-rc.9 - 22 February 2017
+
+###### Bug fixes
+- `Schema#pick` no longer incorrectly infers values for objects and arrays
+
 ##### 3.0.0-rc.8 - 21 February 2017
 
 ###### Breaking changes
