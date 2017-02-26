@@ -1300,22 +1300,22 @@ const props = {
       return pendingQuery
     }
     const item = this.cachedFind(name, id, opts)
-    let promise
 
     if (opts.force || !item) {
-      promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts).then((result) => {
-        delete this._pendingQueries[name][id]
-        result = this._end(name, result, opts)
-        this.cacheFind(name, result, id, opts)
-        return result
-      }, (err) => {
-        delete this._pendingQueries[name][id]
-        return utils.reject(err)
-      })
-    } else {
-      promise = utils.resolve(item)
+      const promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts)
+      return promise
+        .then((result) => {
+          delete this._pendingQueries[name][id]
+          result = this._end(name, result, opts)
+          this.cacheFind(name, result, id, opts)
+          return result
+        }, (err) => {
+          delete this._pendingQueries[name][id]
+          return utils.reject(err)
+        })
     }
-    return promise
+
+    return utils.resolve(item)
   },
 
   /**
@@ -1414,22 +1414,22 @@ const props = {
     }
 
     const items = this.cachedFindAll(name, hash, opts)
-    let promise
 
     if (opts.force || !items) {
-      promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts).then((result) => {
-        delete this._pendingQueries[name][hash]
-        result = this._end(name, result, opts)
-        this.cacheFindAll(name, result, hash, opts)
-        return result
-      }, (err) => {
-        delete this._pendingQueries[name][hash]
-        return utils.reject(err)
-      })
-    } else {
-      promise = utils.resolve(items)
+      const promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts)
+      return promise
+        .then((result) => {
+          delete this._pendingQueries[name][hash]
+          result = this._end(name, result, opts)
+          this.cacheFindAll(name, result, hash, opts)
+          return result
+        }, (err) => {
+          delete this._pendingQueries[name][hash]
+          return utils.reject(err)
+        })
     }
-    return promise
+
+    return utils.resolve(items)
   },
 
   /**
