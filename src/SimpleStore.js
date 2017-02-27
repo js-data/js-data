@@ -1467,7 +1467,7 @@ const props = {
    * @since 3.0.0
    */
   hashQuery (name, query, opts) {
-    return utils.toJson(query)
+    return utils.toJson(query || {})
   },
 
   inject (name, records, opts) {
@@ -1548,6 +1548,11 @@ const props = {
    * @since 3.0.0
    */
   removeAll (name, query, opts) {
+    if (!query || !Object.keys(query).length) {
+      this._completedQueries[name] = {}
+    } else {
+      this._completedQueries[name][this.hashQuery(name, query, opts)] = undefined
+    }
     const records = this.getCollection(name).removeAll(query, opts)
     if (records.length) {
       this.removeRelated(name, records, opts)
