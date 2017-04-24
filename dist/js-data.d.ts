@@ -125,7 +125,7 @@ export class Mapper extends Component {
   afterFind(id: string|number, opts: any, result: any): any
   afterFindAll(query: any, opts: any, result: any): any
   afterSum(field: string, query: any, opts: any, result: any): any
-  afterUpdate(id: string|number, opts: any, result: any): any
+  afterUpdate(id: string|number, props: any, opts: any, result: any): any
   afterUpdateAll(props: any, query: any, opts: any, result: any): any
   afterUpdateMany(records: any[], opts: any, result: any): any
   beforeCreate(props: any, opts: any): any
@@ -222,6 +222,7 @@ export class Container extends Component {
   getAdapterName(opts?: any): string
   getAdapters(): any
   getMapper(name: string): Mapper
+  getMapperByName(name:string): Mapper
   registerAdapter(name: string, adapter: any, opts?: any): void
 }
 export class DataStore extends Container {
@@ -240,6 +241,7 @@ export class DataStore extends Container {
   cachedFindAll(mapperName: string, hash: string, opts: any): any
   cacheFind(mapperName: string, data: any, id: string|number, opts: any): void
   cacheFindAll(mapperName: string, data: any, hash: string, opts: any): void
+  clear(): any
   createIndex(mapperName: string, name: any, fieldList: any, opts?: any): LinkedCollection
   filter(mapperName: string, query: any, thisArg?: any): any[]
   get(mapperName: string, id: string|number): any
