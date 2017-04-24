@@ -270,11 +270,11 @@ const MAPPER_DEFAULTS = {
  * to prevent confusion.)_
  *
  * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+ *
+ * @example
  * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
  * [book]: http://martinfowler.com/books/eaa.html
  * [record]: Record.html
- *
- * @example
  * // Import and instantiate
  * import {Mapper} from 'js-data'
  * const UserMapper = new Mapper({ name: 'user' })
@@ -969,109 +969,62 @@ export default Component.extend({
    * @since 3.0.0
    */
   create (props, opts) {
-    let op, adapter
     // Default values for arguments
     props || (props = {})
     opts || (opts = {})
     const originalRecord = props
+    let parentRelationMap = {}
+    let adapterResponse = {}
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this)
-    adapter = opts.adapter = this.getAdapterName(opts)
+    opts.adapter = this.getAdapterName(opts)
 
-    // beforeCreate lifecycle hook
-    op = opts.op = 'beforeCreate'
-    return utils.resolve(this[op](props, opts)).then((_props) => {
-      // Allow for re-assignment from lifecycle hook
-      props = _props === undefined ? props : _props
-
-      // Deep pre-create belongsTo relations
-      const belongsToRelationData = {}
+    opts.op = 'beforeCreate'
+    return this._runHook(opts.op, props, opts).then((props) => {
       opts.with || (opts.with = [])
-      let tasks = []
-      utils.forEachRelation(this, opts, (def, optsCopy) => {
-        const relationData = def.getLocalField(props)
-        const relatedMapper = def.getRelation()
-        const relatedIdAttribute = relatedMapper.idAttribute
-        optsCopy.raw = false
-        if (!relationData) {
-          return
-        }
-        if (def.type === belongsToType) {
-          // Create belongsTo relation first because we need a generated id to
-          // attach to the child
-          tasks.push(relatedMapper.create(relationData, optsCopy).then((data) => {
-            def.setLocalField(belongsToRelationData, data)
-            def.setForeignKey(props, data)
-          }))
-        } else if (def.type === hasManyType && def.localKeys) {
-          // Create his hasMany relation first because it uses localKeys
-          tasks.push(relatedMapper.createMany(relationData, optsCopy).then((data) => {
-            def.setLocalField(belongsToRelationData, data)
-            utils.set(props, def.localKeys, data.map((record) => utils.get(record, relatedIdAttribute)))
-          }))
-        }
-      })
-      return utils.Promise.all(tasks).then(() => {
-        // Now delegate to the adapter for the main create
-        op = opts.op = 'create'
-        this.dbg(op, props, opts)
-        return utils.resolve(this.getAdapter(adapter)[op](this, this.toJSON(props, { with: opts.pass || [] }), opts))
-      }).then((result) => {
-        const createdRecordData = opts.raw ? result.data : result
-
-        // Deep post-create hasMany and hasOne relations
-        tasks = []
-        utils.forEachRelation(this, opts, (def, optsCopy) => {
-          const relationData = def.getLocalField(props)
-          if (!relationData) {
-            return
-          }
-          optsCopy.raw = false
-          let task
-          // Create hasMany and hasOne after the main create because we needed
-          // a generated id to attach to these items
-          if (def.type === hasManyType && def.foreignKey) {
-            def.setForeignKey(createdRecordData, relationData)
-            task = def.getRelation().createMany(relationData, optsCopy).then((result) => {
-              def.setLocalField(createdRecordData, result)
-            })
-          } else if (def.type === hasOneType) {
-            def.setForeignKey(createdRecordData, relationData)
-            task = def.getRelation().create(relationData, optsCopy).then((result) => {
-              def.setLocalField(createdRecordData, result)
-            })
-          } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData))
-          } else if (def.type === hasManyType && def.localKeys && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData))
-          }
-          if (task) {
-            tasks.push(task)
-          }
-        })
-        return utils.Promise.all(tasks).then(() => {
-          utils.set(originalRecord, createdRecordData, { silent: true })
-          if (utils.isFunction(originalRecord.commit)) {
-            originalRecord.commit()
-          }
-          if (opts.raw) {
-            result.data = originalRecord
-          } else {
-            result = originalRecord
-          }
-          return result
-        })
-      })
+      return this._createParentRecordIfRequired(props, opts)
+    }).then((relationMap) => {
+      parentRelationMap = relationMap
+    }).then(() => {
+      opts.op = 'create'
+      return this._invokeAdapterMethod(opts.op, props, opts)
     }).then((result) => {
-      result = this._end(result, opts)
-      // afterCreate lifecycle hook
-      op = opts.op = 'afterCreate'
-      return utils.resolve(this[op](props, opts, result)).then((_result) => {
-        // Allow for re-assignment from lifecycle hook
-        return _result === undefined ? result : _result
+      adapterResponse = result
+    }).then(() => {
+      const createdProps = opts.raw ? adapterResponse.data : adapterResponse
+
+      return this._createOrAssignChildRecordIfRequired(createdProps, {
+        opts,
+        parentRelationMap,
+        originalProps: props
       })
+    }).then((createdProps) => {
+      return this._commitChanges(originalRecord, createdProps)
+    }).then((record) => {
+      if (opts.raw) {
+        adapterResponse.data = record
+      } else {
+        adapterResponse = record
+      }
+      const result = this._end(adapterResponse, opts)
+      opts.op = 'afterCreate'
+      return this._runHook(opts.op, props, opts, result)
     })
+  },
+
+  _commitChanges (recordOrRecords, newValues) {
+    if (utils.isArray(recordOrRecords)) {
+      return recordOrRecords.map((record, i) => this._commitChanges(record, newValues[i]))
+    }
+
+    utils.set(recordOrRecords, newValues, { silent: true })
+
+    if (utils.isFunction(recordOrRecords.commit)) {
+      recordOrRecords.commit()
+    }
+
+    return recordOrRecords
   },
 
   /**
@@ -1086,6 +1039,77 @@ export default Component.extend({
    */
   createInstance (props, opts) {
     return this.createRecord(props, opts)
+  },
+
+  /**
+   * Creates parent record for relation types like BelongsTo or HasMany with localKeys
+   * in order to satisfy foreignKey dependency (so called child records).
+   * @param {Object} props See {@link Mapper#create}.
+   * @param {Object} opts See {@link Mapper#create}.
+   * @returns {Object} cached parent records map
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  _createParentRecordIfRequired (props, opts) {
+    const tasks = []
+    const relations = []
+
+    utils.forEachRelation(this, opts, (def, optsCopy) => {
+      if (!def.isRequiresParentId() || !def.getLocalField(props)) {
+        return
+      }
+
+      optsCopy.raw = false
+      relations.push(def)
+      tasks.push(def.createParentRecord(props, optsCopy))
+    })
+
+    return utils.Promise.all(tasks).then(records => {
+      return relations.reduce((map, relation, index) => {
+        relation.setLocalField(map, records[index])
+        return map
+      }, {})
+    })
+  },
+
+  /**
+   * Creates child record for relation types like HasOne or HasMany with foreignKey
+   * in order to satisfy foreignKey dependency (so called parent records).
+   * @param {Object} props See {@link Mapper#create}.
+   * @param {Object} context contains collected information.
+   * @param {Object} context.opts See {@link Mapper#create}.
+   * @param {Object} context.parentRelationMap contains parent records map
+   * @param {Object} context.originalProps contains data passed into {@link Mapper#create} method
+   * @return {Promise} updated props
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  _createOrAssignChildRecordIfRequired (props, context) {
+    const tasks = []
+
+    utils.forEachRelation(this, context.opts, (def, optsCopy) => {
+      const relationData = def.getLocalField(context.originalProps)
+
+      if (!relationData) {
+        return
+      }
+
+      optsCopy.raw = false
+      // Create hasMany and hasOne after the main create because we needed
+      // a generated id to attach to these items
+      if (def.isRequiresChildId()) {
+        tasks.push(def.createChildRecord(props, relationData, optsCopy))
+      } else if (def.isRequiresParentId()) {
+        const parent = def.getLocalField(context.parentRelationMap)
+
+        if (parent) {
+          def.setLocalField(props, parent)
+        }
+      }
+    })
+
+    return utils.Promise.all(tasks)
+      .then(() => props)
   },
 
   /**
@@ -1178,22 +1202,19 @@ export default Component.extend({
    * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   createMany (records, opts) {
-    let op, adapter
     // Default values for arguments
     records || (records = [])
     opts || (opts = {})
     const originalRecords = records
+    let adapterResponse
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this)
-    adapter = opts.adapter = this.getAdapterName(opts)
+    opts.adapter = this.getAdapterName(opts)
 
     // beforeCreateMany lifecycle hook
-    op = opts.op = 'beforeCreateMany'
-    return utils.resolve(this[op](records, opts)).then((_records) => {
-      // Allow for re-assignment from lifecycle hook
-      records = _records === undefined ? records : _records
-
+    opts.op = 'beforeCreateMany'
+    return this._runHook(opts.op, records, opts).then((records) => {
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
       opts.with || (opts.with = [])
@@ -1201,37 +1222,37 @@ export default Component.extend({
       utils.forEachRelation(this, opts, (def, optsCopy) => {
         const relationData = records
           .map((record) => def.getLocalField(record))
-          .filter((relatedRecord) => relatedRecord)
+          .filter(Boolean)
         if (def.type === belongsToType && relationData.length === records.length) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          tasks.push(def.getRelation().createMany(relationData, optsCopy).then((data) => {
-            const relatedRecords = optsCopy.raw ? data.data : data
+          optsCopy.raw = false
+          tasks.push(def.createLinked(relationData, optsCopy).then((relatedRecords) => {
+            records.forEach((record, i) => def.setForeignKey(record, relatedRecords[i]))
+          }).then((relatedRecords) => {
             def.setLocalField(belongsToRelationData, relatedRecords)
-            records.forEach((record, i) => {
-              def.setForeignKey(record, relatedRecords[i])
-            })
           }))
         }
       })
       return utils.Promise.all(tasks).then(() => {
-        // Now delegate to the adapter
-        op = opts.op = 'createMany'
-        const json = records.map((record) => this.toJSON(record, { with: opts.pass || [] }))
-        this.dbg(op, records, opts)
-        return utils.resolve(this.getAdapter(adapter)[op](this, json, opts))
+        opts.op = 'createMany'
+        return this._invokeAdapterMethod(opts.op, records, opts)
       }).then((result) => {
-        const createdRecordsData = opts.raw ? result.data : result
+        adapterResponse = result
+      }).then(() => {
+        const createdRecordsData = opts.raw ? adapterResponse.data : adapterResponse
 
         // Deep post-create hasOne relations
         tasks = []
         utils.forEachRelation(this, opts, (def, optsCopy) => {
           const relationData = records
             .map((record) => def.getLocalField(record))
-            .filter((relatedRecord) => relatedRecord)
+            .filter(Boolean)
           if (relationData.length !== records.length) {
             return
           }
+
+          optsCopy.raw = false
           const belongsToData = def.getLocalField(belongsToRelationData)
           let task
           // Create hasMany and hasOne after the main create because we needed
@@ -1243,8 +1264,7 @@ export default Component.extend({
             createdRecordsData.forEach((createdRecordData, i) => {
               def.setForeignKey(createdRecordData, relationData[i])
             })
-            task = def.getRelation().createMany(relationData, optsCopy).then((result) => {
-              const relatedData = opts.raw ? result.data : result
+            task = def.getRelation().createMany(relationData, optsCopy).then((relatedData) => {
               createdRecordsData.forEach((createdRecordData, i) => {
                 def.setLocalField(createdRecordData, relatedData[i])
               })
@@ -1259,29 +1279,18 @@ export default Component.extend({
           }
         })
         return utils.Promise.all(tasks).then(() => {
-          createdRecordsData.forEach((createdRecordData, i) => {
-            const originalRecord = originalRecords[i]
-            utils.set(originalRecord, createdRecordData, { silent: true })
-            if (utils.isFunction(originalRecord.commit)) {
-              originalRecord.commit()
-            }
-          })
-          if (opts.raw) {
-            result.data = originalRecords
-          } else {
-            result = originalRecords
-          }
-          return result
+          return this._commitChanges(originalRecords, createdRecordsData)
         })
       })
-    }).then((result) => {
-      result = this._end(result, opts)
-      // afterCreateMany lifecycle hook
-      op = opts.op = 'afterCreateMany'
-      return utils.resolve(this[op](records, opts, result)).then((_result) => {
-        // Allow for re-assignment from lifecycle hook
-        return _result === undefined ? result : _result
-      })
+    }).then((records) => {
+      if (opts.raw) {
+        adapterResponse.data = records
+      } else {
+        adapterResponse = records
+      }
+      const result = this._end(adapterResponse, opts)
+      opts.op = 'afterCreateMany'
+      return this._runHook(opts.op, records, opts, result)
     })
   },
 
@@ -1368,23 +1377,15 @@ export default Component.extend({
     if (!utils.isObject(props)) {
       throw utils.err(`${DOMAIN}#createRecord`, 'props')(400, 'array or object', props)
     }
-    const RecordCtor = this.recordClass
-    const relationList = this.relationList || []
-    relationList.forEach((def) => {
-      const relatedMapper = def.getRelation()
-      const relationData = def.getLocalField(props)
-      if (relationData && !relatedMapper.is(relationData)) {
-        if (utils.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
-          return
-        }
-        utils.set(props, def.localField, relatedMapper.createRecord(relationData, opts))
-      }
-    })
-    // Check to make sure "props" is not already an instance of this Mapper.
-    if (RecordCtor && (!(props instanceof RecordCtor))) {
-      return new RecordCtor(props, opts)
+
+    if (this.relationList) {
+      this.relationList.forEach(function (def) {
+        def.ensureLinkedDataHasProperType(props, opts)
+      })
     }
-    return props
+    const RecordCtor = this.recordClass
+
+    return (!RecordCtor || props instanceof RecordCtor) ? props : new RecordCtor(props, opts)
   },
 
   /**
@@ -1958,6 +1959,28 @@ export default Component.extend({
     }
   },
 
+  _runHook (hookName, ...hookArgs) {
+    const defaultValueIndex = hookName.indexOf('after') === 0 ? hookArgs.length - 1 : 0
+
+    return utils.resolve(this[hookName](...hookArgs))
+      .then((overridenResult) => overridenResult === undefined ? hookArgs[defaultValueIndex] : overridenResult)
+  },
+
+  _invokeAdapterMethod (method, propsOrRecords, opts) {
+    const conversionOptions = { with: opts.pass || [] }
+    let object
+
+    this.dbg(opts.op, propsOrRecords, opts)
+
+    if (utils.isArray(propsOrRecords)) {
+      object = propsOrRecords.map(record => this.toJSON(record, conversionOptions))
+    } else {
+      object = this.toJSON(propsOrRecords, conversionOptions)
+    }
+
+    return this.getAdapter(opts.adapter)[method](this, object, opts)
+  },
+
   /**
    * Select records according to the `query` argument, and aggregate the sum
    * value of the property specified by `field`.
@@ -2384,11 +2407,8 @@ export default Component.extend({
     const _opts = utils.pick(opts, ['existingOnly'])
     if (utils.isArray(record)) {
       const errors = record.map((_record) => schema.validate(_record, utils.pick(_opts, ['existingOnly'])))
-      const foundErrors = errors.filter((err) => err)
-      if (foundErrors.length) {
-        return errors
-      }
-      return undefined
+
+      return errors.some(Boolean) ? errors : undefined
     }
     return schema.validate(record, _opts)
   },

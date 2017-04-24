@@ -190,5 +190,40 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return this.relatedCollection.filter({
       [this.foreignKey]: id
     })
+  },
+
+  ensureLinkedDataHasProperType (props, opts) {
+    const relatedMapper = this.getRelation()
+    const relationData = this.getLocalField(props)
+
+    if (utils.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
+      return
+    }
+
+    if (relationData && !relatedMapper.is(relationData)) {
+      utils.set(props, this.localField, relatedMapper.createRecord(relationData, opts))
+    }
+  },
+
+  isRequiresParentId () {
+    return false
+  },
+
+  isRequiresChildId () {
+    return false
+  },
+
+  createChildRecord (props, relationData, opts) {
+    this.setForeignKey(props, relationData)
+
+    return this.createLinked(relationData, opts).then((result) => {
+      this.setLocalField(props, result)
+    })
+  },
+
+  createLinked (props, opts) {
+    const create = utils.isArray(props) ? 'createMany' : 'create'
+
+    return this.getRelation()[create](props, opts)
   }
 })
