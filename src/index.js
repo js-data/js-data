@@ -27,27 +27,6 @@
  */
 
 /**
- * Describes the version of this `JSData` object.
- *
- * @example
- * console.log(JSData.version.full) // "3.0.0-beta.1"
- *
- * @name version
- * @memberof module:js-data
- * @property {string} full The full semver value.
- * @property {number} major The major version number.
- * @property {number} minor The minor version number.
- * @property {number} patch The patch version number.
- * @property {(string|boolean)} alpha The alpha version value, otherwise `false`
- * if the current version is not alpha.
- * @property {(string|boolean)} beta The beta version value, otherwise `false`
- * if the current version is not beta.
- * @since 2.0.0
- * @type {Object}
- */
-export const version = '<%= version %>'
-
-/**
  * JSData's utility methods.
  *
  * @example
@@ -257,6 +236,27 @@ import Settable from './Settable'
  * @type {Constructor}
  */
 import SimpleStore from './SimpleStore'
+
+/**
+ * Describes the version of this `JSData` object.
+ *
+ * @example
+ * console.log(JSData.version.full) // "3.0.0-beta.1"
+ *
+ * @name version
+ * @memberof module:js-data
+ * @property {string} full The full semver value.
+ * @property {number} major The major version number.
+ * @property {number} minor The minor version number.
+ * @property {number} patch The patch version number.
+ * @property {(string|boolean)} alpha The alpha version value, otherwise `false`
+ * if the current version is not alpha.
+ * @property {(string|boolean)} beta The beta version value, otherwise `false`
+ * if the current version is not beta.
+ * @since 2.0.0
+ * @type {Object}
+ */
+export const version = '<%= version %>'
 
 export * from './decorators'
 

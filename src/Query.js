@@ -683,7 +683,7 @@ export default Component.extend({
     if (this.data) {
       throw utils.err(`${DOMAIN}#getAll`)(500, INDEX_ERR)
     }
-    if (!args.length || args.length === 1 && utils.isObject(args[0])) {
+    if (!args.length || (args.length === 1 && utils.isObject(args[0]))) {
       this.getData()
       return this
     } else if (args.length && utils.isObject(args[args.length - 1])) {

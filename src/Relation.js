@@ -140,7 +140,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
         relatedData = this.linkRecord(record, relatedData)
       }
 
-      const isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length
+      const isEmptyLinks = !relatedData || (utils.isArray(relatedData) && !relatedData.length)
 
       if (isEmptyLinks && this.canFindLinkFor(record)) {
         relatedData = this.findExistingLinksFor(record)
