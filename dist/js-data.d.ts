@@ -225,14 +225,14 @@ export class Container extends Component {
   getMapperByName(name:string): Mapper
   registerAdapter(name: string, adapter: any, opts?: any): void
 }
-export class DataStore extends Container {
-  collectionClass: typeof LinkedCollection
+export class SimpleStore extends Container {
+  collectionClass: typeof Collection
   _collections: Object
   _pendingQueries: Object
   _completedQueries: Object
   usePendingFind: boolean
   usePendingFindAll: boolean
-  as(name: string): Mapper|LinkedCollection
+  as(name: string): Mapper|Collection
   constructor(opts?: any)
   add(mapperName: string, records: any[]|any, opts?: any): any[]|any
   addToCache(mapperName: string, data: any, opts: any): any
@@ -242,7 +242,7 @@ export class DataStore extends Container {
   cacheFind(mapperName: string, data: any, id: string|number, opts: any): void
   cacheFindAll(mapperName: string, data: any, hash: string, opts: any): void
   clear(): any
-  createIndex(mapperName: string, name: any, fieldList: any, opts?: any): LinkedCollection
+  createIndex(mapperName: string, name: any, fieldList: any, opts?: any): Collection
   filter(mapperName: string, query: any, thisArg?: any): any[]
   get(mapperName: string, id: string|number): any
   getAll(mapperName: string, ...args: any[]): any[]
@@ -262,10 +262,16 @@ export class DataStore extends Container {
   cachedFind(mapperName: string, id: any, opts?: any): any
   cachedFindAll(mapperName: string, query: any, opts?: any): any
   hashQuery(mapperName: string, query: any, opts?: any): string
-  getCollection(mapperName: string): LinkedCollection
+  getCollection(mapperName: string): Collection
   update(mapperName: string, id: any, record: any, opts?: any): Promise<any>
   updateAll(mapperName: string, props: any, query?: any, opts?: any): Promise<any[]|any>
   updateMany(mapperName: string, records: any, opts?: any): Promise<any[]|any>
+}
+export class DataStore extends Container {
+  collectionClass: typeof LinkedCollection
+  as(name: string): Mapper|LinkedCollection
+  createIndex(mapperName: string, name: any, fieldList: any, opts?: any): LinkedCollection
+  getCollection(mapperName: string): LinkedCollection
 }
 export class Query extends Component {
   static ops: {
