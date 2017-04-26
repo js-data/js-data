@@ -46,6 +46,7 @@ const COLLECTION_DEFAULTS = {
    * Possible values:
    * merge
    * replace
+   * skip
    *
    * Merge:
    *
@@ -57,6 +58,10 @@ const COLLECTION_DEFAULTS = {
    * Shallow copy top-level properties from the new record onto the existing
    * record. Any top-level own properties of the existing record that are _not_
    * on the new record will be removed.
+   *
+   * Skip:
+   *
+   * Ignore new record, keep existing record.
    *
    * @name Collection#onConflict
    * @type {string}
@@ -257,8 +262,8 @@ export default Component.extend({
         // Here, the currently visited record corresponds to a record already
         // in the collection, so we need to merge them
         const onConflict = opts.onConflict || this.onConflict
-        if (onConflict !== 'merge' && onConflict !== 'replace') {
-          throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true)
+        if (onConflict !== 'merge' && onConflict !== 'replace' && onConflict !== 'skip') {
+          throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace, skip)', onConflict, true)
         }
         const existingNoValidate = existing._get(noValidatePath)
         if (opts.noValidate) {
@@ -274,7 +279,8 @@ export default Component.extend({
             }
           })
           existing.set(record)
-        }
+        } // else if(onConflict === 'skip'){ do nothing }
+
         if (opts.noValidate) {
           // Restore previous `noValidate` value
           existing._set(noValidatePath, existingNoValidate)

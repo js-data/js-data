@@ -949,15 +949,21 @@ const props = {
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
 
-    // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
-    const collection = self._collections[name] = new self.collectionClass(null, { // eslint-disable-line
+    let collectionOpts = {
       // Make sure the collection has somewhere to store "added" timestamps
       _added: {},
       // Give the collection a reference to this SimpleStore
       datastore: self,
       // The mapper tied to the collection
       mapper
-    })
+    }
+
+    if (opts && ('onConflict' in opts)) {
+      collectionOpts.onConflict = opts.onConflict
+    }
+
+    // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
+    const collection = self._collections[name] = new self.collectionClass(null, collectionOpts)  // eslint-disable-line
 
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
