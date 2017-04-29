@@ -480,6 +480,17 @@ function Mapper (opts) {
         return subClass
       })()
     })
+  } else if (this.recordClass !== false) {
+    const customSuperClass = this.recordClass
+    this.recordClass = customSuperClass.extend({
+      constructor: (function CustomRecord () {
+        var subClass = function CustomRecord (props, opts) {
+          utils.classCallCheck(this, subClass)
+          customSuperClass.call(this, props, opts)
+        }
+        return subClass
+      })()
+    })
   }
 
   if (this.recordClass) {
