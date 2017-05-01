@@ -267,7 +267,7 @@ export class SimpleStore extends Container {
   updateAll(mapperName: string, props: any, query?: any, opts?: any): Promise<any[]|any>
   updateMany(mapperName: string, records: any, opts?: any): Promise<any[]|any>
 }
-export class DataStore extends Container {
+export class DataStore extends SimpleStore {
   collectionClass: typeof LinkedCollection
   as(name: string): Mapper|LinkedCollection
   createIndex(mapperName: string, name: any, fieldList: any, opts?: any): LinkedCollection
