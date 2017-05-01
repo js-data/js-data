@@ -482,17 +482,16 @@ function Mapper (opts) {
     })
   } else if (this.recordClass !== false) {
     const customSuperClass = this.recordClass
-    this.recordClass = customSuperClass.extend({
-      constructor: (function CustomRecord () {
-        var subClass = function CustomRecord (props, opts) {
-          utils.classCallCheck(this, subClass)
-          customSuperClass.call(this, props, opts)
-        }
-        return subClass
-      })()
-    })
+    this.recordClass = function newRecordClass (props, opts) {
+      var base = Reflect.construct(customSuperClass, arguments, newRecordClass); // eslint-disable-line
+      if (!base._get) {
+        Record.call(base, props, opts)
+      }
+      return base
+    }
+    Reflect.setPrototypeOf(this.recordClass.prototype, customSuperClass.prototype)
+    Reflect.setPrototypeOf(this.recordClass, customSuperClass)
   }
-
   if (this.recordClass) {
     this.recordClass.mapper = this
 
