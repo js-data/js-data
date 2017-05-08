@@ -49,7 +49,7 @@ export default {
         observer.deliver()
       }
 
-      let ignoredChanges = _options.ignoredChanges || []
+      let ignoredChanges = DSUtils.copy(_options.ignoredChanges || [])
       // add linked relations to list of ignored changes
       DSUtils.forEach(definition.relationFields, function (field) {
         if (!DSUtils.contains(ignoredChanges, field)) {
