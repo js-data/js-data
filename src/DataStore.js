@@ -206,7 +206,10 @@ const props = {
             }
           }
         }
-        Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor)
+
+        if (!(foreignKey in mapper.recordClass.prototype)) {
+          Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor)
+        }
       } else if (type === hasManyType) {
         const localKeys = def.localKeys
         const foreignKeys = def.foreignKeys
@@ -414,7 +417,9 @@ const props = {
             return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
           }
         }
-        Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
+        if (!(localField in mapper.recordClass.prototype)) {
+          Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
+        }
       }
     })
 
