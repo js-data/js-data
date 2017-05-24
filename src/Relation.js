@@ -117,7 +117,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
 
   findInverseRelation (mapper) {
     this.getRelation().relationList.forEach((def) => {
-      if (def.getRelation() === mapper && this.isInversedTo(def)) {
+      if (def.getRelation() === mapper && this.isInversedTo(def) && this !== def) {
         this.inverse = def
         return true
       }
