@@ -789,7 +789,9 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     const len = keys.length
     let i
     for (i = 0; i < len; i++) {
-      fn.call(thisArg, obj[keys[i]], keys[i], obj)
+      if (fn.call(thisArg, obj[keys[i]], keys[i], obj) === false) {
+        break
+      }
     }
   },
 
@@ -1493,24 +1495,30 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
       return true
     }
     let _equal = true
-    if (utils.isObject(a) && utils.isObject(b)) {
-      utils.forOwn(a, function (value, key) {
-        _equal = _equal && utils.deepEqual(value, b[key])
-      })
-      if (!_equal) {
-        return _equal
-      }
-      utils.forOwn(b, function (value, key) {
-        _equal = _equal && utils.deepEqual(value, a[key])
-      })
-    } else if (utils.isArray(a) && utils.isArray(b)) {
+    if (utils.isArray(a) && utils.isArray(b)) {
       if (a.length !== b.length) {
         return false
       }
       for (let i = a.length; i--;) {
         if (!utils.deepEqual(a[i], b[i])) {
+          // Exit loop early
           return false
         }
+      }
+    } else if (utils.isObject(a) && utils.isObject(b)) {
+      utils.forOwn(a, function (value, key) {
+        if (!(_equal = utils.deepEqual(value, b[key]))) {
+          // Exit loop early
+          return false
+        }
+      })
+      if (_equal) {
+        utils.forOwn(b, function (value, key) {
+          if (!(_equal = utils.deepEqual(value, a[key]))) {
+            // Exit loop early
+            return false
+          }
+        })
       }
     } else {
       return false
