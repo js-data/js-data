@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0-rc.9 - Homepage <http://www.js-data.io/>
+* @version 3.0.0 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -919,7 +919,9 @@ var utils = {
     var len = keys.length;
     var i = void 0;
     for (i = 0; i < len; i++) {
-      fn.call(thisArg, obj[keys[i]], keys[i], obj);
+      if (fn.call(thisArg, obj[keys[i]], keys[i], obj) === false) {
+        break;
+      }
     }
   },
 
@@ -1661,23 +1663,31 @@ var utils = {
       return true;
     }
     var _equal = true;
-    if (utils.isObject(a) && utils.isObject(b)) {
-      utils.forOwn(a, function (value, key) {
-        _equal = _equal && utils.deepEqual(value, b[key]);
-      });
-      if (!_equal) {
-        return _equal;
+    if (utils.isArray(a) && utils.isArray(b)) {
+      if (a.length !== b.length) {
+        return false;
       }
-      utils.forOwn(b, function (value, key) {
-        _equal = _equal && utils.deepEqual(value, a[key]);
-      });
-    } else if (utils.isArray(a) && utils.isArray(b)) {
-      a.forEach(function (value, i) {
-        _equal = _equal && utils.deepEqual(value, b[i]);
-        if (!_equal) {
+      for (var i = a.length; i--;) {
+        if (!utils.deepEqual(a[i], b[i])) {
+          // Exit loop early
+          return false;
+        }
+      }
+    } else if (utils.isObject(a) && utils.isObject(b)) {
+      utils.forOwn(a, function (value, key) {
+        if (!(_equal = utils.deepEqual(value, b[key]))) {
+          // Exit loop early
           return false;
         }
       });
+      if (_equal) {
+        utils.forOwn(b, function (value, key) {
+          if (!(_equal = utils.deepEqual(value, a[key]))) {
+            // Exit loop early
+            return false;
+          }
+        });
+      }
     } else {
       return false;
     }
@@ -2128,10 +2138,9 @@ var reserved = {
   skip: '',
   sort: '',
   where: ''
-};
 
-// Used by our JavaScript implementation of the LIKE operator
-var escapeRegExp = /([.*+?^=!:${}()|[\]/\\])/g;
+  // Used by our JavaScript implementation of the LIKE operator
+};var escapeRegExp = /([.*+?^=!:${}()|[\]/\\])/g;
 var percentRegExp = /%/g;
 var underscoreRegExp = /_/g;
 var escape = function escape(pattern) {
@@ -2524,202 +2533,198 @@ var Query$1 = Component$1.extend({
     query || (query = {});
     this.getData();
     if (utils.isObject(query)) {
-      (function () {
-        var where = {};
+      var where = {};
 
-        /**
-         * Filtering criteria. Records that do not meet this criteria will be exluded
-         * from the result.
-         *
-         * @example <caption>Return posts where author is at least 32 years old</caption>
-         * const store = new JSData.DataStore()
-         * store.defineMapper('post')
-         * const posts = [
-         *   { author: 'John', age: 30, id: 5 },
-         *   { author: 'Sally', age: 31, id: 6 },
-         *   { author: 'Mike', age: 32, id: 7 },
-         *   { author: 'Adam', age: 33, id: 8 },
-         *   { author: 'Adam', age: 33, id: 9 }
-         * ]
-         * store.add('post', posts)
-         * store.filter('post', {
-         *   where: {
-         *     age: {
-         *       '>=': 30
-         *     }
-         *   }
-         * })
-         * console.log(results)
-         *
-         * @name query.where
-         * @type {Object}
-         * @see http://www.js-data.io/v3.0/docs/query-syntax
-         * @since 3.0.0
-         */
-        if (utils.isObject(query.where) || utils.isArray(query.where)) {
-          where = query.where;
+      /**
+       * Filtering criteria. Records that do not meet this criteria will be exluded
+       * from the result.
+       *
+       * @example <caption>Return posts where author is at least 32 years old</caption>
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 5 },
+       *   { author: 'Sally', age: 31, id: 6 },
+       *   { author: 'Mike', age: 32, id: 7 },
+       *   { author: 'Adam', age: 33, id: 8 },
+       *   { author: 'Adam', age: 33, id: 9 }
+       * ]
+       * store.add('post', posts)
+       * store.filter('post', {
+       *   where: {
+       *     age: {
+       *       '>=': 30
+       *     }
+       *   }
+       * })
+       * console.log(results)
+       *
+       * @name query.where
+       * @type {Object}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
+      if (utils.isObject(query.where) || utils.isArray(query.where)) {
+        where = query.where;
+      }
+      utils.forOwn(query, function (value, key) {
+        if (!(key in reserved) && !(key in where)) {
+          where[key] = {
+            '==': value
+          };
         }
-        utils.forOwn(query, function (value, key) {
-          if (!(key in reserved) && !(key in where)) {
-            where[key] = {
-              '==': value
-            };
+      });
+      var groups = void 0;
+
+      // Apply filter for each field
+      if (utils.isObject(where) && Object.keys(where).length !== 0) {
+        groups = this._applyWhereFromArray([where]);
+      } else if (utils.isArray(where)) {
+        groups = this._applyWhereFromArray(where);
+      }
+
+      if (groups) {
+        this.data = this.data.filter(function (item, i) {
+          return _this2._testArrayGroup(true, true, groups, item).keep;
+        });
+      }
+
+      // Sort
+      var orderBy = query.orderBy || query.sort;
+
+      if (utils.isString(orderBy)) {
+        orderBy = [[orderBy, 'ASC']];
+      }
+      if (!utils.isArray(orderBy)) {
+        orderBy = null;
+      }
+
+      /**
+       * Determines how records should be ordered in the result.
+       *
+       * @example <caption>Order posts by `author` then by `id` descending </caption>
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 5 },
+       *   { author: 'Sally', age: 31, id: 6 },
+       *   { author: 'Mike', age: 32, id: 7 },
+       *   { author: 'Adam', age: 33, id: 8 },
+       *   { author: 'Adam', age: 33, id: 9 }
+       * ]
+       * store.add('post', posts)
+       * store.filter('post', {
+       *     orderBy:[['author','ASC'],['id','DESC']]
+       * })
+       * console.log(results)
+       *
+       * @name query.orderBy
+       * @type {string|Array[]}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
+      if (orderBy) {
+        var index = 0;
+        orderBy.forEach(function (def, i) {
+          if (utils.isString(def)) {
+            orderBy[i] = [def, 'ASC'];
           }
         });
-        var groups = void 0;
+        this.data.sort(function (a, b) {
+          return _this2.compare(orderBy, index, a, b);
+        });
+      }
 
-        // Apply filter for each field
-        if (utils.isObject(where) && Object.keys(where).length !== 0) {
-          groups = _this2._applyWhereFromArray([where]);
-        } else if (utils.isArray(where)) {
-          groups = _this2._applyWhereFromArray(where);
-        }
+      /**
+       * Number of records to skip.
+       *
+       * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
+       * const PAGE_SIZE = 10
+       * let currentPage = 1
+       * PostMapper.findAll({
+       *   offset: PAGE_SIZE * (currentPage 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
+       * const PAGE_SIZE = 5
+       * let currentPage = 2
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 1 },
+       *   { author: 'Sally', age: 31, id: 2 },
+       *   { author: 'Mike', age: 32, id: 3 },
+       *   { author: 'Adam', age: 33, id: 4 },
+       *   { author: 'Adam', age: 33, id: 5 },
+       *   { author: 'Peter', age: 25, id: 6 },
+       *   { author: 'Sally', age: 21, id: 7 },
+       *   { author: 'Jim', age: 27, id: 8 },
+       *   { author: 'Jim', age: 27, id: 9 },
+       *   { author: 'Jason', age: 55, id: 10 }
+       * ]
+       * store.add('post', posts)
+       * store.filter('post', {
+       *   offset: PAGE_SIZE * (currentPage 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * console.log(results)
+       *
+       * @name query.offset
+       * @type {number}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
+      if (utils.isNumber(query.skip)) {
+        this.skip(query.skip);
+      } else if (utils.isNumber(query.offset)) {
+        this.skip(query.offset);
+      }
 
-        if (groups) {
-          _this2.data = _this2.data.filter(function (item, i) {
-            return _this2._testArrayGroup(true, true, groups, item).keep;
-          });
-        }
-
-        // Sort
-        var orderBy = query.orderBy || query.sort;
-
-        if (utils.isString(orderBy)) {
-          orderBy = [[orderBy, 'ASC']];
-        }
-        if (!utils.isArray(orderBy)) {
-          orderBy = null;
-        }
-
-        /**
-         * Determines how records should be ordered in the result.
-         *
-         * @example <caption>Order posts by `author` then by `id` descending </caption>
-         * const store = new JSData.DataStore()
-         * store.defineMapper('post')
-         * const posts = [
-         *   { author: 'John', age: 30, id: 5 },
-         *   { author: 'Sally', age: 31, id: 6 },
-         *   { author: 'Mike', age: 32, id: 7 },
-         *   { author: 'Adam', age: 33, id: 8 },
-         *   { author: 'Adam', age: 33, id: 9 }
-         * ]
-         * store.add('post', posts)
-         * store.filter('post', {
-         *     orderBy:[['author','ASC'],['id','DESC']]
-         * })
-         * console.log(results)
-         *
-         * @name query.orderBy
-         * @type {string|Array[]}
-         * @see http://www.js-data.io/v3.0/docs/query-syntax
-         * @since 3.0.0
-         */
-        if (orderBy) {
-          (function () {
-            var index = 0;
-            orderBy.forEach(function (def, i) {
-              if (utils.isString(def)) {
-                orderBy[i] = [def, 'ASC'];
-              }
-            });
-            _this2.data.sort(function (a, b) {
-              return _this2.compare(orderBy, index, a, b);
-            });
-          })();
-        }
-
-        /**
-         * Number of records to skip.
-         *
-         * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
-         * const PAGE_SIZE = 10
-         * let currentPage = 1
-         * PostMapper.findAll({
-         *   offset: PAGE_SIZE * (currentPage 1)
-         *   limit: PAGE_SIZE
-         * })
-         *
-         * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
-         * const PAGE_SIZE = 5
-         * let currentPage = 2
-         * const store = new JSData.DataStore()
-         * store.defineMapper('post')
-         * const posts = [
-         *   { author: 'John', age: 30, id: 1 },
-         *   { author: 'Sally', age: 31, id: 2 },
-         *   { author: 'Mike', age: 32, id: 3 },
-         *   { author: 'Adam', age: 33, id: 4 },
-         *   { author: 'Adam', age: 33, id: 5 },
-         *   { author: 'Peter', age: 25, id: 6 },
-         *   { author: 'Sally', age: 21, id: 7 },
-         *   { author: 'Jim', age: 27, id: 8 },
-         *   { author: 'Jim', age: 27, id: 9 },
-         *   { author: 'Jason', age: 55, id: 10 }
-         * ]
-         * store.add('post', posts)
-         * store.filter('post', {
-         *   offset: PAGE_SIZE * (currentPage 1)
-         *   limit: PAGE_SIZE
-         * })
-         *
-         * console.log(results)
-         *
-         * @name query.offset
-         * @type {number}
-         * @see http://www.js-data.io/v3.0/docs/query-syntax
-         * @since 3.0.0
-         */
-        if (utils.isNumber(query.skip)) {
-          _this2.skip(query.skip);
-        } else if (utils.isNumber(query.offset)) {
-          _this2.skip(query.offset);
-        }
-
-        /**
-         * Maximum number of records to retrieve.
-         *
-         * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
-         * const PAGE_SIZE = 10
-         * let currentPage = 1
-         * PostMapper.findAll({
-         *   offset: PAGE_SIZE * (currentPage 1)
-         *   limit: PAGE_SIZE
-         * })
-         *
-         * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
-         * const PAGE_SIZE = 5
-         * let currentPage = 2
-         * const store = new JSData.DataStore()
-         * store.defineMapper('post')
-         * const posts = [
-         *   { author: 'John', age: 30, id: 1 },
-         *   { author: 'Sally', age: 31, id: 2 },
-         *   { author: 'Mike', age: 32, id: 3 },
-         *   { author: 'Adam', age: 33, id: 4 },
-         *   { author: 'Adam', age: 33, id: 5 },
-         *   { author: 'Peter', age: 25, id: 6 },
-         *   { author: 'Sally', age: 21, id: 7 },
-         *   { author: 'Jim', age: 27, id: 8 },
-         *   { author: 'Jim', age: 27, id: 9 },
-         *   { author: 'Jason', age: 55, id: 10 }
-         * ]
-         * store.add('post', posts)
-         * store.filter('post', {
-         *   offset: PAGE_SIZE * (currentPage 1)
-         *   limit: PAGE_SIZE
-         * })
-         *
-         * console.log(results)
-         * @name query.limit
-         * @type {number}
-         * @see http://www.js-data.io/v3.0/docs/query-syntax
-         * @since 3.0.0
-         */
-        if (utils.isNumber(query.limit)) {
-          _this2.limit(query.limit);
-        }
-      })();
+      /**
+       * Maximum number of records to retrieve.
+       *
+       * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
+       * const PAGE_SIZE = 10
+       * let currentPage = 1
+       * PostMapper.findAll({
+       *   offset: PAGE_SIZE * (currentPage 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
+       * const PAGE_SIZE = 5
+       * let currentPage = 2
+       * const store = new JSData.DataStore()
+       * store.defineMapper('post')
+       * const posts = [
+       *   { author: 'John', age: 30, id: 1 },
+       *   { author: 'Sally', age: 31, id: 2 },
+       *   { author: 'Mike', age: 32, id: 3 },
+       *   { author: 'Adam', age: 33, id: 4 },
+       *   { author: 'Adam', age: 33, id: 5 },
+       *   { author: 'Peter', age: 25, id: 6 },
+       *   { author: 'Sally', age: 21, id: 7 },
+       *   { author: 'Jim', age: 27, id: 8 },
+       *   { author: 'Jim', age: 27, id: 9 },
+       *   { author: 'Jason', age: 55, id: 10 }
+       * ]
+       * store.add('post', posts)
+       * store.filter('post', {
+       *   offset: PAGE_SIZE * (currentPage 1)
+       *   limit: PAGE_SIZE
+       * })
+       *
+       * console.log(results)
+       * @name query.limit
+       * @type {number}
+       * @see http://www.js-data.io/v3.0/docs/query-syntax
+       * @since 3.0.0
+       */
+      if (utils.isNumber(query.limit)) {
+        this.limit(query.limit);
+      }
     } else if (utils.isFunction(query)) {
       this.data = this.data.filter(query, thisArg);
     }
@@ -3359,7 +3364,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     var _this2 = this;
 
     this.getRelation().relationList.forEach(function (def) {
-      if (def.getRelation() === mapper && _this2.isInversedTo(def)) {
+      if (def.getRelation() === mapper && _this2.isInversedTo(def) && _this2 !== def) {
         _this2.inverse = def;
         return true;
       }
@@ -3429,6 +3434,38 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
       return;
     }
     return this.relatedCollection.filter(defineProperty({}, this.foreignKey, id));
+  },
+  ensureLinkedDataHasProperType: function ensureLinkedDataHasProperType(props, opts) {
+    var relatedMapper = this.getRelation();
+    var relationData = this.getLocalField(props);
+
+    if (utils.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
+      return;
+    }
+
+    if (relationData && !relatedMapper.is(relationData)) {
+      utils.set(props, this.localField, relatedMapper.createRecord(relationData, opts));
+    }
+  },
+  isRequiresParentId: function isRequiresParentId() {
+    return false;
+  },
+  isRequiresChildId: function isRequiresChildId() {
+    return false;
+  },
+  createChildRecord: function createChildRecord(props, relationData, opts) {
+    var _this4 = this;
+
+    this.setForeignKey(props, relationData);
+
+    return this.createLinked(relationData, opts).then(function (result) {
+      _this4.setLocalField(props, result);
+    });
+  },
+  createLinked: function createLinked(props, opts) {
+    var create = utils.isArray(props) ? 'createMany' : 'create';
+
+    return this.getRelation()[create](props, opts);
   }
 });
 
@@ -3448,6 +3485,21 @@ var BelongsToRelation = Relation.extend({
     if (relatedId !== undefined && relatedId !== null) {
       return this.relatedCollection.get(relatedId);
     }
+  },
+  isRequiresParentId: function isRequiresParentId() {
+    return true;
+  },
+  createParentRecord: function createParentRecord(props, opts) {
+    var _this = this;
+
+    var relationData = this.getLocalField(props);
+
+    return this.createLinked(relationData, opts).then(function (record) {
+      _this.setForeignKey(props, record);
+    });
+  },
+  createChildRecord: function createChildRecord() {
+    throw new Error('"BelongsTo" relation does not support child creation as it cannot have children.');
   }
 }, {
   TYPE_NAME: 'belongsTo'
@@ -3530,6 +3582,27 @@ var HasManyRelation = Relation.extend({
         'contains': id
       })
     });
+  },
+  isRequiresParentId: function isRequiresParentId() {
+    return !!this.localKeys && this.localKeys.length > 0;
+  },
+  isRequiresChildId: function isRequiresChildId() {
+    return !!this.foreignKey;
+  },
+  createParentRecord: function createParentRecord(props, opts) {
+    var _this2 = this;
+
+    var relationData = this.getLocalField(props);
+    var foreignIdField = this.getRelation().idAttribute;
+
+    return this.createLinked(relationData, opts).then(function (records) {
+      utils.set(props, _this2.localKeys, records.map(function (record) {
+        return utils.get(record, foreignIdField);
+      }));
+    });
+  },
+  createLinked: function createLinked(props, opts) {
+    return this.getRelation().createMany(props, opts);
   }
 }, {
   TYPE_NAME: 'hasMany'
@@ -3543,6 +3616,9 @@ var HasOneRelation = Relation.extend({
     if (records && records.length) {
       return records[0];
     }
+  },
+  isRequiresChildId: function isRequiresChildId() {
+    return true;
   }
 }, {
   TYPE_NAME: 'hasOne'
@@ -3742,12 +3818,13 @@ function Record(props, opts) {
   props || (props = {});
   opts || (opts = {});
   var _set = this._set;
+  var mapper = this.constructor.mapper;
+
   _set(creatingPath, true);
   _set(noValidatePath$1, !!opts.noValidate);
   _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? mapper ? mapper.keepChangeHistory : true : opts.keepChangeHistory);
 
   // Set the idAttribute value first, if it exists.
-  var mapper = this.constructor.mapper;
   var id = mapper ? utils.get(props, mapper.idAttribute) : undefined;
   if (id !== undefined) {
     utils.set(this, mapper.idAttribute, id);
@@ -4414,23 +4491,15 @@ var Record$1 = Component$1.extend({
    * @since 3.0.0
    */
   toJSON: function toJSON(opts) {
-    var _this6 = this;
-
     var mapper = this.constructor.mapper;
     if (mapper) {
       return mapper.toJSON(this, opts);
     } else {
-      var _ret = function () {
-        var json = {};
-        utils.forOwn(_this6, function (prop, key) {
-          json[key] = utils.plainCopy(prop);
-        });
-        return {
-          v: json
-        };
-      }();
-
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      var json = {};
+      utils.forOwn(this, function (prop, key) {
+        json[key] = utils.plainCopy(prop);
+      });
+      return json;
     }
   },
 
@@ -5016,6 +5085,7 @@ var COLLECTION_DEFAULTS = {
    * Possible values:
    * merge
    * replace
+   * skip
    *
    * Merge:
    *
@@ -5028,39 +5098,42 @@ var COLLECTION_DEFAULTS = {
    * record. Any top-level own properties of the existing record that are _not_
    * on the new record will be removed.
    *
+   * Skip:
+   *
+   * Ignore new record, keep existing record.
+   *
    * @name Collection#onConflict
    * @type {string}
    * @default "merge"
    */
   onConflict: 'merge'
-};
 
-/**
- * An ordered set of {@link Record} instances.
- *
- * @example <caption>Collection#constructor</caption>
- * // import {Collection, Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Collection, Record} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * const user1 = new Record({ id: 1 })
- * const user2 = new Record({ id: 2 })
- * const UserCollection = new Collection([user1, user2])
- * console.log(UserCollection.get(1) === user1)
- *
- * @class Collection
- * @extends Component
- * @param {Array} [records] Initial set of records to insert into the
- * collection.
- * @param {Object} [opts] Configuration options.
- * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
- * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
- * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
- * @param {string} [opts.mapper] See {@link Collection#mapper}.
- * @since 3.0.0
- */
-function Collection(records, opts) {
+  /**
+   * An ordered set of {@link Record} instances.
+   *
+   * @example <caption>Collection#constructor</caption>
+   * // import {Collection, Record} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Collection, Record} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const user1 = new Record({ id: 1 })
+   * const user2 = new Record({ id: 2 })
+   * const UserCollection = new Collection([user1, user2])
+   * console.log(UserCollection.get(1) === user1)
+   *
+   * @class Collection
+   * @extends Component
+   * @param {Array} [records] Initial set of records to insert into the
+   * collection.
+   * @param {Object} [opts] Configuration options.
+   * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
+   * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
+   * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
+   * @param {string} [opts.mapper] See {@link Collection#mapper}.
+   * @since 3.0.0
+   */
+};function Collection(records, opts) {
   utils.classCallCheck(this, Collection);
   Component$1.call(this, opts);
 
@@ -5230,8 +5303,8 @@ var Collection$1 = Component$1.extend({
         // Here, the currently visited record corresponds to a record already
         // in the collection, so we need to merge them
         var onConflict = opts.onConflict || _this.onConflict;
-        if (onConflict !== 'merge' && onConflict !== 'replace') {
-          throw utils.err(DOMAIN$1 + '#add', 'opts.onConflict')(400, 'one of (merge, replace)', onConflict, true);
+        if (onConflict !== 'merge' && onConflict !== 'replace' && onConflict !== 'skip') {
+          throw utils.err(DOMAIN$1 + '#add', 'opts.onConflict')(400, 'one of (merge, replace, skip)', onConflict, true);
         }
         var existingNoValidate = existing._get(noValidatePath);
         if (opts.noValidate) {
@@ -5247,7 +5320,8 @@ var Collection$1 = Component$1.extend({
             }
           });
           existing.set(record);
-        }
+        } // else if(onConflict === 'skip'){ do nothing }
+
         if (opts.noValidate) {
           // Restore previous `noValidate` value
           existing._set(noValidatePath, existingNoValidate);
@@ -5499,7 +5573,7 @@ var Collection$1 = Component$1.extend({
    * @returns {(Object|Record)} The record with the given id.
    */
   get: function get(id) {
-    var instances = this.query().get(id).run();
+    var instances = id === undefined ? [] : this.query().get(id).run();
     return instances.length ? instances[0] : undefined;
   },
 
@@ -5994,12 +6068,11 @@ var types = {
   number: utils.isNumber,
   object: utils.isObject,
   string: utils.isString
-};
 
-/**
- * @ignore
- */
-var segmentToString = function segmentToString(segment, prev) {
+  /**
+   * @ignore
+   */
+};var segmentToString = function segmentToString(segment, prev) {
   var str = '';
   if (segment) {
     if (utils.isNumber(segment)) {
@@ -6810,9 +6883,8 @@ var makeDescriptor = function makeDescriptor(prop, schema, opts) {
     // These properties are enumerable by default, but regardless of their
     // enumerability, they won't be "own" properties of individual records
     enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
-  };
-  // Cache a few strings for optimal performance
-  var keyPath = 'props.' + prop;
+    // Cache a few strings for optimal performance
+  };var keyPath = 'props.' + prop;
   var previousPath = 'previous.' + prop;
   var getter = opts.getter;
   var setter = opts.setter;
@@ -6824,12 +6896,10 @@ var makeDescriptor = function makeDescriptor(prop, schema, opts) {
   };
 
   if (utils.isFunction(schema.get)) {
-    (function () {
-      var originalGet = descriptor.get;
-      descriptor.get = function () {
-        return schema.get.call(this, originalGet);
-      };
-    })();
+    var originalGet = descriptor.get;
+    descriptor.get = function () {
+      return schema.get.call(this, originalGet);
+    };
   }
 
   descriptor.set = function (value) {
@@ -6853,88 +6923,84 @@ var makeDescriptor = function makeDescriptor(prop, schema, opts) {
     // TODO: Make it so tracking can be turned on for all properties instead of
     // only per-property
     if (track && !_get(creatingPath$1)) {
-      (function () {
-        // previous is versioned on database commit
-        // props are versioned on set()
-        var previous = _get(previousPath);
-        var current = _get(keyPath);
-        var changing = _get(changingPath);
-        var changed = _get(changedPath);
+      // previous is versioned on database commit
+      // props are versioned on set()
+      var previous = _get(previousPath);
+      var current = _get(keyPath);
+      var changing = _get(changingPath);
+      var changed = _get(changedPath);
 
-        if (!changing) {
-          // Track properties that are changing in the current event loop
-          changed = [];
-        }
+      if (!changing) {
+        // Track properties that are changing in the current event loop
+        changed = [];
+      }
 
-        // Add changing properties to this array once at most
-        var index = changed.indexOf(prop);
-        if (current !== value && index === -1) {
-          changed.push(prop);
+      // Add changing properties to this array once at most
+      var index = changed.indexOf(prop);
+      if (current !== value && index === -1) {
+        changed.push(prop);
+      }
+      if (previous === value) {
+        if (index >= 0) {
+          changed.splice(index, 1);
         }
-        if (previous === value) {
-          if (index >= 0) {
-            changed.splice(index, 1);
-          }
+      }
+      // No changes in current event loop
+      if (!changed.length) {
+        changing = false;
+        _unset(changingPath);
+        _unset(changedPath);
+        // Cancel pending change event
+        if (_get(eventIdPath)) {
+          clearTimeout(_get(eventIdPath));
+          _unset(eventIdPath);
         }
-        // No changes in current event loop
-        if (!changed.length) {
-          changing = false;
-          _unset(changingPath);
+      }
+      // Changes detected in current event loop
+      if (!changing && changed.length) {
+        _set(changedPath, changed);
+        _set(changingPath, true);
+        // Saving the timeout id allows us to batch all changes in the same
+        // event loop into a single "change"
+        // TODO: Optimize
+        _set(eventIdPath, setTimeout(function () {
+          // Previous event loop where changes were gathered has ended, so
+          // notify any listeners of those changes and prepare for any new
+          // changes
           _unset(changedPath);
-          // Cancel pending change event
-          if (_get(eventIdPath)) {
-            clearTimeout(_get(eventIdPath));
-            _unset(eventIdPath);
-          }
-        }
-        // Changes detected in current event loop
-        if (!changing && changed.length) {
-          _set(changedPath, changed);
-          _set(changingPath, true);
-          // Saving the timeout id allows us to batch all changes in the same
-          // event loop into a single "change"
+          _unset(eventIdPath);
+          _unset(changingPath);
           // TODO: Optimize
-          _set(eventIdPath, setTimeout(function () {
-            // Previous event loop where changes were gathered has ended, so
-            // notify any listeners of those changes and prepare for any new
-            // changes
-            _unset(changedPath);
-            _unset(eventIdPath);
-            _unset(changingPath);
-            // TODO: Optimize
-            if (!_get(silentPath)) {
-              var i = void 0;
-              for (i = 0; i < changed.length; i++) {
-                _this.emit('change:' + changed[i], _this, utils.get(_this, changed[i]));
-              }
-
-              var changes = utils.diffObjects(defineProperty({}, prop, value), defineProperty({}, prop, current));
-
-              if (_get(keepChangeHistoryPath$1)) {
-                var changeRecord = utils.plainCopy(changes);
-                changeRecord.timestamp = new Date().getTime();
-                var changeHistory = _get(changeHistoryPath);
-                !changeHistory && _set(changeHistoryPath, changeHistory = []);
-                changeHistory.push(changeRecord);
-              }
-              _this.emit('change', _this, changes);
+          if (!_get(silentPath)) {
+            var i = void 0;
+            for (i = 0; i < changed.length; i++) {
+              _this.emit('change:' + changed[i], _this, utils.get(_this, changed[i]));
             }
-            _unset(silentPath);
-          }, 0));
-        }
-      })();
+
+            var changes = utils.diffObjects(defineProperty({}, prop, value), defineProperty({}, prop, current));
+
+            if (_get(keepChangeHistoryPath$1)) {
+              var changeRecord = utils.plainCopy(changes);
+              changeRecord.timestamp = new Date().getTime();
+              var changeHistory = _get(changeHistoryPath);
+              !changeHistory && _set(changeHistoryPath, changeHistory = []);
+              changeHistory.push(changeRecord);
+            }
+            _this.emit('change', _this, changes);
+          }
+          _unset(silentPath);
+        }, 0));
+      }
     }
     _set(keyPath, value);
     return value;
   };
 
   if (utils.isFunction(schema.set)) {
-    (function () {
-      var originalSet = descriptor.set;
-      descriptor.set = function (value) {
-        return schema.set.call(this, value, originalSet);
-      };
-    })();
+    var originalSet = descriptor.set;
+    descriptor.set = function (value) {
+      return schema.set.call(this, value, originalSet);
+    };
   }
 
   return descriptor;
@@ -7058,30 +7124,29 @@ var typeGroupValidators = {
   string: function string(value, schema, opts) {
     return runOps(STRING_OPS, value, schema, opts);
   }
-};
 
-/**
- * js-data's Schema class.
- *
- * @example <caption>Schema#constructor</caption>
- * // Normally you would do:  import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Schema} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * const PostSchema = new Schema({
- *   type: 'object',
- *   properties: {
- *     title: { type: 'string' }
- *   }
- * })
- * PostSchema.validate({ title: 1234 })
- *
- * @class Schema
- * @extends Component
- * @param {Object} definition Schema definition according to json-schema.org
- */
-function Schema(definition) {
+  /**
+   * js-data's Schema class.
+   *
+   * @example <caption>Schema#constructor</caption>
+   * // Normally you would do:  import {Schema} from 'js-data'
+   * const JSData = require('js-data@3.0.0-rc.4')
+   * const {Schema} = JSData
+   * console.log('Using JSData v' + JSData.version.full)
+   *
+   * const PostSchema = new Schema({
+   *   type: 'object',
+   *   properties: {
+   *     title: { type: 'string' }
+   *   }
+   * })
+   * PostSchema.validate({ title: 1234 })
+   *
+   * @class Schema
+   * @extends Component
+   * @param {Object} definition Schema definition according to json-schema.org
+   */
+};function Schema(definition) {
   var _this2 = this;
 
   definition || (definition = {});
@@ -7189,33 +7254,25 @@ var Schema$1 = Component$1.extend({
       return;
     }
     if (this.type === 'object') {
-      var key;
-
-      var _ret4 = function () {
-        var copy = {};
-        var properties = _this3.properties;
-        if (properties) {
-          utils.forOwn(properties, function (_definition, prop) {
-            copy[prop] = _definition.pick(value[prop]);
-          });
-        }
-        if (_this3.extends) {
-          utils.fillIn(copy, _this3.extends.pick(value));
-        }
-        // Conditionally copy properties not defined in "properties"
-        if (_this3.additionalProperties) {
-          for (key in value) {
-            if (!properties[key]) {
-              copy[key] = utils.plainCopy(value[key]);
-            }
+      var copy = {};
+      var properties = this.properties;
+      if (properties) {
+        utils.forOwn(properties, function (_definition, prop) {
+          copy[prop] = _definition.pick(value[prop]);
+        });
+      }
+      if (this.extends) {
+        utils.fillIn(copy, this.extends.pick(value));
+      }
+      // Conditionally copy properties not defined in "properties"
+      if (this.additionalProperties) {
+        for (var key in value) {
+          if (!properties[key]) {
+            copy[key] = utils.plainCopy(value[key]);
           }
         }
-        return {
-          v: copy
-        };
-      }();
-
-      if ((typeof _ret4 === 'undefined' ? 'undefined' : _typeof(_ret4)) === "object") return _ret4.v;
+      }
+      return copy;
     } else if (this.type === 'array') {
       return value.map(function (item) {
         var _copy = _this3.items ? _this3.items.pick(item) : {};
@@ -7322,18 +7379,16 @@ var makeNotify = function makeNotify(num) {
     this.dbg.apply(this, [op].concat(args));
 
     if (applyDefaultsHooks.indexOf(op) !== -1 && opts.applyDefaults !== false) {
-      (function () {
-        var schema = _this.getSchema();
-        if (schema && schema.applyDefaults) {
-          var toProcess = args[0];
-          if (!utils.isArray(toProcess)) {
-            toProcess = [toProcess];
-          }
-          toProcess.forEach(function (record) {
-            schema.applyDefaults(record);
-          });
+      var schema = this.getSchema();
+      if (schema && schema.applyDefaults) {
+        var toProcess = args[0];
+        if (!utils.isArray(toProcess)) {
+          toProcess = [toProcess];
         }
-      })();
+        toProcess.forEach(function (record) {
+          schema.applyDefaults(record);
+        });
+      }
     }
 
     // Automatic validation
@@ -7549,62 +7604,59 @@ var MAPPER_DEFAULTS = {
    * @type {boolean}
    */
   validateOnSet: true
-};
 
-/**
- * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
- * meta information about a resource, a Mapper can perform generic CRUD
- * operations against that resource. Apart from its configuration, a Mapper is
- * stateless. The particulars of various persistence layers have been abstracted
- * into adapters, which a Mapper uses to perform its operations.
- *
- * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
- * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
- * Data Mapper moves data between [in-memory object instances][record] and a
- * relational or document-based database. JSData's Mapper can work with any
- * persistence layer you can write an adapter for.
- *
- * _("Model" is a heavily overloaded term and is avoided in this documentation
- * to prevent confusion.)_
- *
- * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
- * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
- * [book]: http://martinfowler.com/books/eaa.html
- * [record]: Record.html
- *
- * @example
- * // Import and instantiate
- * import {Mapper} from 'js-data'
- * const UserMapper = new Mapper({ name: 'user' })
- *
- * @example
- * // Define a Mapper using the Container component
- * import {Container} from 'js-data'
- * const store = new Container()
- * store.defineMapper('user')
- *
- * @class Mapper
- * @extends Component
- * @param {Object} opts Configuration options.
- * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
- * @param {boolean} [opts.debug=false] See {@link Component#debug}.
- * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
- * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
- * @param {Object} [opts.methods] See {@link Mapper#methods}.
- * @param {string} opts.name See {@link Mapper#name}.
- * @param {boolean} [opts.notify] See {@link Mapper#notify}.
- * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
- * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
- * @param {Object|Schema} [opts.schema] See {@link Mapper#schema}.
- * @returns {Mapper} A new {@link Mapper} instance.
- * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
- * @since 3.0.0
- * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
- */
-function Mapper(opts) {
-  var _this2 = this;
-
+  /**
+   * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
+   * meta information about a resource, a Mapper can perform generic CRUD
+   * operations against that resource. Apart from its configuration, a Mapper is
+   * stateless. The particulars of various persistence layers have been abstracted
+   * into adapters, which a Mapper uses to perform its operations.
+   *
+   * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
+   * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
+   * Data Mapper moves data between [in-memory object instances][record] and a
+   * relational or document-based database. JSData's Mapper can work with any
+   * persistence layer you can write an adapter for.
+   *
+   * _("Model" is a heavily overloaded term and is avoided in this documentation
+   * to prevent confusion.)_
+   *
+   * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+   *
+   * @example
+   * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
+   * [book]: http://martinfowler.com/books/eaa.html
+   * [record]: Record.html
+   * // Import and instantiate
+   * import {Mapper} from 'js-data'
+   * const UserMapper = new Mapper({ name: 'user' })
+   *
+   * @example
+   * // Define a Mapper using the Container component
+   * import {Container} from 'js-data'
+   * const store = new Container()
+   * store.defineMapper('user')
+   *
+   * @class Mapper
+   * @extends Component
+   * @param {Object} opts Configuration options.
+   * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
+   * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+   * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
+   * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
+   * @param {Object} [opts.methods] See {@link Mapper#methods}.
+   * @param {string} opts.name See {@link Mapper#name}.
+   * @param {boolean} [opts.notify] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
+   * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
+   * @param {Object|Schema} [opts.schema] See {@link Mapper#schema}.
+   * @returns {Mapper} A new {@link Mapper} instance.
+   * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
+   */
+};function Mapper(opts) {
   utils.classCallCheck(this, Mapper);
   Component$1.call(this);
   opts || (opts = {});
@@ -7770,18 +7822,16 @@ function Mapper(opts) {
 
   // Create a subclass of Record that's tied to this Mapper
   if (this.recordClass === undefined) {
-    (function () {
-      var superClass = Record$1;
-      _this2.recordClass = superClass.extend({
-        constructor: function Record() {
-          var subClass = function Record(props, opts) {
-            utils.classCallCheck(this, subClass);
-            superClass.call(this, props, opts);
-          };
-          return subClass;
-        }()
-      });
-    })();
+    var superClass = Record$1;
+    this.recordClass = superClass.extend({
+      constructor: function Record() {
+        var subClass = function Record(props, opts) {
+          utils.classCallCheck(this, subClass);
+          superClass.call(this, props, opts);
+        };
+        return subClass;
+      }()
+    });
   }
 
   if (this.recordClass) {
@@ -8274,114 +8324,67 @@ var Mapper$1 = Component$1.extend({
    * @since 3.0.0
    */
   create: function create(props, opts) {
-    var _this3 = this;
+    var _this2 = this;
 
-    var op = void 0,
-        adapter = void 0;
     // Default values for arguments
     props || (props = {});
     opts || (opts = {});
     var originalRecord = props;
+    var parentRelationMap = {};
+    var adapterResponse = {};
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this);
-    adapter = opts.adapter = this.getAdapterName(opts);
+    opts.adapter = this.getAdapterName(opts);
 
-    // beforeCreate lifecycle hook
-    op = opts.op = 'beforeCreate';
-    return utils.resolve(this[op](props, opts)).then(function (_props) {
-      // Allow for re-assignment from lifecycle hook
-      props = _props === undefined ? props : _props;
-
-      // Deep pre-create belongsTo relations
-      var belongsToRelationData = {};
+    opts.op = 'beforeCreate';
+    return this._runHook(opts.op, props, opts).then(function (props) {
       opts.with || (opts.with = []);
-      var tasks = [];
-      utils.forEachRelation(_this3, opts, function (def, optsCopy) {
-        var relationData = def.getLocalField(props);
-        var relatedMapper = def.getRelation();
-        var relatedIdAttribute = relatedMapper.idAttribute;
-        optsCopy.raw = false;
-        if (!relationData) {
-          return;
-        }
-        if (def.type === belongsToType) {
-          // Create belongsTo relation first because we need a generated id to
-          // attach to the child
-          tasks.push(relatedMapper.create(relationData, optsCopy).then(function (data) {
-            def.setLocalField(belongsToRelationData, data);
-            def.setForeignKey(props, data);
-          }));
-        } else if (def.type === hasManyType && def.localKeys) {
-          // Create his hasMany relation first because it uses localKeys
-          tasks.push(relatedMapper.createMany(relationData, optsCopy).then(function (data) {
-            def.setLocalField(belongsToRelationData, data);
-            utils.set(props, def.localKeys, data.map(function (record) {
-              return utils.get(record, relatedIdAttribute);
-            }));
-          }));
-        }
-      });
-      return utils.Promise.all(tasks).then(function () {
-        // Now delegate to the adapter for the main create
-        op = opts.op = 'create';
-        _this3.dbg(op, props, opts);
-        return utils.resolve(_this3.getAdapter(adapter)[op](_this3, _this3.toJSON(props, { with: opts.pass || [] }), opts));
-      }).then(function (result) {
-        var createdRecordData = opts.raw ? result.data : result;
-
-        // Deep post-create hasMany and hasOne relations
-        tasks = [];
-        utils.forEachRelation(_this3, opts, function (def, optsCopy) {
-          var relationData = def.getLocalField(props);
-          if (!relationData) {
-            return;
-          }
-          optsCopy.raw = false;
-          var task = void 0;
-          // Create hasMany and hasOne after the main create because we needed
-          // a generated id to attach to these items
-          if (def.type === hasManyType && def.foreignKey) {
-            def.setForeignKey(createdRecordData, relationData);
-            task = def.getRelation().createMany(relationData, optsCopy).then(function (result) {
-              def.setLocalField(createdRecordData, result);
-            });
-          } else if (def.type === hasOneType) {
-            def.setForeignKey(createdRecordData, relationData);
-            task = def.getRelation().create(relationData, optsCopy).then(function (result) {
-              def.setLocalField(createdRecordData, result);
-            });
-          } else if (def.type === belongsToType && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData));
-          } else if (def.type === hasManyType && def.localKeys && def.getLocalField(belongsToRelationData)) {
-            def.setLocalField(createdRecordData, def.getLocalField(belongsToRelationData));
-          }
-          if (task) {
-            tasks.push(task);
-          }
-        });
-        return utils.Promise.all(tasks).then(function () {
-          utils.set(originalRecord, createdRecordData, { silent: true });
-          if (utils.isFunction(originalRecord.commit)) {
-            originalRecord.commit();
-          }
-          if (opts.raw) {
-            result.data = originalRecord;
-          } else {
-            result = originalRecord;
-          }
-          return result;
-        });
-      });
+      return _this2._createParentRecordIfRequired(props, opts);
+    }).then(function (relationMap) {
+      parentRelationMap = relationMap;
+    }).then(function () {
+      opts.op = 'create';
+      return _this2._invokeAdapterMethod(opts.op, props, opts);
     }).then(function (result) {
-      result = _this3._end(result, opts);
-      // afterCreate lifecycle hook
-      op = opts.op = 'afterCreate';
-      return utils.resolve(_this3[op](props, opts, result)).then(function (_result) {
-        // Allow for re-assignment from lifecycle hook
-        return _result === undefined ? result : _result;
+      adapterResponse = result;
+    }).then(function () {
+      var createdProps = opts.raw ? adapterResponse.data : adapterResponse;
+
+      return _this2._createOrAssignChildRecordIfRequired(createdProps, {
+        opts: opts,
+        parentRelationMap: parentRelationMap,
+        originalProps: props
       });
+    }).then(function (createdProps) {
+      return _this2._commitChanges(originalRecord, createdProps);
+    }).then(function (record) {
+      if (opts.raw) {
+        adapterResponse.data = record;
+      } else {
+        adapterResponse = record;
+      }
+      var result = _this2._end(adapterResponse, opts);
+      opts.op = 'afterCreate';
+      return _this2._runHook(opts.op, props, opts, result);
     });
+  },
+  _commitChanges: function _commitChanges(recordOrRecords, newValues) {
+    var _this3 = this;
+
+    if (utils.isArray(recordOrRecords)) {
+      return recordOrRecords.map(function (record, i) {
+        return _this3._commitChanges(record, newValues[i]);
+      });
+    }
+
+    utils.set(recordOrRecords, newValues, { silent: true });
+
+    if (utils.isFunction(recordOrRecords.commit)) {
+      recordOrRecords.commit();
+    }
+
+    return recordOrRecords;
   },
 
 
@@ -8397,6 +8400,80 @@ var Mapper$1 = Component$1.extend({
    */
   createInstance: function createInstance(props, opts) {
     return this.createRecord(props, opts);
+  },
+
+
+  /**
+   * Creates parent record for relation types like BelongsTo or HasMany with localKeys
+   * in order to satisfy foreignKey dependency (so called child records).
+   * @param {Object} props See {@link Mapper#create}.
+   * @param {Object} opts See {@link Mapper#create}.
+   * @returns {Object} cached parent records map
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  _createParentRecordIfRequired: function _createParentRecordIfRequired(props, opts) {
+    var tasks = [];
+    var relations = [];
+
+    utils.forEachRelation(this, opts, function (def, optsCopy) {
+      if (!def.isRequiresParentId() || !def.getLocalField(props)) {
+        return;
+      }
+
+      optsCopy.raw = false;
+      relations.push(def);
+      tasks.push(def.createParentRecord(props, optsCopy));
+    });
+
+    return utils.Promise.all(tasks).then(function (records) {
+      return relations.reduce(function (map, relation, index) {
+        relation.setLocalField(map, records[index]);
+        return map;
+      }, {});
+    });
+  },
+
+
+  /**
+   * Creates child record for relation types like HasOne or HasMany with foreignKey
+   * in order to satisfy foreignKey dependency (so called parent records).
+   * @param {Object} props See {@link Mapper#create}.
+   * @param {Object} context contains collected information.
+   * @param {Object} context.opts See {@link Mapper#create}.
+   * @param {Object} context.parentRelationMap contains parent records map
+   * @param {Object} context.originalProps contains data passed into {@link Mapper#create} method
+   * @return {Promise} updated props
+   * @see Mapper#create
+   * @since 3.0.0
+   */
+  _createOrAssignChildRecordIfRequired: function _createOrAssignChildRecordIfRequired(props, context) {
+    var tasks = [];
+
+    utils.forEachRelation(this, context.opts, function (def, optsCopy) {
+      var relationData = def.getLocalField(context.originalProps);
+
+      if (!relationData) {
+        return;
+      }
+
+      optsCopy.raw = false;
+      // Create hasMany and hasOne after the main create because we needed
+      // a generated id to attach to these items
+      if (def.isRequiresChildId()) {
+        tasks.push(def.createChildRecord(props, relationData, optsCopy));
+      } else if (def.isRequiresParentId()) {
+        var parent = def.getLocalField(context.parentRelationMap);
+
+        if (parent) {
+          def.setLocalField(props, parent);
+        }
+      }
+    });
+
+    return utils.Promise.all(tasks).then(function () {
+      return props;
+    });
   },
 
 
@@ -8492,23 +8569,19 @@ var Mapper$1 = Component$1.extend({
   createMany: function createMany(records, opts) {
     var _this4 = this;
 
-    var op = void 0,
-        adapter = void 0;
     // Default values for arguments
     records || (records = []);
     opts || (opts = {});
     var originalRecords = records;
+    var adapterResponse = void 0;
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this);
-    adapter = opts.adapter = this.getAdapterName(opts);
+    opts.adapter = this.getAdapterName(opts);
 
     // beforeCreateMany lifecycle hook
-    op = opts.op = 'beforeCreateMany';
-    return utils.resolve(this[op](records, opts)).then(function (_records) {
-      // Allow for re-assignment from lifecycle hook
-      records = _records === undefined ? records : _records;
-
+    opts.op = 'beforeCreateMany';
+    return this._runHook(opts.op, records, opts).then(function (records) {
       // Deep pre-create belongsTo relations
       var belongsToRelationData = {};
       opts.with || (opts.with = []);
@@ -8516,43 +8589,39 @@ var Mapper$1 = Component$1.extend({
       utils.forEachRelation(_this4, opts, function (def, optsCopy) {
         var relationData = records.map(function (record) {
           return def.getLocalField(record);
-        }).filter(function (relatedRecord) {
-          return relatedRecord;
-        });
+        }).filter(Boolean);
         if (def.type === belongsToType && relationData.length === records.length) {
           // Create belongsTo relation first because we need a generated id to
           // attach to the child
-          tasks.push(def.getRelation().createMany(relationData, optsCopy).then(function (data) {
-            var relatedRecords = optsCopy.raw ? data.data : data;
-            def.setLocalField(belongsToRelationData, relatedRecords);
+          optsCopy.raw = false;
+          tasks.push(def.createLinked(relationData, optsCopy).then(function (relatedRecords) {
             records.forEach(function (record, i) {
-              def.setForeignKey(record, relatedRecords[i]);
+              return def.setForeignKey(record, relatedRecords[i]);
             });
+          }).then(function (relatedRecords) {
+            def.setLocalField(belongsToRelationData, relatedRecords);
           }));
         }
       });
       return utils.Promise.all(tasks).then(function () {
-        // Now delegate to the adapter
-        op = opts.op = 'createMany';
-        var json = records.map(function (record) {
-          return _this4.toJSON(record, { with: opts.pass || [] });
-        });
-        _this4.dbg(op, records, opts);
-        return utils.resolve(_this4.getAdapter(adapter)[op](_this4, json, opts));
+        opts.op = 'createMany';
+        return _this4._invokeAdapterMethod(opts.op, records, opts);
       }).then(function (result) {
-        var createdRecordsData = opts.raw ? result.data : result;
+        adapterResponse = result;
+      }).then(function () {
+        var createdRecordsData = opts.raw ? adapterResponse.data : adapterResponse;
 
         // Deep post-create hasOne relations
         tasks = [];
         utils.forEachRelation(_this4, opts, function (def, optsCopy) {
           var relationData = records.map(function (record) {
             return def.getLocalField(record);
-          }).filter(function (relatedRecord) {
-            return relatedRecord;
-          });
+          }).filter(Boolean);
           if (relationData.length !== records.length) {
             return;
           }
+
+          optsCopy.raw = false;
           var belongsToData = def.getLocalField(belongsToRelationData);
           var task = void 0;
           // Create hasMany and hasOne after the main create because we needed
@@ -8564,8 +8633,7 @@ var Mapper$1 = Component$1.extend({
             createdRecordsData.forEach(function (createdRecordData, i) {
               def.setForeignKey(createdRecordData, relationData[i]);
             });
-            task = def.getRelation().createMany(relationData, optsCopy).then(function (result) {
-              var relatedData = opts.raw ? result.data : result;
+            task = def.getRelation().createMany(relationData, optsCopy).then(function (relatedData) {
               createdRecordsData.forEach(function (createdRecordData, i) {
                 def.setLocalField(createdRecordData, relatedData[i]);
               });
@@ -8580,29 +8648,18 @@ var Mapper$1 = Component$1.extend({
           }
         });
         return utils.Promise.all(tasks).then(function () {
-          createdRecordsData.forEach(function (createdRecordData, i) {
-            var originalRecord = originalRecords[i];
-            utils.set(originalRecord, createdRecordData, { silent: true });
-            if (utils.isFunction(originalRecord.commit)) {
-              originalRecord.commit();
-            }
-          });
-          if (opts.raw) {
-            result.data = originalRecords;
-          } else {
-            result = originalRecords;
-          }
-          return result;
+          return _this4._commitChanges(originalRecords, createdRecordsData);
         });
       });
-    }).then(function (result) {
-      result = _this4._end(result, opts);
-      // afterCreateMany lifecycle hook
-      op = opts.op = 'afterCreateMany';
-      return utils.resolve(_this4[op](records, opts, result)).then(function (_result) {
-        // Allow for re-assignment from lifecycle hook
-        return _result === undefined ? result : _result;
-      });
+    }).then(function (records) {
+      if (opts.raw) {
+        adapterResponse.data = records;
+      } else {
+        adapterResponse = records;
+      }
+      var result = _this4._end(adapterResponse, opts);
+      opts.op = 'afterCreateMany';
+      return _this4._runHook(opts.op, records, opts, result);
     });
   },
 
@@ -8694,23 +8751,15 @@ var Mapper$1 = Component$1.extend({
     if (!utils.isObject(props)) {
       throw utils.err(DOMAIN$6 + '#createRecord', 'props')(400, 'array or object', props);
     }
-    var RecordCtor = this.recordClass;
-    var relationList = this.relationList || [];
-    relationList.forEach(function (def) {
-      var relatedMapper = def.getRelation();
-      var relationData = def.getLocalField(props);
-      if (relationData && !relatedMapper.is(relationData)) {
-        if (utils.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
-          return;
-        }
-        utils.set(props, def.localField, relatedMapper.createRecord(relationData, opts));
-      }
-    });
-    // Check to make sure "props" is not already an instance of this Mapper.
-    if (RecordCtor && !(props instanceof RecordCtor)) {
-      return new RecordCtor(props, opts);
+
+    if (this.relationList) {
+      this.relationList.forEach(function (def) {
+        def.ensureLinkedDataHasProperType(props, opts);
+      });
     }
-    return props;
+    var RecordCtor = this.recordClass;
+
+    return !RecordCtor || props instanceof RecordCtor ? props : new RecordCtor(props, opts);
   },
 
 
@@ -9305,6 +9354,35 @@ var Mapper$1 = Component$1.extend({
       this.defaultAdapter = name;
     }
   },
+  _runHook: function _runHook(hookName) {
+    for (var _len3 = arguments.length, hookArgs = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+      hookArgs[_key3 - 1] = arguments[_key3];
+    }
+
+    var defaultValueIndex = hookName.indexOf('after') === 0 ? hookArgs.length - 1 : 0;
+
+    return utils.resolve(this[hookName].apply(this, hookArgs)).then(function (overridenResult) {
+      return overridenResult === undefined ? hookArgs[defaultValueIndex] : overridenResult;
+    });
+  },
+  _invokeAdapterMethod: function _invokeAdapterMethod(method, propsOrRecords, opts) {
+    var _this7 = this;
+
+    var conversionOptions = { with: opts.pass || [] };
+    var object = void 0;
+
+    this.dbg(opts.op, propsOrRecords, opts);
+
+    if (utils.isArray(propsOrRecords)) {
+      object = propsOrRecords.map(function (record) {
+        return _this7.toJSON(record, conversionOptions);
+      });
+    } else {
+      object = this.toJSON(propsOrRecords, conversionOptions);
+    }
+
+    return this.getAdapter(opts.adapter)[method](this, object, opts);
+  },
 
 
   /**
@@ -9385,13 +9463,13 @@ var Mapper$1 = Component$1.extend({
    * @since 3.0.0
    */
   toJSON: function toJSON(records, opts) {
-    var _this7 = this;
+    var _this8 = this;
 
     var record = void 0;
     opts || (opts = {});
     if (utils.isArray(records)) {
       return records.map(function (record) {
-        return _this7.toJSON(record, opts);
+        return _this8.toJSON(record, opts);
       });
     } else {
       record = records;
@@ -9744,13 +9822,8 @@ var Mapper$1 = Component$1.extend({
       var errors = record.map(function (_record) {
         return schema.validate(_record, utils.pick(_opts, ['existingOnly']));
       });
-      var foundErrors = errors.filter(function (err) {
-        return err;
-      });
-      if (foundErrors.length) {
-        return errors;
-      }
-      return undefined;
+
+      return errors.some(Boolean) ? errors : undefined;
     }
     return schema.validate(record, _opts);
   },
@@ -9803,7 +9876,7 @@ var Mapper$1 = Component$1.extend({
    * @ignore
    */
   defineRelations: function defineRelations() {
-    var _this8 = this;
+    var _this9 = this;
 
     // Setup the mapper's relations, including generating Mapper#relationList
     // and Mapper#relationFields
@@ -9813,16 +9886,16 @@ var Mapper$1 = Component$1.extend({
           relations = [relations];
         }
         relations.forEach(function (def) {
-          var relatedMapper = _this8.datastore.getMapperByName(_name) || _name;
+          var relatedMapper = _this9.datastore.getMapperByName(_name) || _name;
           def.getRelation = function () {
-            return _this8.datastore.getMapper(_name);
+            return _this9.datastore.getMapper(_name);
           };
 
           if (typeof Relation[type] !== 'function') {
             throw utils.err(DOMAIN$6, 'defineRelations')(400, 'relation type (hasOne, hasMany, etc)', type, true);
           }
 
-          _this8[type](relatedMapper, def);
+          _this9[type](relatedMapper, def);
         });
       });
     });
@@ -11568,63 +11641,62 @@ var SIMPLESTORE_DEFAULTS = {
    * @type {boolean|Function}
    */
   usePendingFindAll: true
-};
 
-/**
- * The `SimpleStore` class is an extension of {@link Container}. Not only does
- * `SimpleStore` manage mappers, but also collections. `SimpleStore` implements the
- * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
- * {@link Mapper#create}. If you use the asynchronous `SimpleStore` methods
- * instead of calling them directly on the mappers, then the results of the
- * method calls will be inserted into the store's collections. You can think of
- * a `SimpleStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
- * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
- * (the Mappers).
- *
- * ```javascript
- * import {SimpleStore} from 'js-data'
- * ```
- *
- * @example
- * import {SimpleStore} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const store = new SimpleStore()
- *
- * // SimpleStore#defineMapper returns a direct reference to the newly created
- * // Mapper.
- * const UserMapper = store.defineMapper('user')
- *
- * // SimpleStore#as returns the store scoped to a particular Mapper.
- * const UserStore = store.as('user')
- *
- * // Call "find" on "UserMapper" (Stateless ORM)
- * UserMapper.find(1).then((user) => {
- *   // retrieved a "user" record via the http adapter, but that's it
- *
- *   // Call "find" on "store" targeting "user" (Stateful SimpleStore)
- *   return store.find('user', 1) // same as "UserStore.find(1)"
- * }).then((user) => {
- *   // not only was a "user" record retrieved, but it was added to the
- *   // store's "user" collection
- *   const cachedUser = store.getCollection('user').get(1)
- *   console.log(user === cachedUser) // true
- * })
- *
- * @class SimpleStore
- * @extends Container
- * @param {Object} [opts] Configuration options. See {@link Container}.
- * @param {boolean} [opts.collectionClass={@link Collection}] See {@link SimpleStore#collectionClass}.
- * @param {boolean} [opts.debug=false] See {@link Component#debug}.
- * @param {boolean|Function} [opts.usePendingFind=true] See {@link SimpleStore#usePendingFind}.
- * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link SimpleStore#usePendingFindAll}.
- * @returns {SimpleStore}
- * @see Container
- * @since 3.0.0
- * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#SimpleStore","Components of JSData: SimpleStore"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-SimpleStore","Working with the SimpleStore"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
- */
-function SimpleStore(opts) {
+  /**
+   * The `SimpleStore` class is an extension of {@link Container}. Not only does
+   * `SimpleStore` manage mappers, but also collections. `SimpleStore` implements the
+   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+   * {@link Mapper#create}. If you use the asynchronous `SimpleStore` methods
+   * instead of calling them directly on the mappers, then the results of the
+   * method calls will be inserted into the store's collections. You can think of
+   * a `SimpleStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+   * (the Mappers).
+   *
+   * ```javascript
+   * import {SimpleStore} from 'js-data'
+   * ```
+   *
+   * @example
+   * import {SimpleStore} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const store = new SimpleStore()
+   *
+   * // SimpleStore#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user')
+   *
+   * // SimpleStore#as returns the store scoped to a particular Mapper.
+   * const UserStore = store.as('user')
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then((user) => {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" targeting "user" (Stateful SimpleStore)
+   *   return store.find('user', 1) // same as "UserStore.find(1)"
+   * }).then((user) => {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1)
+   *   console.log(user === cachedUser) // true
+   * })
+   *
+   * @class SimpleStore
+   * @extends Container
+   * @param {Object} [opts] Configuration options. See {@link Container}.
+   * @param {boolean} [opts.collectionClass={@link Collection}] See {@link SimpleStore#collectionClass}.
+   * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+   * @param {boolean|Function} [opts.usePendingFind=true] See {@link SimpleStore#usePendingFind}.
+   * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link SimpleStore#usePendingFindAll}.
+   * @returns {SimpleStore}
+   * @see Container
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#SimpleStore","Components of JSData: SimpleStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-SimpleStore","Working with the SimpleStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+   */
+};function SimpleStore(opts) {
   utils.classCallCheck(this, SimpleStore);
 
   opts || (opts = {});
@@ -12252,15 +12324,21 @@ var props$2 = {
     self._completedQueries[name] = {};
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
 
-    // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
-    var collection = self._collections[name] = new self.collectionClass(null, { // eslint-disable-line
+    var collectionOpts = {
       // Make sure the collection has somewhere to store "added" timestamps
       _added: {},
       // Give the collection a reference to this SimpleStore
       datastore: self,
       // The mapper tied to the collection
       mapper: mapper
-    });
+    };
+
+    if (opts && 'onConflict' in opts) {
+      collectionOpts.onConflict = opts.onConflict;
+    }
+
+    // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
+    var collection = self._collections[name] = new self.collectionClass(null, collectionOpts); // eslint-disable-line
 
     var schema = mapper.schema || {};
     var properties = schema.properties || {};
@@ -12614,10 +12692,10 @@ var props$2 = {
       return pendingQuery;
     }
     var item = this.cachedFind(name, id, opts);
-    var promise = void 0;
 
     if (opts.force || !item) {
-      promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts).then(function (result) {
+      var promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts);
+      return promise.then(function (result) {
         delete _this8._pendingQueries[name][id];
         result = _this8._end(name, result, opts);
         _this8.cacheFind(name, result, id, opts);
@@ -12626,10 +12704,9 @@ var props$2 = {
         delete _this8._pendingQueries[name][id];
         return utils.reject(err);
       });
-    } else {
-      promise = utils.resolve(item);
     }
-    return promise;
+
+    return utils.resolve(item);
   },
 
 
@@ -12731,10 +12808,10 @@ var props$2 = {
     }
 
     var items = this.cachedFindAll(name, hash, opts);
-    var promise = void 0;
 
     if (opts.force || !items) {
-      promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts).then(function (result) {
+      var promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts);
+      return promise.then(function (result) {
         delete _this9._pendingQueries[name][hash];
         result = _this9._end(name, result, opts);
         _this9.cacheFindAll(name, result, hash, opts);
@@ -12743,10 +12820,9 @@ var props$2 = {
         delete _this9._pendingQueries[name][hash];
         return utils.reject(err);
       });
-    } else {
-      promise = utils.resolve(items);
     }
-    return promise;
+
+    return utils.resolve(items);
   },
 
 
@@ -12786,7 +12862,7 @@ var props$2 = {
    * @since 3.0.0
    */
   hashQuery: function hashQuery(name, query, opts) {
-    return utils.toJson(query);
+    return utils.toJson(query || {});
   },
   inject: function inject(name, records, opts) {
     console.warn('DEPRECATED: "inject" is deprecated, use "add" instead');
@@ -12868,6 +12944,11 @@ var props$2 = {
    * @since 3.0.0
    */
   removeAll: function removeAll(name, query, opts) {
+    if (!query || !Object.keys(query).length) {
+      this._completedQueries[name] = {};
+    } else {
+      this._completedQueries[name][this.hashQuery(name, query, opts)] = undefined;
+    }
     var records = this.getCollection(name).removeAll(query, opts);
     if (records.length) {
       this.removeRelated(name, records, opts);
@@ -13579,58 +13660,57 @@ var DATASTORE_DEFAULTS = {
    * @type {boolean}
    */
   unlinkOnDestroy: true
-};
 
-/**
- * The `DataStore` class is an extension of {@link SimpleStore}. Not only does
- * `DataStore` manage mappers and store data in collections, it uses the
- * {@link LinkedCollection} class to link related records together in memory.
- *
- * ```javascript
- * import {DataStore} from 'js-data'
- * ```
- *
- * @example
- * import {DataStore} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const store = new DataStore()
- *
- * // DataStore#defineMapper returns a direct reference to the newly created
- * // Mapper.
- * const UserMapper = store.defineMapper('user')
- *
- * // DataStore#as returns the store scoped to a particular Mapper.
- * const UserStore = store.as('user')
- *
- * // Call "find" on "UserMapper" (Stateless ORM)
- * UserMapper.find(1).then((user) => {
- *   // retrieved a "user" record via the http adapter, but that's it
- *
- *   // Call "find" on "store" targeting "user" (Stateful DataStore)
- *   return store.find('user', 1) // same as "UserStore.find(1)"
- * }).then((user) => {
- *   // not only was a "user" record retrieved, but it was added to the
- *   // store's "user" collection
- *   const cachedUser = store.getCollection('user').get(1)
- *   console.log(user === cachedUser) // true
- * })
- *
- * @class DataStore
- * @extends SimpleStore
- * @param {Object} [opts] Configuration options. See {@link SimpleStore}.
- * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
- * @param {boolean} [opts.debug=false] See {@link Component#debug}.
- * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
- * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
- * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
- * @returns {DataStore}
- * @see SimpleStore
- * @since 3.0.0
- * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
- * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
- */
-function DataStore(opts) {
+  /**
+   * The `DataStore` class is an extension of {@link SimpleStore}. Not only does
+   * `DataStore` manage mappers and store data in collections, it uses the
+   * {@link LinkedCollection} class to link related records together in memory.
+   *
+   * ```javascript
+   * import {DataStore} from 'js-data'
+   * ```
+   *
+   * @example
+   * import {DataStore} from 'js-data'
+   * import HttpAdapter from 'js-data-http'
+   * const store = new DataStore()
+   *
+   * // DataStore#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user')
+   *
+   * // DataStore#as returns the store scoped to a particular Mapper.
+   * const UserStore = store.as('user')
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then((user) => {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" targeting "user" (Stateful DataStore)
+   *   return store.find('user', 1) // same as "UserStore.find(1)"
+   * }).then((user) => {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1)
+   *   console.log(user === cachedUser) // true
+   * })
+   *
+   * @class DataStore
+   * @extends SimpleStore
+   * @param {Object} [opts] Configuration options. See {@link SimpleStore}.
+   * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
+   * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+   * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
+   * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
+   * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
+   * @returns {DataStore}
+   * @see SimpleStore
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+   */
+};function DataStore(opts) {
   utils.classCallCheck(this, DataStore);
 
   opts || (opts = {});
@@ -13664,302 +13744,298 @@ var props$1 = {
       };
 
       if (type === belongsToType) {
-        (function () {
-          if (!collection.indexes[foreignKey]) {
-            collection.createIndex(foreignKey);
-          }
+        if (!collection.indexes[foreignKey]) {
+          collection.createIndex(foreignKey);
+        }
 
-          descriptor = {
-            get: getter,
-            // e.g. profile.user = someUser
-            // or comment.post = somePost
-            set: function set(record) {
-              // e.g. const otherUser = profile.user
-              var currentParent = this._get(path);
-              // e.g. profile.user === someUser
-              if (record === currentParent) {
-                return currentParent;
-              }
-              var id = utils.get(this, idAttribute);
-              var inverseDef = def.getInverse(mapper);
-
-              // e.g. profile.user !== someUser
-              // or comment.post !== somePost
-              if (currentParent && inverseDef) {
-                this.removeInverseRelation(currentParent, id, inverseDef, idAttribute);
-              }
-              if (record) {
-                // e.g. profile.user = someUser
-                var relatedIdAttribute = def.getRelation().idAttribute;
-                var relatedId = utils.get(record, relatedIdAttribute);
-
-                // Prefer store record
-                if (relatedId !== undefined && this._get('$')) {
-                  record = self.get(relation, relatedId) || record;
-                }
-
-                // Set locals
-                // e.g. profile.user = someUser
-                // or comment.post = somePost
-                safeSetLink(this, localField, record);
-                safeSetProp(this, foreignKey, relatedId);
-                collection.updateIndex(this, updateOpts);
-
-                if (inverseDef) {
-                  this.setupInverseRelation(record, id, inverseDef, idAttribute);
-                }
-              } else {
-                // Unset in-memory link only
-                // e.g. profile.user = undefined
-                // or comment.post = undefined
-                safeSetLink(this, localField, undefined);
-              }
-              return record;
+        descriptor = {
+          get: getter,
+          // e.g. profile.user = someUser
+          // or comment.post = somePost
+          set: function set(record) {
+            // e.g. const otherUser = profile.user
+            var currentParent = this._get(path);
+            // e.g. profile.user === someUser
+            if (record === currentParent) {
+              return currentParent;
             }
-          };
-
-          var foreignKeyDescriptor = Object.getOwnPropertyDescriptor(mapper.recordClass.prototype, foreignKey);
-          if (!foreignKeyDescriptor) {
-            foreignKeyDescriptor = {
-              enumerable: true
-            };
-          }
-          var originalGet = foreignKeyDescriptor.get;
-          foreignKeyDescriptor.get = function () {
-            if (originalGet) {
-              return originalGet.call(this);
-            }
-            return this._get('props.' + foreignKey);
-          };
-          var originalSet = foreignKeyDescriptor.set;
-          foreignKeyDescriptor.set = function (value) {
-            var _this = this;
-
-            if (originalSet) {
-              originalSet.call(this, value);
-            }
-            var currentParent = utils.get(this, localField);
             var id = utils.get(this, idAttribute);
             var inverseDef = def.getInverse(mapper);
-            var currentParentId = currentParent ? utils.get(currentParent, def.getRelation().idAttribute) : undefined;
 
-            if (currentParent && currentParentId !== undefined && currentParentId !== value) {
-              if (inverseDef.type === hasOneType) {
-                safeSetLink(currentParent, inverseDef.localField, undefined);
-              } else if (inverseDef.type === hasManyType) {
-                var children = utils.get(currentParent, inverseDef.localField);
-                if (id === undefined) {
-                  utils.remove(children, function (child) {
-                    return child === _this;
-                  });
-                } else {
-                  utils.remove(children, function (child) {
-                    return child === _this || id === utils.get(child, idAttribute);
-                  });
-                }
-              }
+            // e.g. profile.user !== someUser
+            // or comment.post !== somePost
+            if (currentParent && inverseDef) {
+              this.removeInverseRelation(currentParent, id, inverseDef, idAttribute);
             }
+            if (record) {
+              // e.g. profile.user = someUser
+              var relatedIdAttribute = def.getRelation().idAttribute;
+              var relatedId = utils.get(record, relatedIdAttribute);
 
-            safeSetProp(this, foreignKey, value);
-            collection.updateIndex(this, updateOpts);
+              // Prefer store record
+              if (relatedId !== undefined && this._get('$')) {
+                record = self.get(relation, relatedId) || record;
+              }
 
-            if (value === undefined || value === null) {
-              if (currentParentId !== undefined) {
-                // Unset locals
-                utils.set(this, localField, undefined);
+              // Set locals
+              // e.g. profile.user = someUser
+              // or comment.post = somePost
+              safeSetLink(this, localField, record);
+              safeSetProp(this, foreignKey, relatedId);
+              collection.updateIndex(this, updateOpts);
+
+              if (inverseDef) {
+                this.setupInverseRelation(record, id, inverseDef, idAttribute);
               }
-            } else if (this._get('$')) {
-              var storeRecord = self.get(relation, value);
-              if (storeRecord) {
-                utils.set(this, localField, storeRecord);
-              }
+            } else {
+              // Unset in-memory link only
+              // e.g. profile.user = undefined
+              // or comment.post = undefined
+              safeSetLink(this, localField, undefined);
             }
+            return record;
+          }
+        };
+
+        var foreignKeyDescriptor = Object.getOwnPropertyDescriptor(mapper.recordClass.prototype, foreignKey);
+        if (!foreignKeyDescriptor) {
+          foreignKeyDescriptor = {
+            enumerable: true
           };
-          Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor);
-        })();
-      } else if (type === hasManyType) {
-        (function () {
-          var localKeys = def.localKeys;
-          var foreignKeys = def.foreignKeys;
+        }
+        var originalGet = foreignKeyDescriptor.get;
+        foreignKeyDescriptor.get = function () {
+          if (originalGet) {
+            return originalGet.call(this);
+          }
+          return this._get('props.' + foreignKey);
+        };
+        var originalSet = foreignKeyDescriptor.set;
+        foreignKeyDescriptor.set = function (value) {
+          var _this = this;
 
-          // TODO: Handle case when belongsTo relation isn't ever defined
-          if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
-            self.getCollection(relation).createIndex(foreignKey);
+          if (originalSet) {
+            originalSet.call(this, value);
+          }
+          var currentParent = utils.get(this, localField);
+          var id = utils.get(this, idAttribute);
+          var inverseDef = def.getInverse(mapper);
+          var currentParentId = currentParent ? utils.get(currentParent, def.getRelation().idAttribute) : undefined;
+
+          if (currentParent && currentParentId !== undefined && currentParentId !== value) {
+            if (inverseDef.type === hasOneType) {
+              safeSetLink(currentParent, inverseDef.localField, undefined);
+            } else if (inverseDef.type === hasManyType) {
+              var children = utils.get(currentParent, inverseDef.localField);
+              if (id === undefined) {
+                utils.remove(children, function (child) {
+                  return child === _this;
+                });
+              } else {
+                utils.remove(children, function (child) {
+                  return child === _this || id === utils.get(child, idAttribute);
+                });
+              }
+            }
           }
 
-          descriptor = {
-            get: function get() {
-              var current = getter.call(this);
-              if (!current) {
-                this._set(path, []);
-              }
-              return getter.call(this);
-            },
+          safeSetProp(this, foreignKey, value);
+          collection.updateIndex(this, updateOpts);
+
+          if (value === undefined || value === null) {
+            if (currentParentId !== undefined) {
+              // Unset locals
+              utils.set(this, localField, undefined);
+            }
+          } else if (this._get('$')) {
+            var storeRecord = self.get(relation, value);
+            if (storeRecord) {
+              utils.set(this, localField, storeRecord);
+            }
+          }
+        };
+        Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor);
+      } else if (type === hasManyType) {
+        var localKeys = def.localKeys;
+        var foreignKeys = def.foreignKeys;
+
+        // TODO: Handle case when belongsTo relation isn't ever defined
+        if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
+          self.getCollection(relation).createIndex(foreignKey);
+        }
+
+        descriptor = {
+          get: function get() {
+            var current = getter.call(this);
+            if (!current) {
+              this._set(path, []);
+            }
+            return getter.call(this);
+          },
+
+          // e.g. post.comments = someComments
+          // or user.groups = someGroups
+          // or group.users = someUsers
+          set: function set(records) {
+            var _this2 = this;
+
+            if (records && !utils.isArray(records)) {
+              records = [records];
+            }
+            var id = utils.get(this, idAttribute);
+            var relatedIdAttribute = def.getRelation().idAttribute;
+            var inverseDef = def.getInverse(mapper);
+            var inverseLocalField = inverseDef.localField;
+            var current = this._get(path) || [];
+            var toLink = [];
+            var toLinkIds = {};
+
+            if (records) {
+              records.forEach(function (record) {
+                // e.g. comment.id
+                var relatedId = utils.get(record, relatedIdAttribute);
+                var currentParent = utils.get(record, inverseLocalField);
+                if (currentParent && currentParent !== _this2) {
+                  var currentChildrenOfParent = utils.get(currentParent, localField);
+                  // e.g. somePost.comments.remove(comment)
+                  if (relatedId === undefined) {
+                    utils.remove(currentChildrenOfParent, function (child) {
+                      return child === record;
+                    });
+                  } else {
+                    utils.remove(currentChildrenOfParent, function (child) {
+                      return child === record || relatedId === utils.get(child, relatedIdAttribute);
+                    });
+                  }
+                }
+                if (relatedId !== undefined) {
+                  if (_this2._get('$')) {
+                    // Prefer store record
+                    record = self.get(relation, relatedId) || record;
+                  }
+                  // e.g. toLinkIds[comment.id] = comment
+                  toLinkIds[relatedId] = record;
+                }
+                toLink.push(record);
+              });
+            }
 
             // e.g. post.comments = someComments
-            // or user.groups = someGroups
-            // or group.users = someUsers
-            set: function set(records) {
-              var _this2 = this;
-
-              if (records && !utils.isArray(records)) {
-                records = [records];
-              }
-              var id = utils.get(this, idAttribute);
-              var relatedIdAttribute = def.getRelation().idAttribute;
-              var inverseDef = def.getInverse(mapper);
-              var inverseLocalField = inverseDef.localField;
-              var current = this._get(path) || [];
-              var toLink = [];
-              var toLinkIds = {};
-
-              if (records) {
-                records.forEach(function (record) {
-                  // e.g. comment.id
-                  var relatedId = utils.get(record, relatedIdAttribute);
-                  var currentParent = utils.get(record, inverseLocalField);
-                  if (currentParent && currentParent !== _this2) {
-                    var currentChildrenOfParent = utils.get(currentParent, localField);
-                    // e.g. somePost.comments.remove(comment)
-                    if (relatedId === undefined) {
-                      utils.remove(currentChildrenOfParent, function (child) {
-                        return child === record;
-                      });
-                    } else {
-                      utils.remove(currentChildrenOfParent, function (child) {
-                        return child === record || relatedId === utils.get(child, relatedIdAttribute);
-                      });
-                    }
+            if (foreignKey) {
+              current.forEach(function (record) {
+                // e.g. comment.id
+                var relatedId = utils.get(record, relatedIdAttribute);
+                if (relatedId === undefined && toLink.indexOf(record) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
+                  // Update (unset) inverse relation
+                  if (records) {
+                    // e.g. comment.post_id = undefined
+                    safeSetProp(record, foreignKey, undefined);
+                    // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                    self.getCollection(relation).updateIndex(record, updateOpts);
                   }
-                  if (relatedId !== undefined) {
-                    if (_this2._get('$')) {
-                      // Prefer store record
-                      record = self.get(relation, relatedId) || record;
-                    }
-                    // e.g. toLinkIds[comment.id] = comment
-                    toLinkIds[relatedId] = record;
-                  }
-                  toLink.push(record);
-                });
-              }
-
-              // e.g. post.comments = someComments
-              if (foreignKey) {
-                current.forEach(function (record) {
-                  // e.g. comment.id
-                  var relatedId = utils.get(record, relatedIdAttribute);
-                  if (relatedId === undefined && toLink.indexOf(record) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
-                    // Update (unset) inverse relation
-                    if (records) {
-                      // e.g. comment.post_id = undefined
-                      safeSetProp(record, foreignKey, undefined);
-                      // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
-                      self.getCollection(relation).updateIndex(record, updateOpts);
-                    }
-                    // e.g. comment.post = undefined
-                    safeSetLink(record, inverseLocalField, undefined);
-                  }
-                });
-                toLink.forEach(function (record) {
-                  // Update (set) inverse relation
-                  // e.g. comment.post_id = post.id
-                  safeSetProp(record, foreignKey, id);
-                  // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
-                  self.getCollection(relation).updateIndex(record, updateOpts);
-                  // e.g. comment.post = post
-                  safeSetLink(record, inverseLocalField, _this2);
-                });
-              } else if (localKeys) {
-                // Update locals
-                // e.g. group.users = someUsers
+                  // e.g. comment.post = undefined
+                  safeSetLink(record, inverseLocalField, undefined);
+                }
+              });
+              toLink.forEach(function (record) {
                 // Update (set) inverse relation
-                var ids = toLink.map(function (child) {
-                  return utils.get(child, relatedIdAttribute);
-                }).filter(function (id) {
-                  return id !== undefined;
-                });
-                // e.g. group.user_ids = [1,2,3,...]
-                utils.set(this, localKeys, ids);
-                // Update (unset) inverse relation
-                if (inverseDef.foreignKeys) {
-                  current.forEach(function (child) {
-                    var relatedId = utils.get(child, relatedIdAttribute);
-                    if (relatedId === undefined && toLink.indexOf(child) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
-                      // Update inverse relation
-                      // safeSetLink(child, inverseLocalField, undefined)
-                      var parents = utils.get(child, inverseLocalField) || [];
-                      // e.g. someUser.groups.remove(group)
-                      if (id === undefined) {
-                        utils.remove(parents, function (parent) {
-                          return parent === _this2;
-                        });
-                      } else {
-                        utils.remove(parents, function (parent) {
-                          return parent === _this2 || id === utils.get(parent, idAttribute);
-                        });
-                      }
-                    }
-                  });
-                  toLink.forEach(function (child) {
-                    // Update (set) inverse relation
-                    var parents = utils.get(child, inverseLocalField);
-                    // e.g. someUser.groups.push(group)
+                // e.g. comment.post_id = post.id
+                safeSetProp(record, foreignKey, id);
+                // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                self.getCollection(relation).updateIndex(record, updateOpts);
+                // e.g. comment.post = post
+                safeSetLink(record, inverseLocalField, _this2);
+              });
+            } else if (localKeys) {
+              // Update locals
+              // e.g. group.users = someUsers
+              // Update (set) inverse relation
+              var ids = toLink.map(function (child) {
+                return utils.get(child, relatedIdAttribute);
+              }).filter(function (id) {
+                return id !== undefined;
+              });
+              // e.g. group.user_ids = [1,2,3,...]
+              utils.set(this, localKeys, ids);
+              // Update (unset) inverse relation
+              if (inverseDef.foreignKeys) {
+                current.forEach(function (child) {
+                  var relatedId = utils.get(child, relatedIdAttribute);
+                  if (relatedId === undefined && toLink.indexOf(child) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
+                    // Update inverse relation
+                    // safeSetLink(child, inverseLocalField, undefined)
+                    var parents = utils.get(child, inverseLocalField) || [];
+                    // e.g. someUser.groups.remove(group)
                     if (id === undefined) {
-                      utils.noDupeAdd(parents, _this2, function (parent) {
+                      utils.remove(parents, function (parent) {
                         return parent === _this2;
                       });
                     } else {
-                      utils.noDupeAdd(parents, _this2, function (parent) {
+                      utils.remove(parents, function (parent) {
                         return parent === _this2 || id === utils.get(parent, idAttribute);
                       });
                     }
-                  });
-                }
-              } else if (foreignKeys) {
-                // e.g. user.groups = someGroups
-                // Update (unset) inverse relation
-                current.forEach(function (parent) {
-                  var ids = utils.get(parent, foreignKeys) || [];
-                  // e.g. someGroup.user_ids.remove(user.id)
-                  utils.remove(ids, function (_key) {
-                    return id === _key;
-                  });
-                  var children = utils.get(parent, inverseLocalField);
-                  // e.g. someGroup.users.remove(user)
-                  if (id === undefined) {
-                    utils.remove(children, function (child) {
-                      return child === _this2;
-                    });
-                  } else {
-                    utils.remove(children, function (child) {
-                      return child === _this2 || id === utils.get(child, idAttribute);
-                    });
                   }
                 });
-                // Update (set) inverse relation
-                toLink.forEach(function (parent) {
-                  var ids = utils.get(parent, foreignKeys) || [];
-                  utils.noDupeAdd(ids, id, function (_key) {
-                    return id === _key;
-                  });
-                  var children = utils.get(parent, inverseLocalField);
+                toLink.forEach(function (child) {
+                  // Update (set) inverse relation
+                  var parents = utils.get(child, inverseLocalField);
+                  // e.g. someUser.groups.push(group)
                   if (id === undefined) {
-                    utils.noDupeAdd(children, _this2, function (child) {
-                      return child === _this2;
+                    utils.noDupeAdd(parents, _this2, function (parent) {
+                      return parent === _this2;
                     });
                   } else {
-                    utils.noDupeAdd(children, _this2, function (child) {
-                      return child === _this2 || id === utils.get(child, idAttribute);
+                    utils.noDupeAdd(parents, _this2, function (parent) {
+                      return parent === _this2 || id === utils.get(parent, idAttribute);
                     });
                   }
                 });
               }
-
-              this._set(path, toLink);
-              return toLink;
+            } else if (foreignKeys) {
+              // e.g. user.groups = someGroups
+              // Update (unset) inverse relation
+              current.forEach(function (parent) {
+                var ids = utils.get(parent, foreignKeys) || [];
+                // e.g. someGroup.user_ids.remove(user.id)
+                utils.remove(ids, function (_key) {
+                  return id === _key;
+                });
+                var children = utils.get(parent, inverseLocalField);
+                // e.g. someGroup.users.remove(user)
+                if (id === undefined) {
+                  utils.remove(children, function (child) {
+                    return child === _this2;
+                  });
+                } else {
+                  utils.remove(children, function (child) {
+                    return child === _this2 || id === utils.get(child, idAttribute);
+                  });
+                }
+              });
+              // Update (set) inverse relation
+              toLink.forEach(function (parent) {
+                var ids = utils.get(parent, foreignKeys) || [];
+                utils.noDupeAdd(ids, id, function (_key) {
+                  return id === _key;
+                });
+                var children = utils.get(parent, inverseLocalField);
+                if (id === undefined) {
+                  utils.noDupeAdd(children, _this2, function (child) {
+                    return child === _this2;
+                  });
+                } else {
+                  utils.noDupeAdd(children, _this2, function (child) {
+                    return child === _this2 || id === utils.get(child, idAttribute);
+                  });
+                }
+              });
             }
-          };
-        })();
+
+            this._set(path, toLink);
+            return toLink;
+          }
+        };
       } else if (type === hasOneType) {
         // TODO: Handle case when belongsTo relation isn't ever defined
         if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
@@ -14006,32 +14082,28 @@ var props$1 = {
       if (descriptor) {
         descriptor.enumerable = def.enumerable === undefined ? false : def.enumerable;
         if (def.get) {
-          (function () {
-            var origGet = descriptor.get;
-            descriptor.get = function () {
-              var _this3 = this;
+          var origGet = descriptor.get;
+          descriptor.get = function () {
+            var _this3 = this;
 
-              return def.get(def, this, function () {
-                for (var _len = arguments.length, args = Array(_len), _key2 = 0; _key2 < _len; _key2++) {
-                  args[_key2] = arguments[_key2];
-                }
+            return def.get(def, this, function () {
+              for (var _len = arguments.length, args = Array(_len), _key2 = 0; _key2 < _len; _key2++) {
+                args[_key2] = arguments[_key2];
+              }
 
-                return origGet.apply(_this3, args);
-              });
-            };
-          })();
+              return origGet.apply(_this3, args);
+            });
+          };
         }
         if (def.set) {
-          (function () {
-            var origSet = descriptor.set;
-            descriptor.set = function (related) {
-              var _this4 = this;
+          var origSet = descriptor.set;
+          descriptor.set = function (related) {
+            var _this4 = this;
 
-              return def.set(def, this, related, function (value) {
-                return origSet.call(_this4, value === undefined ? related : value);
-              });
-            };
-          })();
+            return def.set(def, this, related, function (value) {
+              return origSet.call(_this4, value === undefined ? related : value);
+            });
+          };
         }
         Object.defineProperty(mapper.recordClass.prototype, localField, descriptor);
       }
@@ -14169,32 +14241,6 @@ var DataStore$1 = SimpleStore$1.extend(props$1);
  * @example <caption>Load into your app via AMD</caption>
  * define('myApp', ['js-data'], function (JSData) { ... })
  */
-
-/**
- * Describes the version of this `JSData` object.
- *
- * @example
- * console.log(JSData.version.full) // "3.0.0-beta.1"
- *
- * @name version
- * @memberof module:js-data
- * @property {string} full The full semver value.
- * @property {number} major The major version number.
- * @property {number} minor The minor version number.
- * @property {number} patch The patch version number.
- * @property {(string|boolean)} alpha The alpha version value, otherwise `false`
- * if the current version is not alpha.
- * @property {(string|boolean)} beta The beta version value, otherwise `false`
- * if the current version is not beta.
- * @since 2.0.0
- * @type {Object}
- */
-var version = {
-  full: '3.0.0-rc.9',
-  major: 3,
-  minor: 0,
-  patch: 0
-};
 
 /**
  * JSData's utility methods.
@@ -14381,6 +14427,31 @@ var version = {
  * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#SimpleStore","Components of JSData: SimpleStore"]
  * @type {Constructor}
  */
+/**
+ * Describes the version of this `JSData` object.
+ *
+ * @example
+ * console.log(JSData.version.full) // "3.0.0-beta.1"
+ *
+ * @name version
+ * @memberof module:js-data
+ * @property {string} full The full semver value.
+ * @property {number} major The major version number.
+ * @property {number} minor The minor version number.
+ * @property {number} patch The patch version number.
+ * @property {(string|boolean)} alpha The alpha version value, otherwise `false`
+ * if the current version is not alpha.
+ * @property {(string|boolean)} beta The beta version value, otherwise `false`
+ * if the current version is not beta.
+ * @since 2.0.0
+ * @type {Object}
+ */
+var version = {
+  full: '3.0.0',
+  major: 3,
+  minor: 0,
+  patch: 0
+};
 
 exports.version = version;
 exports.Collection = Collection$1;
