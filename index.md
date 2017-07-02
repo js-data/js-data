@@ -6,7 +6,8 @@ To get started visit __[http://js-data.io](http://www.js-data.io)__.
 
 [Back to api.js-data.io](http://api.js-data.io).
 
-* [3.0.0-rc.8 (latest)](http://api.js-data.io/js-data/3.0.0-rc.8/index.html)
+* [3.0.0 (latest)](http://api.js-data.io/js-data/3.0.0/index.html)
+* [3.0.0-rc.8](http://api.js-data.io/js-data/3.0.0-rc.8/index.html)
 * [3.0.0-rc.7](http://api.js-data.io/js-data/3.0.0-rc.7/index.html)
 * [3.0.0-rc.2](http://api.js-data.io/js-data/3.0.0-rc.2/index.html)
 * [3.0.0-rc.1](http://api.js-data.io/js-data/3.0.0-rc.1/index.html)

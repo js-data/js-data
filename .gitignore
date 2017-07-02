@@ -5,3 +5,4 @@ coverage/
 junit/
 .nyc_output
 typings/
+*.log
