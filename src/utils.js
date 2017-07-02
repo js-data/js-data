@@ -414,7 +414,7 @@ export default {
       throw new DSErrors.IA('"options" must be an object!')
     }
     forEach(toPromisify, function (name) {
-      if (typeof options[name] === 'function' && options[name].toString().indexOf('for (var _len = arg') === -1) {
+      if (typeof options[name] === 'function' && options[name].toString().indexOf('for (var _len3 = arg') === -1) {
         options[name] = _this.promisify(options[name])
       }
     })
