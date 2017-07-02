@@ -117,7 +117,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
 
   findInverseRelation (mapper) {
     this.getRelation().relationList.forEach((def) => {
-      if (def.getRelation() === mapper && this.isInversedTo(def)) {
+      if (def.getRelation() === mapper && this.isInversedTo(def) && this !== def) {
         this.inverse = def
         return true
       }
@@ -140,7 +140,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
         relatedData = this.linkRecord(record, relatedData)
       }
 
-      const isEmptyLinks = !relatedData || utils.isArray(relatedData) && !relatedData.length
+      const isEmptyLinks = !relatedData || (utils.isArray(relatedData) && !relatedData.length)
 
       if (isEmptyLinks && this.canFindLinkFor(record)) {
         relatedData = this.findExistingLinksFor(record)
@@ -190,5 +190,40 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return this.relatedCollection.filter({
       [this.foreignKey]: id
     })
+  },
+
+  ensureLinkedDataHasProperType (props, opts) {
+    const relatedMapper = this.getRelation()
+    const relationData = this.getLocalField(props)
+
+    if (utils.isArray(relationData) && (!relationData.length || relatedMapper.is(relationData[0]))) {
+      return
+    }
+
+    if (relationData && !relatedMapper.is(relationData)) {
+      utils.set(props, this.localField, relatedMapper.createRecord(relationData, opts))
+    }
+  },
+
+  isRequiresParentId () {
+    return false
+  },
+
+  isRequiresChildId () {
+    return false
+  },
+
+  createChildRecord (props, relationData, opts) {
+    this.setForeignKey(props, relationData)
+
+    return this.createLinked(relationData, opts).then((result) => {
+      this.setLocalField(props, result)
+    })
+  },
+
+  createLinked (props, opts) {
+    const create = utils.isArray(props) ? 'createMany' : 'create'
+
+    return this.getRelation()[create](props, opts)
   }
 })

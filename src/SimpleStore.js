@@ -949,15 +949,21 @@ const props = {
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
 
-    // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
-    const collection = self._collections[name] = new self.collectionClass(null, { // eslint-disable-line
+    let collectionOpts = {
       // Make sure the collection has somewhere to store "added" timestamps
       _added: {},
       // Give the collection a reference to this SimpleStore
       datastore: self,
       // The mapper tied to the collection
       mapper
-    })
+    }
+
+    if (opts && ('onConflict' in opts)) {
+      collectionOpts.onConflict = opts.onConflict
+    }
+
+    // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
+    const collection = self._collections[name] = new self.collectionClass(null, collectionOpts)  // eslint-disable-line
 
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
@@ -1300,22 +1306,22 @@ const props = {
       return pendingQuery
     }
     const item = this.cachedFind(name, id, opts)
-    let promise
 
     if (opts.force || !item) {
-      promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts).then((result) => {
-        delete this._pendingQueries[name][id]
-        result = this._end(name, result, opts)
-        this.cacheFind(name, result, id, opts)
-        return result
-      }, (err) => {
-        delete this._pendingQueries[name][id]
-        return utils.reject(err)
-      })
-    } else {
-      promise = utils.resolve(item)
+      const promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts)
+      return promise
+        .then((result) => {
+          delete this._pendingQueries[name][id]
+          result = this._end(name, result, opts)
+          this.cacheFind(name, result, id, opts)
+          return result
+        }, (err) => {
+          delete this._pendingQueries[name][id]
+          return utils.reject(err)
+        })
     }
-    return promise
+
+    return utils.resolve(item)
   },
 
   /**
@@ -1414,22 +1420,22 @@ const props = {
     }
 
     const items = this.cachedFindAll(name, hash, opts)
-    let promise
 
     if (opts.force || !items) {
-      promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts).then((result) => {
-        delete this._pendingQueries[name][hash]
-        result = this._end(name, result, opts)
-        this.cacheFindAll(name, result, hash, opts)
-        return result
-      }, (err) => {
-        delete this._pendingQueries[name][hash]
-        return utils.reject(err)
-      })
-    } else {
-      promise = utils.resolve(items)
+      const promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts)
+      return promise
+        .then((result) => {
+          delete this._pendingQueries[name][hash]
+          result = this._end(name, result, opts)
+          this.cacheFindAll(name, result, hash, opts)
+          return result
+        }, (err) => {
+          delete this._pendingQueries[name][hash]
+          return utils.reject(err)
+        })
     }
-    return promise
+
+    return utils.resolve(items)
   },
 
   /**
@@ -1467,7 +1473,7 @@ const props = {
    * @since 3.0.0
    */
   hashQuery (name, query, opts) {
-    return utils.toJson(query)
+    return utils.toJson(query || {})
   },
 
   inject (name, records, opts) {
@@ -1548,6 +1554,11 @@ const props = {
    * @since 3.0.0
    */
   removeAll (name, query, opts) {
+    if (!query || !Object.keys(query).length) {
+      this._completedQueries[name] = {}
+    } else {
+      this._completedQueries[name][this.hashQuery(name, query, opts)] = undefined
+    }
     const records = this.getCollection(name).removeAll(query, opts)
     if (records.length) {
       this.removeRelated(name, records, opts)

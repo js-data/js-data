@@ -107,4 +107,3 @@ describe('utils.copy', function () {
     return assert.strictEqual(objCopy.structs.instance, srcObj.structs.instance)
   })
 })
-

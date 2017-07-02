@@ -590,4 +590,67 @@ describe('DataStore integration tests', function () {
     assert.equal(getCalled, 11)
     assert.equal(setCalled, 4)
   })
+  it('supports tree-like relations', function () {
+    const store = new JSData.DataStore()
+
+    store.defineMapper('node', {
+      relations: {
+        belongsTo: {
+          node: {
+            localField: 'parent',
+            foreignKey: 'parentId'
+          }
+        },
+        hasMany: {
+          node: {
+            localField: 'children',
+            foreignKey: 'parentId'
+          }
+        }
+      }
+    })
+
+    const nodes = store.add('node', [
+      {
+        id: 0,
+        name: 'A',
+        parentId: null
+      },
+      {
+        id: 1,
+        name: 'B',
+        parentId: null
+      },
+      {
+        id: 2,
+        name: 'A.1',
+        parentId: 0
+      },
+      {
+        id: 3,
+        name: 'A.2',
+        parentId: 0
+      },
+      {
+        id: 4,
+        name: 'A.2.a',
+        parentId: 3
+      }
+    ])
+
+    assert.equal(nodes[0].parent, null)
+    assert.deepEqual(nodes[0].children, [nodes[2], nodes[3]])
+
+    assert.equal(nodes[1].parent, null)
+    assert.deepEqual(nodes[1].children, [])
+
+    assert.strictEqual(nodes[2].parent, nodes[0])
+    assert.deepEqual(nodes[2].children, [])
+
+    assert.equal(nodes[3].parent, nodes[0])
+    assert.deepEqual(nodes[3].children, [nodes[4]])
+
+    assert.equal(nodes[4].parent, nodes[3])
+    assert.deepEqual(nodes[4].children, [])
+  })
 })

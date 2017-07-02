@@ -30,4 +30,3 @@ describe('utils.fromJson', function () {
     assert.deepEqual(expected, actual)
   })
 })
-

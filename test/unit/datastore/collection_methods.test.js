@@ -81,4 +81,65 @@ describe('DataStore collection methods', function () {
     assert.equal(this.store.filter('profile', { userId: user.id }).length, 0)
     assert(!removedUsers[0].profile)
   })
+  it('should delete cached findAll query on removeAll', function () {
+    const query = { name: 'John' }
+    let callCount = 0
+    this.store.registerAdapter('mock', {
+      findAll () {
+        callCount++
+        return Promise.resolve([{ id: 1, name: 'John' }])
+      }
+    }, { 'default': true })
+    return this.store.findAll('user', query)
+      .then((users) => {
+        assert.equal(callCount, 1)
+        return this.store.findAll('user', query)
+      })
+      .then((users) => {
+        // Query was only made once
+        assert.equal(callCount, 1)
+        this.store.removeAll('user', query)
+        return this.store.findAll('user', query)
+      })
+      .then((users) => {
+        assert.equal(callCount, 2)
+      })
+  })
+  it('should remove all queries', function () {
+    const queryOne = { name: 'Bob' }
+    const queryTwo = { name: 'Alice' }
+    let callCount = 0
+    this.store.registerAdapter('mock', {
+      findAll () {
+        callCount++
+        return Promise.resolve([])
+      }
+    }, { 'default': true })
+    return this.store.findAll('user', queryOne)
+      .then((users) => {
+        assert.equal(callCount, 1)
+        return this.store.findAll('user', queryOne)
+      })
+      .then((users) => {
+        assert.equal(callCount, 1)
+        return this.store.findAll('user', queryTwo)
+      })
+      .then((users) => {
+        assert.equal(callCount, 2)
+        return this.store.findAll('user', queryTwo)
+      })
+      .then((users) => {
+        // Query was only made twice
+        assert.equal(callCount, 2)
+        this.store.removeAll('user')
+        return this.store.findAll('user', queryOne)
+      })
+      .then((users) => {
+        assert.equal(callCount, 3)
+        return this.store.findAll('user', queryTwo)
+      })
+      .then((users) => {
+        assert.equal(callCount, 4)
+      })
+  })
 })

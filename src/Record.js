@@ -130,12 +130,13 @@ function Record (props, opts) {
   props || (props = {})
   opts || (opts = {})
   const _set = this._set
+  const mapper = this.constructor.mapper
+
   _set(creatingPath, true)
   _set(noValidatePath, !!opts.noValidate)
   _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? (mapper ? mapper.keepChangeHistory : true) : opts.keepChangeHistory)
 
   // Set the idAttribute value first, if it exists.
-  const mapper = this.constructor.mapper
   const id = mapper ? utils.get(props, mapper.idAttribute) : undefined
   if (id !== undefined) {
     utils.set(this, mapper.idAttribute, id)

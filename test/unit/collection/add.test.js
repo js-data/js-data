@@ -113,7 +113,7 @@ describe('Collection#add', function () {
     collection.add({ id: 1 })
     assert.throws(() => {
       collection.add({ id: 1 }, { onConflict: 'invalid_choice' })
-    }, Error, `[Collection#add:opts.onConflict] expected: one of (merge, replace), found: invalid_choice\nhttp://www.js-data.io/v3.0/docs/errors#400`)
+    }, Error, `[Collection#add:opts.onConflict] expected: one of (merge, replace, skip), found: invalid_choice\nhttp://www.js-data.io/v3.0/docs/errors#400`)
   })
   it('should respect opts.noValidate', function () {
     const mapper = new JSData.Mapper({
@@ -197,6 +197,36 @@ describe('Collection#add', function () {
       age: 30,
       id: 5
     })
+  })
+  it('should keep existing items', function () {
+    const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
+    const user = collection.add({ id: 1, foo: 'bar', beep: 'boop' })
+    assert.equal(user.id, 1)
+    assert.equal(user.foo, 'bar')
+    assert.equal(user.beep, 'boop')
+    let existing = collection.add({ id: 1, biz: 'baz', foo: 'BAR' }, { onConflict: 'skip' })
+    assert(user === existing)
+    assert.equal(user.id, 1)
+    assert.equal(user.foo, 'bar')
+    assert.equal(user.beep, 'boop')
+    assert(!user.biz)
+
+    const store = new JSData.DataStore()
+    store.defineMapper('test', {
+      onConflict: 'skip',
+      schema: {
+        properties: {
+          id: { type: 'string' },
+          count: { type: 'number' }
+        }
+      }
+    })
+
+    const test = store.createRecord('test', { id: 'abcd', count: 1 })
+    store.add('test', test)
+    const test2 = store.createRecord('test', { id: 'abcd', count: 2 })
+    store.add('test', test2)
+    assert.equal(store.get('test', 'abcd').count, 1)
   })
   it('should inject 1,000 items', function () {
     let users = []

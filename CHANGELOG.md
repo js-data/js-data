@@ -1,3 +1,10 @@
+##### 3.0.0 - 01 July 2017
+
+**v3 Stable Release**
+
+###### Bug fixes
+- [#473] - Fixes #471 by @Tronix117
+
 ##### 3.0.0-rc.9 - 22 February 2017
 
 ###### Bug fixes

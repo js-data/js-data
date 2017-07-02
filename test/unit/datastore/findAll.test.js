@@ -84,7 +84,7 @@ describe('DataStore#findAll', function () {
         callCount++
         return new Promise(function (resolve, reject) {
           setTimeout(function () {
-            reject('foo')
+            reject(new Error('foo'))
           }, 300)
         })
       }
@@ -94,7 +94,7 @@ describe('DataStore#findAll', function () {
     return pendingQuery.catch((err) => {
       assert.equal(callCount, 1, 'findAll should have been called once')
       assert(!this.store._pendingQueries.user[this.store.hashQuery('user', query)])
-      assert.equal(err, 'foo')
+      assert.equal(err.message, 'foo')
     })
   })
 })
