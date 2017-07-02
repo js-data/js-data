@@ -1504,12 +1504,14 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
         _equal = _equal && utils.deepEqual(value, a[key])
       })
     } else if (utils.isArray(a) && utils.isArray(b)) {
-      a.forEach(function (value, i) {
-        _equal = _equal && utils.deepEqual(value, b[i])
-        if (!_equal) {
+      if (a.length !== b.length) {
+        return false
+      }
+      for (let i = a.length; i--;) {
+        if (!utils.deepEqual(a[i], b[i])) {
           return false
         }
-      })
+      }
     } else {
       return false
     }
