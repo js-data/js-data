@@ -7,7 +7,7 @@ export { belongsToType, hasManyType, hasOneType } from './relations'
  * @name module:js-data.belongsTo
  * @method
  * @param {Mapper} related The relation the target belongs to.
- * @param {Object} opts Configuration options.
+ * @param {object} opts Configuration options.
  * @param {string} opts.foreignKey The field that holds the primary key of the
  * related record.
  * @param {string} opts.localField The field that holds a reference to the
@@ -27,7 +27,7 @@ export const belongsTo = function (related, opts) {
  * @name module:js-data.hasMany
  * @method
  * @param {Mapper} related The relation of which the target has many.
- * @param {Object} opts Configuration options.
+ * @param {object} opts Configuration options.
  * @param {string} [opts.foreignKey] The field that holds the primary key of the
  * related record.
  * @param {string} opts.localField The field that holds a reference to the
@@ -47,7 +47,7 @@ export const hasMany = function (related, opts) {
  * @name module:js-data.hasOne
  * @method
  * @param {Mapper} related The relation of which the target has one.
- * @param {Object} opts Configuration options.
+ * @param {object} opts Configuration options.
  * @param {string} [opts.foreignKey] The field that holds the primary key of the
  * related record.
  * @param {string} opts.localField The field that holds a reference to the
