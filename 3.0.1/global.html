@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>js-data Source: Settable.js</title>
+	<title>js-data Global</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -130,138 +130,650 @@
 <div class="row">
 
 	
+		<div class="col-lg-3 col-md-4 hidden-xs hidden-sm toc-wrapper">
+			<div id="toc" class="col-lg-3 col-md-4 hidden-xs hidden-sm toc-wrapper"></div>
+		</div>
+	
 
 	<!-- <div class="clearfix"></div> -->
 
 	
-	<div class="col-md-12">
+	<div class="col-lg-9 col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: Settable.js</h1>
-    
+	<h1 class="page-title">Global</h1>
 <section>
-    <article>
-        <pre><code
-            class="javascript linenums">import utils from './utils'
 
-/**
- * A base class which gives instances private properties.
- *
- * Typically you won't instantiate this class directly, but you may find it
- * useful as an abstract class for your own components.
- *
- * See {@link Settable.extend} for an example of using {@link Settable} as a
- * base class.
- *
- *```javascript
- * import {Settable} from 'js-data'
- * ```
- *
- * @class Settable
- * @returns {Settable} A new {@link Settable} instance.
- * @since 3.0.0
- */
-export default function Settable () {
-  const _props = {}
-  Object.defineProperties(this, {
-    /**
-     * Get a private property of this instance.
-     *
-     * __Don't use the method unless you know what you're doing.__
-     *
-     * @method Settable#_get
-     * @param {string} key The property to retrieve.
-     * @returns {*} The value of the property.
-     * @since 3.0.0
-     */
-    _get: { value (key) { return utils.get(_props, key) } },
+<header>
+    
+        <h2>
+        
+        </h2>
+        
+    
+</header>
 
-    /**
-     * Set a private property of this instance.
-     *
-     * __Don't use the method unless you know what you're doing.__
-     *
-     * @method __Don't use the method unless you know what you're doing.__#_set
-     * @param {(string|Object)} key The key or path to the property. Can also
-     * pass in an object of key/value pairs, which will all be set on the instance.
-     * @param {*} [value] The value to set.
-     * @since 3.0.0
-     */
-    _set: { value (key, value) { return utils.set(_props, key, value) } },
 
-    /**
-     * Unset a private property of this instance.
-     *
-     * __Don't use the method unless you know what you're doing.__
-     *
-     * @method __Don't use the method unless you know what you're doing.__#_unset
-     * @param {string} key The property to unset.
-     * @since 3.0.0
-     */
-    _unset: { value (key) { return utils.unset(_props, key) } }
-  })
-}
+<article>
+    <div class="container-overview">
+    
+        
 
-/**
- * Create a subclass of this Settable:
- *
- * @example &lt;caption>Settable.extend&lt;/caption>
- * // Normally you would do: import {Settable} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Settable} = JSData
- * console.log('Using JSData v' + JSData.version.full)
- *
- * // Extend the class using ES2015 class syntax.
- * class CustomSettableClass extends Settable {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
- * }
- * const customSettable = new CustomSettableClass()
- * console.log(customSettable.foo())
- * console.log(CustomSettableClass.beep())
- *
- * // Extend the class using alternate method.
- * const OtherSettableClass = Settable.extend({
- *   foo () { return 'bar' }
- * }, {
- *   beep () { return 'boop' }
- * })
- * const otherSettable = new OtherSettableClass()
- * console.log(otherSettable.foo())
- * console.log(OtherSettableClass.beep())
- *
- * // Extend the class, providing a custom constructor.
- * function AnotherSettableClass () {
- *   Settable.call(this)
- *   this.created_at = new Date().getTime()
- * }
- * Settable.extend({
- *   constructor: AnotherSettableClass,
- *   foo () { return 'bar' }
- * }, {
- *   beep () { return 'boop' }
- * })
- * const anotherSettable = new AnotherSettableClass()
- * console.log(anotherSettable.created_at)
- * console.log(anotherSettable.foo())
- * console.log(AnotherSettableClass.beep())
- *
- * @method Settable.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
- * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Settable class.
- * @since 3.0.0
- */
-Settable.extend = utils.extend
-</code></pre>
-    </article>
+        
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+  <h4 class="name" id="_createOrAssignChildRecordIfRequired"><span class="type-signature"></span>_createOrAssignChildRecordIfRequired(props, context)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Creates child record for relation types like HasOne or HasMany with foreignKey
+in order to satisfy foreignKey dependency (so called parent records).</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>See <a href="Mapper.html#create">Mapper#create</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>context</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>contains collected information.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>See <a href="Mapper.html#create">Mapper#create</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parentRelationMap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>contains parent records map</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>originalProps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>contains data passed into <a href="Mapper.html#create">Mapper#create</a> method</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">Promise</a></span>
+
+
+</td>
+            
+            
+              <td><p>updated props</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Mapper.js.html">Mapper.js</a>,
+             <a href="Mapper.js.html#sunlight-1-line-1087">line 1087</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="Mapper.html#create">Mapper#create</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="_createParentRecordIfRequired"><span class="type-signature"></span>_createParentRecordIfRequired(props, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Creates parent record for relation types like BelongsTo or HasMany with localKeys
+in order to satisfy foreignKey dependency (so called child records).</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>See <a href="Mapper.html#create">Mapper#create</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>See <a href="Mapper.html#create">Mapper#create</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+</td>
+            
+            
+              <td><p>cached parent records map</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Mapper.js.html">Mapper.js</a>,
+             <a href="Mapper.js.html#sunlight-1-line-1053">line 1053</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="Mapper.html#create">Mapper#create</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
 </section>
-
 
 
 
