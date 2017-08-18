@@ -62,52 +62,51 @@ export default function Settable () {
  * Create a subclass of this Settable:
  *
  * @example <caption>Settable.extend</caption>
- * // Normally you would do: import {Settable} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Settable} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { Settable } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomSettableClass extends Settable {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
  * }
- * const customSettable = new CustomSettableClass()
- * console.log(customSettable.foo())
- * console.log(CustomSettableClass.beep())
+ * const customSettable = new CustomSettableClass();
+ * console.log(customSettable.foo());
+ * console.log(CustomSettableClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherSettableClass = Settable.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherSettable = new OtherSettableClass()
- * console.log(otherSettable.foo())
- * console.log(OtherSettableClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherSettable = new OtherSettableClass();
+ * console.log(otherSettable.foo());
+ * console.log(OtherSettableClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherSettableClass () {
- *   Settable.call(this)
- *   this.created_at = new Date().getTime()
+ *   Settable.call(this);
+ *   this.created_at = new Date().getTime();
  * }
  * Settable.extend({
  *   constructor: AnotherSettableClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
+ *   beep () { return 'boop'; }
  * })
- * const anotherSettable = new AnotherSettableClass()
- * console.log(anotherSettable.created_at)
- * console.log(anotherSettable.foo())
- * console.log(AnotherSettableClass.beep())
+ * const anotherSettable = new AnotherSettableClass();
+ * console.log(anotherSettable.created_at);
+ * console.log(anotherSettable.foo());
+ * console.log(AnotherSettableClass.beep());
  *
  * @method Settable.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Settable class.
  * @since 3.0.0
  */

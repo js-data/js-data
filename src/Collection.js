@@ -74,21 +74,21 @@ const COLLECTION_DEFAULTS = {
  * An ordered set of {@link Record} instances.
  *
  * @example <caption>Collection#constructor</caption>
- * // import {Collection, Record} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Collection, Record} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * // import { Collection, Record } from 'js-data';
+ * const JSData = require('js-data');
+ * const {Collection, Record} = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
- * const user1 = new Record({ id: 1 })
- * const user2 = new Record({ id: 2 })
- * const UserCollection = new Collection([user1, user2])
- * console.log(UserCollection.get(1) === user1)
+ * const user1 = new Record({ id: 1 });
+ * const user2 = new Record({ id: 2 });
+ * const UserCollection = new Collection([user1, user2]);
+ * console.log(UserCollection.get(1) === user1);
  *
  * @class Collection
  * @extends Component
- * @param {Array} [records] Initial set of records to insert into the
+ * @param {array} [records] Initial set of records to insert into the
  * collection.
- * @param {Object} [opts] Configuration options.
+ * @param {object} [opts] Configuration options.
  * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
  * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
  * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
@@ -118,16 +118,15 @@ function Collection (records, opts) {
      * wrap records in {@link Mapper#recordClass}.
      *
      * @example <caption>Collection#mapper</caption>
-     * // Normally you would do: import {Collection, Mapper} from 'js-data'
-     * const JSData = require('js-data@3.0.0-rc.4')
-     * const {Collection, Mapper} = JSData
-     * console.log('Using JSData v' + JSData.version.full)
+     * const JSData = require('js-data');
+     * const {Collection, Mapper} = JSData;
+     * console.log('Using JSData v' + JSData.version.full);
      *
      * class MyMapperClass extends Mapper {
-     *   foo () { return 'bar' }
+     *   foo () { return 'bar'; }
      * }
-     * const myMapper = new MyMapperClass({ name: 'myMapper' })
-     * const collection = new Collection(null, { mapper: myMapper })
+     * const myMapper = new MyMapperClass({ name: 'myMapper' });
+     * const collection = new Collection(null, { mapper: myMapper });
      *
      * @name Collection#mapper
      * @type {Mapper}
@@ -218,7 +217,7 @@ export default Component.extend({
    * @method Collection#add
    * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} data The record or records to insert.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @param {boolean} [opts.commitOnMerge=true] See {@link Collection#commitOnMerge}.
    * @param {boolean} [opts.noValidate] See {@link Record#noValidate}.
    * @param {string} [opts.onConflict] See {@link Collection#onConflict}.
@@ -322,7 +321,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} result The record or records
    * that were added to this Collection by {@link Collection#add}.
-   * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
+   * @param {object} opts The `opts` argument passed to {@link Collection#add}.
    */
   afterAdd () {},
 
@@ -333,8 +332,8 @@ export default Component.extend({
    * @method Collection#afterRemove
    * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
-   * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
-   * @param {Object} record The result that will be returned by {@link Collection#remove}.
+   * @param {object} opts The `opts` argument passed to {@link Collection#remove}.
+   * @param {object} record The result that will be returned by {@link Collection#remove}.
    */
   afterRemove () {},
 
@@ -345,9 +344,9 @@ export default Component.extend({
    *
    * @method Collection#afterRemoveAll
    * @since 3.0.0
-   * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
-   * @param {Object} records The result that will be returned by {@link Collection#removeAll}.
+   * @param {object} query The `query` argument passed to {@link Collection#removeAll}.
+   * @param {object} opts The `opts` argument passed to {@link Collection#removeAll}.
+   * @param {object} records The result that will be returned by {@link Collection#removeAll}.
    */
   afterRemoveAll () {},
 
@@ -359,7 +358,7 @@ export default Component.extend({
    * @method Collection#beforeAdd
    * @since 3.0.0
    * @param {(Object|Object[]|Record|Record[])} records The `records` argument passed to {@link Collection#add}.
-   * @param {Object} opts The `opts` argument passed to {@link Collection#add}.
+   * @param {object} opts The `opts` argument passed to {@link Collection#add}.
    */
   beforeAdd () {},
 
@@ -369,7 +368,7 @@ export default Component.extend({
    * @method Collection#beforeRemove
    * @since 3.0.0
    * @param {(string|number)} id The `id` argument passed to {@link Collection#remove}.
-   * @param {Object} opts The `opts` argument passed to {@link Collection#remove}.
+   * @param {object} opts The `opts` argument passed to {@link Collection#remove}.
    */
   beforeRemove () {},
 
@@ -378,8 +377,8 @@ export default Component.extend({
    *
    * @method Collection#beforeRemoveAll
    * @since 3.0.0
-   * @param {Object} query The `query` argument passed to {@link Collection#removeAll}.
-   * @param {Object} opts The `opts` argument passed to {@link Collection#removeAll}.
+   * @param {object} query The `query` argument passed to {@link Collection#removeAll}.
+   * @param {object} opts The `opts` argument passed to {@link Collection#removeAll}.
    */
   beforeRemoveAll () {},
 
@@ -390,17 +389,17 @@ export default Component.extend({
    *
    * @example
    * // Get all users ages 18 to 30
-   * const users = collection.between(18, 30, { index: 'age' })
+   * const users = collection.between(18, 30, { index: 'age' });
    *
    * @example
    * // Same as above
-   * const users = collection.between([18], [30], { index: 'age' })
+   * const users = collection.between([18], [30], { index: 'age' });
    *
    * @method Collection#between
    * @since 3.0.0
-   * @param {Array} leftKeys Keys defining the left boundary.
-   * @param {Array} rightKeys Keys defining the right boundary.
-   * @param {Object} [opts] Configuration options.
+   * @param {array} leftKeys Keys defining the left boundary.
+   * @param {array} rightKeys Keys defining the right boundary.
+   * @param {object} [opts] Configuration options.
    * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @param {boolean} [opts.leftInclusive=true] Whether to include records
@@ -420,11 +419,11 @@ export default Component.extend({
    *
    * @example
    * // Index users by age
-   * collection.createIndex('age')
+   * collection.createIndex('age');
    *
    * @example
    * // Index users by status and role
-   * collection.createIndex('statusAndRole', ['status', 'role'])
+   * collection.createIndex('statusAndRole', ['status', 'role']);
    *
    * @method Collection#createIndex
    * @since 3.0.0
@@ -450,14 +449,13 @@ export default Component.extend({
    * Shortcut for `collection.query().filter(queryOrFn[, thisArg]).run()`
    *
    * @example <caption>Collection#filter</caption>
-   * // Normally you would do: import {Collection} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Collection} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * const JSData = require('js-data');
+   * const { Collection } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
    * const collection = new Collection([
    *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
-   * ])
+   * ]);
    *
    * // Get the draft posts created less than three months ago
    * let posts = collection.filter({
@@ -469,18 +467,16 @@ export default Component.extend({
    *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
    *     }
    *   }
-   * })
-   * console.log(posts)
+   * });
+   * console.log(posts);
    *
    * // Use a custom filter function
-   * posts = collection.filter(function (post) {
-   *   return post.id % 2 === 0
-   * })
+   * posts = collection.filter((post) => post.id % 2 === 0);
    *
    * @method Collection#filter
    * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
    * function.
-   * @param {Object} [thisArg] Context to which to bind `queryOrFn` if
+   * @param {object} [thisArg] Context to which to bind `queryOrFn` if
    * `queryOrFn` is a function.
    * @returns {Array} The result.
    * @see query
@@ -496,7 +492,7 @@ export default Component.extend({
    * @example
    * collection.forEach(function (record) {
    *   // do something
-   * })
+   * });
    *
    * @method Collection#forEach
    * @since 3.0.0
@@ -528,18 +524,18 @@ export default Component.extend({
    *
    * @example
    * // Get the posts where "status" is "draft" or "inReview"
-   * const posts = collection.getAll('draft', 'inReview', { index: 'status' })
+   * const posts = collection.getAll('draft', 'inReview', { index: 'status' });
    *
    * @example
    * // Same as above
-   * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' })
+   * const posts = collection.getAll(['draft'], ['inReview'], { index: 'status' });
    *
    * @method Collection#getAll
    * @since 3.0.0
    * @param {...Array} [keyList] Provide one or more keyLists, and all
    * records matching each keyList will be retrieved. If no keyLists are
    * provided, all records will be returned.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @returns {Array} The result.
@@ -570,7 +566,7 @@ export default Component.extend({
    * Shortcut for `collection.query().limit(maximumNumber).run()`
    *
    * @example
-   * const posts = collection.limit(10)
+   * const posts = collection.limit(10);
    *
    * @method Collection#limit
    * @since 3.0.0
@@ -585,9 +581,7 @@ export default Component.extend({
    * Apply a mapping function to all records.
    *
    * @example
-   * const names = collection.map(function (user) {
-   *   return user.name
-   * })
+   * const names = collection.map((user) => user.name);
    *
    * @method Collection#map
    * @since 3.0.0
@@ -625,7 +619,7 @@ export default Component.extend({
    * Return all "unsaved" (not uniquely identifiable) records in this colleciton.
    *
    * @method Collection#prune
-   * @param {Object} [opts] Configuration options, passed to {@link Collection#removeAll}.
+   * @param {object} [opts] Configuration options, passed to {@link Collection#removeAll}.
    * @since 3.0.0
    * @returns {Array} The removed records, if any.
    */
@@ -643,7 +637,7 @@ export default Component.extend({
    *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
    *   .skip(10) // second page
    *   .limit(10) // page size
-   *   .run()
+   *   .run();
    *
    * @method Collection#query
    * @since 3.0.0
@@ -676,9 +670,9 @@ export default Component.extend({
    * Reduce the data in the collection to a single value and return the result.
    *
    * @example
-   * const totalVotes = collection.reduce(function (prev, record) {
-   *   return prev + record.upVotes + record.downVotes
-   * }, 0)
+   * const totalVotes = collection.reduce((prev, record) => {
+   *   return prev + record.upVotes + record.downVotes;
+   * }, 0);
    *
    * @method Collection#reduce
    * @since 3.0.0
@@ -698,7 +692,7 @@ export default Component.extend({
    * @since 3.0.0
    * @param {(string|number|object|Record)} idOrRecord The primary key of the
    * record to be removed, or a reference to the record that is to be removed.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @returns {Object|Record} The removed record, if any.
    */
   remove (idOrRecord, opts) {
@@ -732,11 +726,11 @@ export default Component.extend({
    * @method Collection#removeAll
    * @since 3.0.0
    * @param {Object|Object[]|Record[]} [queryOrRecords={}] Records to be removed or selection query. See {@link query}.
-   * @param {Object} [queryOrRecords.where] See {@link query.where}.
+   * @param {object} [queryOrRecords.where] See {@link query.where}.
    * @param {number} [queryOrRecords.offset] See {@link query.offset}.
    * @param {number} [queryOrRecords.limit] See {@link query.limit}.
    * @param {string|Array[]} [queryOrRecords.orderBy] See {@link query.orderBy}.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @returns {(Object[]|Record[])} The removed records, if any.
    */
   removeAll (queryOrRecords, opts) {
@@ -763,7 +757,7 @@ export default Component.extend({
    * Shortcut for `collection.query().skip(numberToSkip).run()`
    *
    * @example
-   * const posts = collection.skip(10)
+   * const posts = collection.skip(10);
    *
    * @method Collection#skip
    * @since 3.0.0
@@ -780,7 +774,7 @@ export default Component.extend({
    *
    * @method Collection#toJSON
    * @since 3.0.0
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @param {string[]} [opts.with] Array of relation names or relation fields
    * to include in the representation.
    * @returns {Array} The records.
@@ -807,8 +801,8 @@ export default Component.extend({
    *
    * @method Collection#updateIndex
    * @since 3.0.0
-   * @param {Object} record The record to update.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} record The record to update.
+   * @param {object} [opts] Configuration options.
    * @param {string} [opts.index] The index in which to update the record's
    * position. If you don't specify an index then the record will be updated
    * in the main index.
@@ -824,7 +818,7 @@ export default Component.extend({
    *
    * @method Collection#updateIndexes
    * @since 3.0.0
-   * @param {Object} record TODO
+   * @param {object} record TODO
    */
   updateIndexes (record) {
     this.index.updateRecord(record)
@@ -849,11 +843,11 @@ export default Component.extend({
  * function onChange (record, changes) {
  *   // do something
  * }
- * collection.on('change', onChange)
+ * collection.on('change', onChange);
  *
  * @callback Collection~changeListener
  * @param {Record} The Record that changed.
- * @param {Object} The changes.
+ * @param {object} The changes.
  * @see Collection#event:change
  * @since 3.0.0
  */
@@ -875,7 +869,7 @@ export default Component.extend({
  * function onAdd (recordOrRecords) {
  *   // do something
  * }
- * collection.on('add', onAdd)
+ * collection.on('add', onAdd);
  *
  * @callback Collection~addListener
  * @param {Record|Record[]} The Record or Records that were added.
@@ -902,7 +896,7 @@ export default Component.extend({
  * function onRemove (recordsOrRecords) {
  *   // do something
  * }
- * collection.on('remove', onRemove)
+ * collection.on('remove', onRemove);
  *
  * @callback Collection~removeListener
  * @param {Record|Record[]} Record or Records that were removed.
@@ -915,52 +909,51 @@ export default Component.extend({
 /**
  * Create a subclass of this Collection:
  * @example <caption>Collection.extend</caption>
- * // Normally you would do: import {Collection} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Collection} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { Collection } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomCollectionClass extends Collection {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
  * }
- * const customCollection = new CustomCollectionClass()
- * console.log(customCollection.foo())
- * console.log(CustomCollectionClass.beep())
+ * const customCollection = new CustomCollectionClass();
+ * console.log(customCollection.foo());
+ * console.log(CustomCollectionClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherCollectionClass = Collection.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherCollection = new OtherCollectionClass()
- * console.log(otherCollection.foo())
- * console.log(OtherCollectionClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherCollection = new OtherCollectionClass();
+ * console.log(otherCollection.foo());
+ * console.log(OtherCollectionClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherCollectionClass () {
- *   Collection.call(this)
- *   this.created_at = new Date().getTime()
+ *   Collection.call(this);
+ *   this.created_at = new Date().getTime();
  * }
  * Collection.extend({
  *   constructor: AnotherCollectionClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const anotherCollection = new AnotherCollectionClass()
- * console.log(anotherCollection.created_at)
- * console.log(anotherCollection.foo())
- * console.log(AnotherCollectionClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const anotherCollection = new AnotherCollectionClass();
+ * console.log(anotherCollection.created_at);
+ * console.log(anotherCollection.foo());
+ * console.log(AnotherCollectionClass.beep());
  *
  * @method Collection.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Collection class.
  * @since 3.0.0
  */

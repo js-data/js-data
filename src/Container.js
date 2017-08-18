@@ -10,20 +10,20 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Get the number of published blog posts
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.count('post', { status: 'published' }).then((numPublished) => {
-   *   console.log(numPublished) // e.g. 45
-   * })
+   *   console.log(numPublished); // e.g. 45
+   * });
    *
    * @method Container#count
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} [query] See {@link Mapper#count}.
-   * @param {Object} [opts] See {@link Mapper#count}.
+   * @param {object} [query] See {@link Mapper#count}.
+   * @param {object} [opts] See {@link Mapper#count}.
    * @returns {Promise} See {@link Mapper#count}.
    * @see Mapper#count
    * @since 3.0.0
@@ -45,12 +45,12 @@ export const proxiedMapperMethods = [
    * function onBeforeCreate (mapperName, props, opts) {
    *   // do something
    * }
-   * store.on('beforeCreate', onBeforeCreate)
+   * store.on('beforeCreate', onBeforeCreate);
    *
    * @callback Container~beforeCreateListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeCreate}.
-   * @param {Object} props The `props` argument received by {@link Mapper#beforeCreate}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreate}.
+   * @param {object} props The `props` argument received by {@link Mapper#beforeCreate}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeCreate}.
    * @see Container#event:beforeCreate
    * @see Container#create
    * @since 3.0.0
@@ -70,13 +70,13 @@ export const proxiedMapperMethods = [
    * function onAfterCreate (mapperName, props, opts, result) {
    *   // do something
    * }
-   * store.on('afterCreate', onAfterCreate)
+   * store.on('afterCreate', onAfterCreate);
    *
    * @callback Container~afterCreateListener
    * @param {string} name The `name` argument received by {@link Mapper#afterCreate}.
-   * @param {Object} props The `props` argument received by {@link Mapper#afterCreate}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreate}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterCreate}.
+   * @param {object} props The `props` argument received by {@link Mapper#afterCreate}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterCreate}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterCreate}.
    * @see Container#event:afterCreate
    * @see Container#create
    * @since 3.0.0
@@ -86,25 +86,25 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Create and save a new blog post
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.create('post', {
    *   title: 'Modeling your data',
    *   status: 'draft'
    * }).then((post) => {
-   *   console.log(post) // { id: 1234, status: 'draft', ... }
-   * })
+   *   console.log(post); // { id: 1234, status: 'draft', ... }
+   * });
    *
    * @fires Container#beforeCreate
    * @fires Container#afterCreate
    * @method Container#create
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} props See {@link Mapper#create}.
-   * @param {Object} [opts] See {@link Mapper#create}.
+   * @param {object} props See {@link Mapper#create}.
+   * @param {object} [opts] See {@link Mapper#create}.
    * @returns {Promise} See {@link Mapper#create}.
    * @see Mapper#create
    * @since 3.0.0
@@ -126,12 +126,12 @@ export const proxiedMapperMethods = [
    * function onBeforeCreateMany (mapperName, records, opts) {
    *   // do something
    * }
-   * store.on('beforeCreateMany', onBeforeCreateMany)
+   * store.on('beforeCreateMany', onBeforeCreateMany);
    *
    * @callback Container~beforeCreateManyListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeCreateMany}.
-   * @param {Object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {object} records The `records` argument received by {@link Mapper#beforeCreateMany}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeCreateMany}.
    * @see Container#event:beforeCreateMany
    * @see Container#createMany
    * @since 3.0.0
@@ -151,13 +151,13 @@ export const proxiedMapperMethods = [
    * function onAfterCreateMany (mapperName, records, opts, result) {
    *   // do something
    * }
-   * store.on('afterCreateMany', onAfterCreateMany)
+   * store.on('afterCreateMany', onAfterCreateMany);
    *
    * @callback Container~afterCreateManyListener
    * @param {string} name The `name` argument received by {@link Mapper#afterCreateMany}.
-   * @param {Object} records The `records` argument received by {@link Mapper#afterCreateMany}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterCreateMany}.
+   * @param {object} records The `records` argument received by {@link Mapper#afterCreateMany}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterCreateMany}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterCreateMany}.
    * @see Container#event:afterCreateMany
    * @see Container#createMany
    * @since 3.0.0
@@ -167,11 +167,11 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Create and save several new blog posts
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.createMany('post', [{
    *   title: 'Modeling your data',
@@ -180,16 +180,16 @@ export const proxiedMapperMethods = [
    *   title: 'Reading data',
    *   status: 'draft'
    * }]).then((posts) => {
-   *   console.log(posts[0]) // { id: 1234, status: 'draft', ... }
-   *   console.log(posts[1]) // { id: 1235, status: 'draft', ... }
-   * })
+   *   console.log(posts[0]); // { id: 1234, status: 'draft', ... }
+   *   console.log(posts[1]); // { id: 1235, status: 'draft', ... }
+   * });
    *
    * @fires Container#beforeCreateMany
    * @fires Container#afterCreateMany
    * @method Container#createMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Record[]} records See {@link Mapper#createMany}.
-   * @param {Object} [opts] See {@link Mapper#createMany}.
+   * @param {object} [opts] See {@link Mapper#createMany}.
    * @returns {Promise} See {@link Mapper#createMany}.
    * @see Mapper#createMany
    * @since 3.0.0
@@ -204,15 +204,15 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Create empty unsaved record instance
-   * import {Container} from 'js-data'
-   * const store = new Container()
-   * store.defineMapper('post')
-   * const post = PostMapper.createRecord()
+   * import { Container } from 'js-data';
+   * const store = new Container();
+   * store.defineMapper('post');
+   * const post = PostMapper.createRecord();
    *
    * @method Container#createRecord
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Object|Object[]} props See {@link Mapper#createRecord}.
-   * @param {Object} [opts] See {@link Mapper#createRecord}.
+   * @param {object} [opts] See {@link Mapper#createRecord}.
    * @returns {Promise} See {@link Mapper#createRecord}.
    * @see Mapper#createRecord
    * @since 3.0.0
@@ -234,12 +234,12 @@ export const proxiedMapperMethods = [
    * function onBeforeDestroy (mapperName, id, opts) {
    *   // do something
    * }
-   * store.on('beforeDestroy', onBeforeDestroy)
+   * store.on('beforeDestroy', onBeforeDestroy);
    *
    * @callback Container~beforeDestroyListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeDestroy}.
    * @param {string|number} id The `id` argument received by {@link Mapper#beforeDestroy}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroy}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeDestroy}.
    * @see Container#event:beforeDestroy
    * @see Container#destroy
    * @since 3.0.0
@@ -259,13 +259,13 @@ export const proxiedMapperMethods = [
    * function onAfterDestroy (mapperName, id, opts, result) {
    *   // do something
    * }
-   * store.on('afterDestroy', onAfterDestroy)
+   * store.on('afterDestroy', onAfterDestroy);
    *
    * @callback Container~afterDestroyListener
    * @param {string} name The `name` argument received by {@link Mapper#afterDestroy}.
    * @param {string|number} id The `id` argument received by {@link Mapper#afterDestroy}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroy}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroy}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterDestroy}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterDestroy}.
    * @see Container#event:afterDestroy
    * @see Container#destroy
    * @since 3.0.0
@@ -275,22 +275,22 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Destroy a specific blog post
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.destroy('post', 1234).then(() => {
    *   // Blog post #1234 has been destroyed
-   * })
+   * });
    *
    * @fires Container#beforeDestroy
    * @fires Container#afterDestroy
    * @method Container#destroy
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#destroy}.
-   * @param {Object} [opts] See {@link Mapper#destroy}.
+   * @param {object} [opts] See {@link Mapper#destroy}.
    * @returns {Promise} See {@link Mapper#destroy}.
    * @see Mapper#destroy
    * @since 3.0.0
@@ -312,12 +312,12 @@ export const proxiedMapperMethods = [
    * function onBeforeDestroyAll (mapperName, query, opts) {
    *   // do something
    * }
-   * store.on('beforeDestroyAll', onBeforeDestroyAll)
+   * store.on('beforeDestroyAll', onBeforeDestroyAll);
    *
    * @callback Container~beforeDestroyAllListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeDestroyAll}.
-   * @param {Object} query The `query` argument received by {@link Mapper#beforeDestroyAll}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {object} query The `query` argument received by {@link Mapper#beforeDestroyAll}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeDestroyAll}.
    * @see Container#event:beforeDestroyAll
    * @see Container#destroyAll
    * @since 3.0.0
@@ -337,13 +337,13 @@ export const proxiedMapperMethods = [
    * function onAfterDestroyAll (mapperName, query, opts, result) {
    *   // do something
    * }
-   * store.on('afterDestroyAll', onAfterDestroyAll)
+   * store.on('afterDestroyAll', onAfterDestroyAll);
    *
    * @callback Container~afterDestroyAllListener
    * @param {string} name The `name` argument received by {@link Mapper#afterDestroyAll}.
-   * @param {Object} query The `query` argument received by {@link Mapper#afterDestroyAll}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterDestroyAll}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {object} query The `query` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterDestroyAll}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterDestroyAll}.
    * @see Container#event:afterDestroyAll
    * @see Container#destroyAll
    * @since 3.0.0
@@ -353,22 +353,22 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Destroy all "draft" blog posts
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.destroyAll('post', { status: 'draft' }).then(() => {
    *   // All "draft" blog posts have been destroyed
-   * })
+   * });
    *
    * @fires Container#beforeDestroyAll
    * @fires Container#afterDestroyAll
    * @method Container#destroyAll
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} [query] See {@link Mapper#destroyAll}.
-   * @param {Object} [opts] See {@link Mapper#destroyAll}.
+   * @param {object} [query] See {@link Mapper#destroyAll}.
+   * @param {object} [opts] See {@link Mapper#destroyAll}.
    * @returns {Promise} See {@link Mapper#destroyAll}.
    * @see Mapper#destroyAll
    * @since 3.0.0
@@ -390,12 +390,12 @@ export const proxiedMapperMethods = [
    * function onBeforeFind (mapperName, id, opts) {
    *   // do something
    * }
-   * store.on('beforeFind', onBeforeFind)
+   * store.on('beforeFind', onBeforeFind);
    *
    * @callback Container~beforeFindListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeFind}.
    * @param {string|number} id The `id` argument received by {@link Mapper#beforeFind}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFind}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeFind}.
    * @see Container#event:beforeFind
    * @see Container#find
    * @since 3.0.0
@@ -415,13 +415,13 @@ export const proxiedMapperMethods = [
    * function onAfterFind (mapperName, id, opts, result) {
    *   // do something
    * }
-   * store.on('afterFind', onAfterFind)
+   * store.on('afterFind', onAfterFind);
    *
    * @callback Container~afterFindListener
    * @param {string} name The `name` argument received by {@link Mapper#afterFind}.
    * @param {string|number} id The `id` argument received by {@link Mapper#afterFind}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFind}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterFind}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterFind}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterFind}.
    * @see Container#event:afterFind
    * @see Container#find
    * @since 3.0.0
@@ -430,22 +430,22 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#find}.
    *
    * @example
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.find('post', 1).then((post) => {
    *   console.log(post) // { id: 1, ...}
-   * })
+   * });
    *
    * @fires Container#beforeFind
    * @fires Container#afterFind
    * @method Container#find
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#find}.
-   * @param {Object} [opts] See {@link Mapper#find}.
+   * @param {object} [opts] See {@link Mapper#find}.
    * @returns {Promise} See {@link Mapper#find}.
    * @see Mapper#find
    * @since 3.0.0
@@ -467,12 +467,12 @@ export const proxiedMapperMethods = [
    * function onBeforeFindAll (mapperName, query, opts) {
    *   // do something
    * }
-   * store.on('beforeFindAll', onBeforeFindAll)
+   * store.on('beforeFindAll', onBeforeFindAll);
    *
    * @callback Container~beforeFindAllListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeFindAll}.
-   * @param {Object} query The `query` argument received by {@link Mapper#beforeFindAll}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeFindAll}.
+   * @param {object} query The `query` argument received by {@link Mapper#beforeFindAll}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeFindAll}.
    * @see Container#event:beforeFindAll
    * @see Container#findAll
    * @since 3.0.0
@@ -492,13 +492,13 @@ export const proxiedMapperMethods = [
    * function onAfterFindAll (mapperName, query, opts, result) {
    *   // do something
    * }
-   * store.on('afterFindAll', onAfterFindAll)
+   * store.on('afterFindAll', onAfterFindAll);
    *
    * @callback Container~afterFindAllListener
    * @param {string} name The `name` argument received by {@link Mapper#afterFindAll}.
-   * @param {Object} query The `query` argument received by {@link Mapper#afterFindAll}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterFindAll}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterFindAll}.
+   * @param {object} query The `query` argument received by {@link Mapper#afterFindAll}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterFindAll}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterFindAll}.
    * @see Container#event:afterFindAll
    * @see Container#findAll
    * @since 3.0.0
@@ -508,22 +508,22 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Find all "published" blog posts
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.findAll('post', { status: 'published' }).then((posts) => {
-   *   console.log(posts) // [{ id: 1, ...}, ...]
-   * })
+   *   console.log(posts); // [{ id: 1, ...}, ...]
+   * });
    *
    * @fires Container#beforeFindAll
    * @fires Container#afterFindAll
    * @method Container#findAll
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} [query] See {@link Mapper#findAll}.
-   * @param {Object} [opts] See {@link Mapper#findAll}.
+   * @param {object} [query] See {@link Mapper#findAll}.
+   * @param {object} [opts] See {@link Mapper#findAll}.
    * @returns {Promise} See {@link Mapper#findAll}.
    * @see Mapper#findAll
    * @since 3.0.0
@@ -545,14 +545,14 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#is}.
    *
    * @example
-   * import {Container} from 'js-data'
-   * const store = new Container()
-   * store.defineMapper('post')
-   * const post = store.createRecord()
+   * import { Container } from 'js-data';
+   * const store = new Container();
+   * store.defineMapper('post');
+   * const post = store.createRecord();
    *
-   * console.log(store.is('post', post)) // true
+   * console.log(store.is('post', post)); // true
    * // Equivalent to what's above
-   * console.log(post instanceof store.getMapper('post').recordClass) // true
+   * console.log(post instanceof store.getMapper('post').recordClass); // true
    *
    * @method Container#is
    * @param {string} name Name of the {@link Mapper} to target.
@@ -567,21 +567,21 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#sum}.
    *
    * @example
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('purchase_order')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('purchase_order');
    *
    * store.sum('purchase_order', 'amount', { status: 'paid' }).then((amountPaid) => {
-   *   console.log(amountPaid) // e.g. 451125.34
-   * })
+   *   console.log(amountPaid); // e.g. 451125.34
+   * });
    *
    * @method Container#sum
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {string} field See {@link Mapper#sum}.
-   * @param {Object} [query] See {@link Mapper#sum}.
-   * @param {Object} [opts] See {@link Mapper#sum}.
+   * @param {object} [query] See {@link Mapper#sum}.
+   * @param {object} [opts] See {@link Mapper#sum}.
    * @returns {Promise} See {@link Mapper#sum}.
    * @see Mapper#sum
    * @since 3.0.0
@@ -592,10 +592,10 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#toJSON}.
    *
    * @example
-   * import { Container } from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
    * store.defineMapper('person', {
    *   schema: {
    *     properties: {
@@ -603,10 +603,10 @@ export const proxiedMapperMethods = [
    *       id: { type: 'string' }
    *     }
    *   }
-   * })
-   * const person = store.createRecord('person', { id: 1, name: 'John', foo: 'bar' })
+   * });
+   * const person = store.createRecord('person', { id: 1, name: 'John', foo: 'bar' });
    * // "foo" is stripped by toJSON()
-   * console.log(store.toJSON('person', person)) // {"id":1,"name":"John"}
+   * console.log(store.toJSON('person', person)); // {"id":1,"name":"John"}
    *
    * store.defineMapper('personRelaxed', {
    *   schema: {
@@ -616,15 +616,15 @@ export const proxiedMapperMethods = [
    *     },
    *     additionalProperties: true
    *   }
-   * })
-   * const person2 = store.createRecord('personRelaxed', { id: 1, name: 'John', foo: 'bar' })
+   * });
+   * const person2 = store.createRecord('personRelaxed', { id: 1, name: 'John', foo: 'bar' });
    * // "foo" is not stripped by toJSON
-   * console.log(store.toJSON('personRelaxed', person2)) // {"id":1,"name":"John","foo":"bar"}
+   * console.log(store.toJSON('personRelaxed', person2)); // {"id":1,"name":"John","foo":"bar"}
    *
    * @method Container#toJSON
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {Record|Record[]} records See {@link Mapper#toJSON}.
-   * @param {Object} [opts] See {@link Mapper#toJSON}.
+   * @param {object} [opts] See {@link Mapper#toJSON}.
    * @returns {Object|Object[]} See {@link Mapper#toJSON}.
    * @see Mapper#toJSON
    * @since 3.0.0
@@ -646,13 +646,13 @@ export const proxiedMapperMethods = [
    * function onBeforeUpdate (mapperName, id, props, opts) {
    *   // do something
    * }
-   * store.on('beforeUpdate', onBeforeUpdate)
+   * store.on('beforeUpdate', onBeforeUpdate);
    *
    * @callback Container~beforeUpdateListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeUpdate}.
    * @param {string|number} id The `id` argument received by {@link Mapper#beforeUpdate}.
-   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdate}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdate}.
+   * @param {object} props The `props` argument received by {@link Mapper#beforeUpdate}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeUpdate}.
    * @see Container#event:beforeUpdate
    * @see Container#update
    * @since 3.0.0
@@ -672,14 +672,14 @@ export const proxiedMapperMethods = [
    * function onAfterUpdate (mapperName, id, props, opts, result) {
    *   // do something
    * }
-   * store.on('afterUpdate', onAfterUpdate)
+   * store.on('afterUpdate', onAfterUpdate);
    *
    * @callback Container~afterUpdateListener
    * @param {string} name The `name` argument received by {@link Mapper#afterUpdate}.
    * @param {string|number} id The `id` argument received by {@link Mapper#afterUpdate}.
-   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdate}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdate}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdate}.
+   * @param {object} props The `props` argument received by {@link Mapper#afterUpdate}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterUpdate}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterUpdate}.
    * @see Container#event:afterUpdate
    * @see Container#update
    * @since 3.0.0
@@ -688,26 +688,26 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#update}.
    *
    * @example
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.update('post', 1234, {
    *   status: 'published',
    *   published_at: new Date()
    * }).then((post) => {
-   *   console.log(post) // { id: 1234, status: 'published', ... }
-   * })
+   *   console.log(post); // { id: 1234, status: 'published', ... }
+   * });
    *
    * @fires Container#beforeUpdate
    * @fires Container#afterUpdate
    * @method Container#update
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#update}.
-   * @param {Object} record See {@link Mapper#update}.
-   * @param {Object} [opts] See {@link Mapper#update}.
+   * @param {object} record See {@link Mapper#update}.
+   * @param {object} [opts] See {@link Mapper#update}.
    * @returns {Promise} See {@link Mapper#update}.
    * @see Mapper#update
    * @since 3.0.0
@@ -730,13 +730,13 @@ export const proxiedMapperMethods = [
    * function onBeforeUpdateAll (mapperName, props, query, opts) {
    *   // do something
    * }
-   * store.on('beforeUpdateAll', onBeforeUpdateAll)
+   * store.on('beforeUpdateAll', onBeforeUpdateAll);
    *
    * @callback Container~beforeUpdateAllListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateAll}.
-   * @param {Object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
-   * @param {Object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {object} props The `props` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {object} query The `query` argument received by {@link Mapper#beforeUpdateAll}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeUpdateAll}.
    * @see Container#event:beforeUpdateAll
    * @see Container#updateAll
    * @since 3.0.0
@@ -756,14 +756,14 @@ export const proxiedMapperMethods = [
    * function onAfterUpdateAll (mapperName, props, query, opts, result) {
    *   // do something
    * }
-   * store.on('afterUpdateAll', onAfterUpdateAll)
+   * store.on('afterUpdateAll', onAfterUpdateAll);
    *
    * @callback Container~afterUpdateAllListener
    * @param {string} name The `name` argument received by {@link Mapper#afterUpdateAll}.
-   * @param {Object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
-   * @param {Object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {object} props The `props` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {object} query The `query` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterUpdateAll}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterUpdateAll}.
    * @see Container#event:afterUpdateAll
    * @see Container#updateAll
    * @since 3.0.0
@@ -773,25 +773,25 @@ export const proxiedMapperMethods = [
    *
    * @example
    * // Turn all of John's blog posts into drafts.
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
-   * const update = { status: draft: published_at: null }
-   * const query = { userId: 1234 }
+   * const update = { status: draft: published_at: null };
+   * const query = { userId: 1234 };
    * store.updateAll('post', update, query).then((posts) => {
-   *   console.log(posts) // [...]
-   * })
+   *   console.log(posts); // [...]
+   * });
    *
    * @fires Container#beforeUpdateAll
    * @fires Container#afterUpdateAll
    * @method Container#updateAll
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {Object} update See {@link Mapper#updateAll}.
-   * @param {Object} [query] See {@link Mapper#updateAll}.
-   * @param {Object} [opts] See {@link Mapper#updateAll}.
+   * @param {object} update See {@link Mapper#updateAll}.
+   * @param {object} [query] See {@link Mapper#updateAll}.
+   * @param {object} [opts] See {@link Mapper#updateAll}.
    * @returns {Promise} See {@link Mapper#updateAll}.
    * @see Mapper#updateAll
    * @since 3.0.0
@@ -813,12 +813,12 @@ export const proxiedMapperMethods = [
    * function onBeforeUpdateMany (mapperName, records, opts) {
    *   // do something
    * }
-   * store.on('beforeUpdateMany', onBeforeUpdateMany)
+   * store.on('beforeUpdateMany', onBeforeUpdateMany);
    *
    * @callback Container~beforeUpdateManyListener
    * @param {string} name The `name` argument received by {@link Mapper#beforeUpdateMany}.
-   * @param {Object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {object} records The `records` argument received by {@link Mapper#beforeUpdateMany}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#beforeUpdateMany}.
    * @see Container#event:beforeUpdateMany
    * @see Container#updateMany
    * @since 3.0.0
@@ -838,13 +838,13 @@ export const proxiedMapperMethods = [
    * function onAfterUpdateMany (mapperName, records, opts, result) {
    *   // do something
    * }
-   * store.on('afterUpdateMany', onAfterUpdateMany)
+   * store.on('afterUpdateMany', onAfterUpdateMany);
    *
    * @callback Container~afterUpdateManyListener
    * @param {string} name The `name` argument received by {@link Mapper#afterUpdateMany}.
-   * @param {Object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
-   * @param {Object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
-   * @param {Object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {object} records The `records` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {object} opts The `opts` argument received by {@link Mapper#afterUpdateMany}.
+   * @param {object} result The `result` argument received by {@link Mapper#afterUpdateMany}.
    * @see Container#event:afterUpdateMany
    * @see Container#updateMany
    * @since 3.0.0
@@ -853,25 +853,25 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#updateMany}.
    *
    * @example
-   * import {Container} from 'js-data'
-   * import RethinkDBAdapter from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
-   * store.defineMapper('post')
+   * import { Container } from 'js-data';
+   * import RethinkDBAdapter from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('post');
    *
    * store.updateMany('post', [
    *   { id: 1234, status: 'draft' },
    *   { id: 2468, status: 'published', published_at: new Date() }
    * ]).then((posts) => {
-   *   console.log(posts) // [...]
-   * })
+   *   console.log(posts); // [...]
+   * });
    *
    * @fires Container#beforeUpdateMany
    * @fires Container#afterUpdateMany
    * @method Container#updateMany
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(Object[]|Record[])} records See {@link Mapper#updateMany}.
-   * @param {Object} [opts] See {@link Mapper#updateMany}.
+   * @param {object} [opts] See {@link Mapper#updateMany}.
    * @returns {Promise} See {@link Mapper#updateMany}.
    * @see Mapper#updateMany
    * @since 3.0.0
@@ -882,8 +882,8 @@ export const proxiedMapperMethods = [
    * Wrapper for {@link Mapper#validate}.
    *
    * @example
-   * import {Container} from 'js-data'
-   * const store = new Container()
+   * import { Container } from 'js-data';
+   * const store = new Container();
    * store.defineMapper('post', {
    *   schema: {
    *     properties: {
@@ -891,16 +891,16 @@ export const proxiedMapperMethods = [
    *       id: { type: 'string' }
    *     }
    *   }
-   * })
-   * let errors = store.validate('post', { name: 'John' })
-   * console.log(errors) // undefined
-   * errors = store.validate('post', { name: 123 })
-   * console.log(errors) // [{ expected: 'one of (string)', actual: 'number', path: 'name' }]
+   * });
+   * let errors = store.validate('post', { name: 'John' });
+   * console.log(errors); // undefined
+   * errors = store.validate('post', { name: 123 });
+   * console.log(errors); // [{ expected: 'one of (string)', actual: 'number', path: 'name' }]
    *
    * @method Container#validate
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(Object[]|Record[])} records See {@link Mapper#validate}.
-   * @param {Object} [opts] See {@link Mapper#validate}.
+   * @param {object} [opts] See {@link Mapper#validate}.
    * @returns {Promise} See {@link Mapper#validate}.
    * @see Mapper#validate
    * @since 3.0.0
@@ -917,19 +917,19 @@ export const proxiedMapperMethods = [
  * don't have to register adapters for every single Mapper.
  *
  * @example <caption>Container#constructor</caption>
- * // import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Container} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * // import { Container } from 'js-data';
+ * const JSData = require('js-data');
+ * const {Container} = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
- * const store = new Container()
+ * const store = new Container();
  *
  * @class Container
  * @extends Component
- * @param {Object} [opts] Configuration options.
+ * @param {object} [opts] Configuration options.
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {Constructor} [opts.mapperClass] See {@link Container#mapperClass}.
- * @param {Object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
+ * @param {object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
  * @since 3.0.0
  */
 export function Container (opts) {
@@ -969,19 +969,19 @@ export function Container (opts) {
      * {@link Mapper}. By default {@link Mapper} is used to instantiate Mappers.
      *
      * @example <caption>Container#mapperClass</caption>
-     * // import {Container, Mapper} from 'js-data'
-     * const JSData = require('js-data@3.0.0-rc.4')
-     * const {Container} = JSData
-     * console.log('Using JSData v' + JSData.version.full)
+     * // import { Container, Mapper } from 'js-data';
+     * const JSData = require('js-data');
+     * const { Container, Mapper } = JSData;
+     * console.log('Using JSData v' + JSData.version.full);
      *
      * class MyMapperClass extends Mapper {
      *   foo () { return 'bar' }
      * }
      * const store = new Container({
      *   mapperClass: MyMapperClass
-     * })
-     * store.defineMapper('user')
-     * console.log(store.getMapper('user').foo())
+     * });
+     * store.defineMapper('user');
+     * console.log(store.getMapper('user').foo());
      *
      * @name Container#mapperClass
      * @see Mapper
@@ -1002,18 +1002,18 @@ export function Container (opts) {
    * new {@link Mapper}.
    *
    * @example <caption>Container#mapperDefaults</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
    * const store = new Container({
    *   mapperDefaults: {
    *     idAttribute: '_id'
    *   }
-   * })
-   * store.defineMapper('user')
-   * console.log(store.getMapper('user').idAttribute)
+   * });
+   * store.defineMapper('user');
+   * console.log(store.getMapper('user').idAttribute);
    *
    * @default {}
    * @name Container#mapperDefaults
@@ -1037,16 +1037,16 @@ const props = {
    * the arugments passed to the listener.
    *
    * @example <caption>Container#on</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new Container()
-   * store.on('foo', function (...args) { console.log(args.join(':')) })
-   * store.defineMapper('user')
-   * store.emit('foo', 'arg1', 'arg2')
-   * store.getMapper('user').emit('foo', 'arg1', 'arg2')
+   * const store = new Container();
+   * store.on('foo', function (...args) { console.log(args.join(':')) });
+   * store.defineMapper('user');
+   * store.emit('foo', 'arg1', 'arg2');
+   * store.getMapper('user').emit('foo', 'arg1', 'arg2');
    *
    * @method Container#on
    * @param {string} event Name of event to subsribe to.
@@ -1073,21 +1073,21 @@ const props = {
    * Return a container scoped to a particular mapper.
    *
    * @example <caption>Container#as</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new Container()
-   * const UserMapper = store.defineMapper('user')
-   * const UserStore = store.as('user')
+   * const store = new Container();
+   * const UserMapper = store.defineMapper('user');
+   * const UserStore = store.as('user');
    *
-   * const user1 = store.createRecord('user', { name: 'John' })
-   * const user2 = UserStore.createRecord({ name: 'John' })
-   * const user3 = UserMapper.createRecord({ name: 'John' })
-   * console.log(user1 === user2)
-   * console.log(user2 === user3)
-   * console.log(user1 === user3)
+   * const user1 = store.createRecord('user', { name: 'John' });
+   * const user2 = UserStore.createRecord({ name: 'John' });
+   * const user3 = UserMapper.createRecord({ name: 'John' });
+   * console.log(user1 === user2);
+   * console.log(user2 === user3);
+   * console.log(user1 === user3);
    *
    * @method Container#as
    * @param {string} name Name of the {@link Mapper}.
@@ -1118,25 +1118,25 @@ const props = {
    * Create a new mapper and register it in this container.
    *
    * @example <caption>Container#defineMapper</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
    * const store = new Container({
    *   mapperDefaults: { foo: 'bar' }
-   * })
+   * });
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
-   * const UserMapper = store.defineMapper('user')
-   * console.log(UserMapper === store.getMapper('user'))
-   * console.log(UserMapper === store.as('user').getMapper())
-   * console.log(UserMapper.foo)
+   * const UserMapper = store.defineMapper('user');
+   * console.log(UserMapper === store.getMapper('user'));
+   * console.log(UserMapper === store.as('user').getMapper());
+   * console.log(UserMapper.foo);
    *
    * @method Container#defineMapper
    * @param {string} name Name under which to register the new {@link Mapper}.
    * {@link Mapper#name} will be set to this value.
-   * @param {Object} [opts] Configuration options. Passed to
+   * @param {object} [opts] Configuration options. Passed to
    * {@link Container#mapperClass} when creating the new {@link Mapper}.
    * @returns {Mapper} The newly created instance of {@link Mapper}.
    * @see Container#as
@@ -1235,18 +1235,18 @@ const props = {
    * Return the mapper registered under the specified name.
    *
    * @example <caption>Container#getMapper</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new Container()
+   * const store = new Container();
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
-   * const UserMapper = store.defineMapper('user')
-   * console.log(UserMapper === store.getMapper('user'))
-   * console.log(UserMapper === store.as('user').getMapper())
-   * store.getMapper('profile') // throws Error, there is no mapper with name "profile"
+   * const UserMapper = store.defineMapper('user');
+   * console.log(UserMapper === store.getMapper('user'));
+   * console.log(UserMapper === store.as('user').getMapper());
+   * store.getMapper('profile'); // throws Error, there is no mapper with name "profile"
    *
    * @method Container#getMapper
    * @param {string} name {@link Mapper#name}.
@@ -1266,18 +1266,18 @@ const props = {
    * Doesn't throw error if mapper doesn't exist.
    *
    * @example <caption>Container#getMapperByName</caption>
-   * // import {Container} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Container} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new Container()
+   * const store = new Container();
    * // Container#defineMapper returns a direct reference to the newly created
    * // Mapper.
-   * const UserMapper = store.defineMapper('user')
-   * console.log(UserMapper === store.getMapper('user'))
-   * console.log(UserMapper === store.as('user').getMapper())
-   * console.log(store.getMapper('profile')) // Does NOT throw an error
+   * const UserMapper = store.defineMapper('user');
+   * console.log(UserMapper === store.getMapper('user'));
+   * console.log(UserMapper === store.as('user').getMapper());
+   * console.log(store.getMapper('profile')); // Does NOT throw an error
    *
    * @method Container#getMapperByName
    * @param {string} name {@link Mapper#name}.
@@ -1293,15 +1293,15 @@ const props = {
    * registered on a container are shared by all mappers in the container.
    *
    * @example
-   * import {Container} from 'js-data'
-   * import {RethinkDBAdapter} from 'js-data-rethinkdb'
-   * const store = new Container()
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true })
+   * import { Container } from 'js-data';
+   * import { RethinkDBAdapter } from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
    *
    * @method Container#registerAdapter
    * @param {string} name The name of the adapter to register.
    * @param {Adapter} adapter The adapter to register.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @param {boolean} [opts.default=false] Whether to make the adapter the
    * default adapter for all Mappers in this container.
    * @since 3.0.0
@@ -1331,52 +1331,51 @@ Component.extend(props)
 /**
  * Create a subclass of this Container:
  * @example <caption>Container.extend</caption>
- * // Normally you would do: import {Container} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Container} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { Container } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomContainerClass extends Container {
  *   foo () { return 'bar' }
  *   static beep () { return 'boop' }
  * }
- * const customContainer = new CustomContainerClass()
- * console.log(customContainer.foo())
- * console.log(CustomContainerClass.beep())
+ * const customContainer = new CustomContainerClass();
+ * console.log(customContainer.foo());
+ * console.log(CustomContainerClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherContainerClass = Container.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherContainer = new OtherContainerClass()
- * console.log(otherContainer.foo())
- * console.log(OtherContainerClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherContainer = new OtherContainerClass();
+ * console.log(otherContainer.foo());
+ * console.log(OtherContainerClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherContainerClass () {
- *   Container.call(this)
- *   this.created_at = new Date().getTime()
+ *   Container.call(this);
+ *   this.created_at = new Date().getTime();
  * }
  * Container.extend({
  *   constructor: AnotherContainerClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
+ *   beep () { return 'boop'; }
  * })
- * const anotherContainer = new AnotherContainerClass()
- * console.log(anotherContainer.created_at)
- * console.log(anotherContainer.foo())
- * console.log(AnotherContainerClass.beep())
+ * const anotherContainer = new AnotherContainerClass();
+ * console.log(anotherContainer.created_at);
+ * console.log(anotherContainer.foo());
+ * console.log(AnotherContainerClass.beep());
  *
  * @method Container.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Container class.
  * @since 3.0.0
  */

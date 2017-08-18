@@ -23,15 +23,15 @@
  * @example <caption>Load into your app via ES2015 Modules</caption>
  * import * as JSData from 'js-data';
  * @example <caption>Load into your app via AMD</caption>
- * define('myApp', ['js-data'], function (JSData) { ... })
+ * define('myApp', ['js-data'], function (JSData) { ... });
  */
 
 /**
  * JSData's utility methods.
  *
  * @example
- * import {utils} from 'js-data'
- * console.log(utils.isString('foo')) // true
+ * import { utils } from 'js-data';
+ * console.log(utils.isString('foo')); // true
  *
  * @name module:js-data.utils
  * @property {Function} Promise See {@link utils.Promise}.
@@ -45,8 +45,8 @@ import utils from './utils'
  * JSData's {@link Collection} class.
  *
  * @example
- * import {Collection} from 'js-data'
- * const collection = new Collection()
+ * import { Collection } from 'js-data';
+ * const collection = new Collection();
  *
  * @name module:js-data.Collection
  * @see Collection
@@ -61,11 +61,11 @@ import Collection from './Collection'
  * class.
  *
  * @example
- * import {Component} from 'js-data'
+ * import { Component } from 'js-data';
  * // Make a custom component.
  * const MyComponent = Component.extend({
  *   myMethod (someArg) { ... }
- * })
+ * });
  *
  * @name module:js-data.Component
  * @see Component
@@ -80,8 +80,8 @@ import Component from './Component'
  * {@link DataStore} instead.
  *
  * @example
- * import {Container} from 'js-data'
- * const store = new Container()
+ * import { Container } from 'js-data';
+ * const store = new Container();
  *
  * @name module:js-data.Container
  * @see Container
@@ -96,8 +96,8 @@ import {Container} from './Container'
  * Node.js you probably want to use {@link Container} instead.
  *
  * @example
- * import {DataStore} from 'js-data'
- * const store = new DataStore()
+ * import { DataStore } from 'js-data';
+ * const store = new DataStore();
  *
  * @name module:js-data.DataStore
  * @see DataStore
@@ -134,13 +134,13 @@ import LinkedCollection from './LinkedCollection'
  * JSData's {@link Mapper} class. The core of the ORM.
  *
  * @example <caption>Recommended use</caption>
- * import {Container} from 'js-data'
- * const store = new Container()
- * store.defineMapper('user')
+ * import { Container } from 'js-data';
+ * const store = new Container();
+ * store.defineMapper('user');
  *
  * @example <caption>Create Mapper manually</caption>
- * import {Mapper} from 'js-data'
- * const UserMapper = new Mapper({ name: 'user' })
+ * import { Mapper } from 'js-data';
+ * const UserMapper = new Mapper({ name: 'user' });
  *
  * @name module:js-data.Mapper
  * @see Container
@@ -166,10 +166,10 @@ import Query from './Query'
  * JSData's {@link Record} class.
  *
  * @example
- * import {Container} from 'js-data'
- * const store = new Container()
- * store.defineMapper('user')
- * const user = store.createRecord('user')
+ * import { Container } from 'js-data';
+ * const store = new Container();
+ * store.defineMapper('user');
+ * const user = store.createRecord('user');
  *
  * @name module:js-data.Record
  * @see Record
@@ -183,17 +183,17 @@ import Record from './Record'
  * JSData's {@link Schema} class. Implements http://json-schema.org/draft-04.
  *
  * @example
- * import {Container, Schema} from 'js-data'
+ * import { Container, Schema } from 'js-data';
  * const userSchema = new Schema({
  *   properties: {
  *     id: { type: 'string' },
  *     name: { type: 'string' }
  *   }
- * })
- * const store = new Container()
+ * });
+ * const store = new Container();
  * store.defineMapper('user', {
  *   schema: userSchema
- * })
+ * });
  *
  * @name module:js-data.Schema
  * @see Schema
@@ -209,10 +209,10 @@ import Schema from './Schema'
  * JSData's {@link Settable} class.
  *
  * @example
- * import {Settable} from 'js-data'
- * const obj = new Settable()
- * obj.set('secret', 'value')
- * console.log(JSON.stringify(obj)) // {}
+ * import { Settable } from 'js-data';
+ * const obj = new Settable();
+ * obj.set('secret', 'value');
+ * console.log(JSON.stringify(obj)); // {}
  *
  * @name module:js-data.Settable
  * @see Settable
@@ -226,8 +226,8 @@ import Settable from './Settable'
  * Node.js you probably want to use {@link Container} instead.
  *
  * @example
- * import {SimpleStore} from 'js-data'
- * const store = new SimpleStore()
+ * import { SimpleStore } from 'js-data';
+ * const store = new SimpleStore();
  *
  * @name module:js-data.SimpleStore
  * @see SimpleStore
@@ -241,7 +241,7 @@ import SimpleStore from './SimpleStore'
  * Describes the version of this `JSData` object.
  *
  * @example
- * console.log(JSData.version.full) // "3.0.0-beta.1"
+ * console.log(JSData.version.full); // "3.0.0-beta.1"
  *
  * @name version
  * @memberof module:js-data

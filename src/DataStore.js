@@ -27,37 +27,37 @@ const DATASTORE_DEFAULTS = {
  * {@link LinkedCollection} class to link related records together in memory.
  *
  * ```javascript
- * import {DataStore} from 'js-data'
+ * import { DataStore } from 'js-data';
  * ```
  *
  * @example
- * import {DataStore} from 'js-data'
- * import HttpAdapter from 'js-data-http'
- * const store = new DataStore()
+ * import { DataStore } from 'js-data';
+ * import HttpAdapter from 'js-data-http';
+ * const store = new DataStore();
  *
  * // DataStore#defineMapper returns a direct reference to the newly created
  * // Mapper.
- * const UserMapper = store.defineMapper('user')
+ * const UserMapper = store.defineMapper('user');
  *
  * // DataStore#as returns the store scoped to a particular Mapper.
- * const UserStore = store.as('user')
+ * const UserStore = store.as('user');
  *
  * // Call "find" on "UserMapper" (Stateless ORM)
  * UserMapper.find(1).then((user) => {
  *   // retrieved a "user" record via the http adapter, but that's it
  *
  *   // Call "find" on "store" targeting "user" (Stateful DataStore)
- *   return store.find('user', 1) // same as "UserStore.find(1)"
+ *   return store.find('user', 1); // same as "UserStore.find(1)"
  * }).then((user) => {
  *   // not only was a "user" record retrieved, but it was added to the
  *   // store's "user" collection
- *   const cachedUser = store.getCollection('user').get(1)
- *   console.log(user === cachedUser) // true
- * })
+ *   const cachedUser = store.getCollection('user').get(1);
+ *   console.log(user === cachedUser); // true
+ * });
  *
  * @class DataStore
  * @extends SimpleStore
- * @param {Object} [opts] Configuration options. See {@link SimpleStore}.
+ * @param {object} [opts] Configuration options. See {@link SimpleStore}.
  * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
@@ -471,52 +471,51 @@ export default SimpleStore.extend(props)
 /**
  * Create a subclass of this DataStore:
  * @example <caption>DataStore.extend</caption>
- * // Normally you would do: import {DataStore} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {DataStore} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { DataStore } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomDataStoreClass extends DataStore {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
  * }
- * const customDataStore = new CustomDataStoreClass()
- * console.log(customDataStore.foo())
- * console.log(CustomDataStoreClass.beep())
+ * const customDataStore = new CustomDataStoreClass();
+ * console.log(customDataStore.foo());
+ * console.log(CustomDataStoreClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherDataStoreClass = DataStore.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherDataStore = new OtherDataStoreClass()
- * console.log(otherDataStore.foo())
- * console.log(OtherDataStoreClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherDataStore = new OtherDataStoreClass();
+ * console.log(otherDataStore.foo());
+ * console.log(OtherDataStoreClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherDataStoreClass () {
- *   DataStore.call(this)
- *   this.created_at = new Date().getTime()
+ *   DataStore.call(this);
+ *   this.created_at = new Date().getTime();
  * }
  * DataStore.extend({
  *   constructor: AnotherDataStoreClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const anotherDataStore = new AnotherDataStoreClass()
- * console.log(anotherDataStore.created_at)
- * console.log(anotherDataStore.foo())
- * console.log(AnotherDataStoreClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const anotherDataStore = new AnotherDataStoreClass();
+ * console.log(anotherDataStore.created_at);
+ * console.log(anotherDataStore.foo());
+ * console.log(AnotherDataStoreClass.beep());
  *
  * @method DataStore.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this DataStore class.
  * @since 3.0.0
  */

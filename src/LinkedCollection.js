@@ -14,9 +14,9 @@ const DOMAIN = 'LinkedCollection'
  *
  * @class LinkedCollection
  * @extends Collection
- * @param {Array} [records] Initial set of records to insert into the
+ * @param {array} [records] Initial set of records to insert into the
  * collection. See {@link Collection}.
- * @param {Object} [opts] Configuration options. See {@link Collection}.
+ * @param {object} [opts] Configuration options. See {@link Collection}.
  * @returns {Mapper}
  */
 function LinkedCollection (records, opts) {
@@ -127,52 +127,51 @@ export default Collection.extend({
  * Create a subclass of this LinkedCollection:
  *
  * @example <caption>LinkedCollection.extend</caption>
- * // Normally you would do: import {LinkedCollection} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {LinkedCollection} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { LinkedCollection } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomLinkedCollectionClass extends LinkedCollection {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
  * }
- * const customLinkedCollection = new CustomLinkedCollectionClass()
- * console.log(customLinkedCollection.foo())
- * console.log(CustomLinkedCollectionClass.beep())
+ * const customLinkedCollection = new CustomLinkedCollectionClass();
+ * console.log(customLinkedCollection.foo());
+ * console.log(CustomLinkedCollectionClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherLinkedCollectionClass = LinkedCollection.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherLinkedCollection = new OtherLinkedCollectionClass()
- * console.log(otherLinkedCollection.foo())
- * console.log(OtherLinkedCollectionClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherLinkedCollection = new OtherLinkedCollectionClass();
+ * console.log(otherLinkedCollection.foo());
+ * console.log(OtherLinkedCollectionClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherLinkedCollectionClass () {
- *   LinkedCollection.call(this)
- *   this.created_at = new Date().getTime()
+ *   LinkedCollection.call(this);
+ *   this.created_at = new Date().getTime();
  * }
  * LinkedCollection.extend({
  *   constructor: AnotherLinkedCollectionClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const anotherLinkedCollection = new AnotherLinkedCollectionClass()
- * console.log(anotherLinkedCollection.created_at)
- * console.log(anotherLinkedCollection.foo())
- * console.log(AnotherLinkedCollectionClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const anotherLinkedCollection = new AnotherLinkedCollectionClass();
+ * console.log(anotherLinkedCollection.created_at);
+ * console.log(anotherLinkedCollection.foo());
+ * console.log(AnotherLinkedCollectionClass.beep());
  *
  * @method LinkedCollection.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this LinkedCollection class.
  * @since 3.0.0
  */
