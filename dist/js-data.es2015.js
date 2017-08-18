@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.0 - Homepage <http://www.js-data.io/>
+* @version 3.0.1 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -6052,7 +6052,7 @@ var DOMAIN$7 = 'Schema';
  * ```
  * http://json-schema.org/latest/json-schema-core.html#anchor8
  * @name Schema.types
- * @type {Object}
+ * @type {object}
  */
 var types = {
   array: utils.isArray,
@@ -6135,7 +6135,7 @@ var minLengthCommon = function minLengthCommon(keyword, value, schema, opts) {
 /**
  * A map of all object member validation functions for each keyword defined in the JSON Schema.
  * @name Schema.validationKeywords
- * @type {Object}
+ * @type {object}
  */
 var validationKeywords = {
   /**
@@ -6150,8 +6150,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.allOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} schema Schema containing the `allOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `allOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   allOf: function allOf(value, schema, opts) {
@@ -6175,8 +6175,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.anyOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} schema Schema containing the `anyOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `anyOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   anyOf: function anyOf(value, schema, opts) {
@@ -6200,8 +6200,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.dependencies
    * @method
    * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {object} schema TODO
+   * @param {object} opts TODO
    */
   dependencies: function dependencies(value, schema, opts) {
     // TODO
@@ -6216,8 +6216,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.enum
    * @method
    * @param {*} value Value to validate
-   * @param {Object} schema Schema containing the `enum` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `enum` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   enum: function _enum(value, schema, opts) {
@@ -6237,8 +6237,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.items
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the items keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the items keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   items: function items(value, schema, opts) {
@@ -6269,8 +6269,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.maximum
    * @method
    * @param {*} value Number to validate against the keyword.
-   * @param {Object} schema Schema containing the `maximum` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maximum` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maximum: function maximum(value, schema, opts) {
@@ -6294,8 +6294,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.maxItems
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the `maxItems` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maxItems` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxItems: function maxItems(value, schema, opts) {
@@ -6313,8 +6313,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.maxLength
    * @method
    * @param {*} value String to be validated.
-   * @param {Object} schema Schema containing the `maxLength` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maxLength` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxLength: function maxLength(value, schema, opts) {
@@ -6330,8 +6330,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.maxProperties
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `maxProperties` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maxProperties` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxProperties: function maxProperties(value, schema, opts) {
@@ -6353,8 +6353,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.minimum
    * @method
    * @param {*} value Number to validate against the keyword.
-   * @param {Object} schema Schema containing the `minimum` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minimum` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minimum: function minimum(value, schema, opts) {
@@ -6378,8 +6378,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.minItems
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the `minItems` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minItems` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minItems: function minItems(value, schema, opts) {
@@ -6397,8 +6397,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.minLength
    * @method
    * @param {*} value String to be validated.
-   * @param {Object} schema Schema containing the `minLength` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minLength` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minLength: function minLength(value, schema, opts) {
@@ -6414,8 +6414,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.minProperties
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `minProperties` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minProperties` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minProperties: function minProperties(value, schema, opts) {
@@ -6437,8 +6437,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.multipleOf
    * @method
    * @param {*} value Number to be validated.
-   * @param {Object} schema Schema containing the `multipleOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `multipleOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   multipleOf: function multipleOf(value, schema, opts) {
@@ -6459,8 +6459,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.not
    * @method
    * @param {*} value to be checked.
-   * @param {Object} schema Schema containing the not keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the not keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   not: function not(value, schema, opts) {
@@ -6479,8 +6479,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.oneOf
    * @method
    * @param {*} value to be checked.
-   * @param {Object} schema Schema containing the `oneOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `oneOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   oneOf: function oneOf(value, schema, opts) {
@@ -6510,8 +6510,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.pattern
    * @method
    * @param {*} value String to be validated.
-   * @param {Object} schema Schema containing the `pattern` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `pattern` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   pattern: function pattern(value, schema, opts) {
@@ -6532,8 +6532,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.properties
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `properties` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `properties` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   properties: function properties(value, schema, opts) {
@@ -6600,8 +6600,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.required
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `required` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `required` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   required: function required(value, schema, opts) {
@@ -6629,8 +6629,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.type
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} schema Schema containing the `type` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `type` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   type: function type(value, schema, opts) {
@@ -6670,8 +6670,8 @@ var validationKeywords = {
    * @name Schema.validationKeywords.uniqueItems
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the `uniqueItems` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `uniqueItems` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   uniqueItems: function uniqueItems(value, schema, opts) {
@@ -6788,8 +6788,8 @@ var validateAny = function validateAny(value, schema, opts) {
  * @name Schema.validate
  * @method
  * @param {*} value Value to be validated.
- * @param {Object} schema Valid Schema according to the http://json-schema.org/ v4 specification.
- * @param {Object} [opts] Configuration options.
+ * @param {object} schema Valid Schema according to the http://json-schema.org/ v4 specification.
+ * @param {object} [opts] Configuration options.
  * @returns {(array|undefined)} Array of errors or `undefined` if valid.
  */
 var _validate = function _validate(value, schema, opts) {
@@ -6864,147 +6864,10 @@ var silentPath = 'silent';
 var validationFailureMsg = 'validation failed';
 
 /**
- * Assemble a property descriptor which will be added to the prototype of
- * {@link Mapper#recordClass}. This method is called when
- * {@link Mapper#applySchema} is set to `true`.
- *
- * @ignore
- */
-var makeDescriptor = function makeDescriptor(prop, schema, opts) {
-  var descriptor = {
-    // Better to allow configurability, but at the user's own risk
-    configurable: true,
-    // These properties are enumerable by default, but regardless of their
-    // enumerability, they won't be "own" properties of individual records
-    enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
-    // Cache a few strings for optimal performance
-  };var keyPath = 'props.' + prop;
-  var previousPath = 'previous.' + prop;
-  var getter = opts.getter;
-  var setter = opts.setter;
-  var unsetter = opts.unsetter;
-  var track = utils.isBoolean(opts.track) ? opts.track : schema.track;
-
-  descriptor.get = function () {
-    return this._get(keyPath);
-  };
-
-  if (utils.isFunction(schema.get)) {
-    var originalGet = descriptor.get;
-    descriptor.get = function () {
-      return schema.get.call(this, originalGet);
-    };
-  }
-
-  descriptor.set = function (value) {
-    var _this = this;
-
-    // These are accessed a lot
-    var _get = this[getter];
-    var _set = this[setter];
-    var _unset = this[unsetter];
-    // Optionally check that the new value passes validation
-    if (!_get(noValidatePath$2)) {
-      var errors = schema.validate(value, { path: [prop] });
-      if (errors) {
-        // Immediately throw an error, preventing the record from getting into
-        // an invalid state
-        var error = new Error(validationFailureMsg);
-        error.errors = errors;
-        throw error;
-      }
-    }
-    // TODO: Make it so tracking can be turned on for all properties instead of
-    // only per-property
-    if (track && !_get(creatingPath$1)) {
-      // previous is versioned on database commit
-      // props are versioned on set()
-      var previous = _get(previousPath);
-      var current = _get(keyPath);
-      var changing = _get(changingPath);
-      var changed = _get(changedPath);
-
-      if (!changing) {
-        // Track properties that are changing in the current event loop
-        changed = [];
-      }
-
-      // Add changing properties to this array once at most
-      var index = changed.indexOf(prop);
-      if (current !== value && index === -1) {
-        changed.push(prop);
-      }
-      if (previous === value) {
-        if (index >= 0) {
-          changed.splice(index, 1);
-        }
-      }
-      // No changes in current event loop
-      if (!changed.length) {
-        changing = false;
-        _unset(changingPath);
-        _unset(changedPath);
-        // Cancel pending change event
-        if (_get(eventIdPath)) {
-          clearTimeout(_get(eventIdPath));
-          _unset(eventIdPath);
-        }
-      }
-      // Changes detected in current event loop
-      if (!changing && changed.length) {
-        _set(changedPath, changed);
-        _set(changingPath, true);
-        // Saving the timeout id allows us to batch all changes in the same
-        // event loop into a single "change"
-        // TODO: Optimize
-        _set(eventIdPath, setTimeout(function () {
-          // Previous event loop where changes were gathered has ended, so
-          // notify any listeners of those changes and prepare for any new
-          // changes
-          _unset(changedPath);
-          _unset(eventIdPath);
-          _unset(changingPath);
-          // TODO: Optimize
-          if (!_get(silentPath)) {
-            var i = void 0;
-            for (i = 0; i < changed.length; i++) {
-              _this.emit('change:' + changed[i], _this, utils.get(_this, changed[i]));
-            }
-
-            var changes = utils.diffObjects(defineProperty({}, prop, value), defineProperty({}, prop, current));
-
-            if (_get(keepChangeHistoryPath$1)) {
-              var changeRecord = utils.plainCopy(changes);
-              changeRecord.timestamp = new Date().getTime();
-              var changeHistory = _get(changeHistoryPath);
-              !changeHistory && _set(changeHistoryPath, changeHistory = []);
-              changeHistory.push(changeRecord);
-            }
-            _this.emit('change', _this, changes);
-          }
-          _unset(silentPath);
-        }, 0));
-      }
-    }
-    _set(keyPath, value);
-    return value;
-  };
-
-  if (utils.isFunction(schema.set)) {
-    var originalSet = descriptor.set;
-    descriptor.set = function (value) {
-      return schema.set.call(this, value, originalSet);
-    };
-  }
-
-  return descriptor;
-};
-
-/**
  * A map of validation functions grouped by type.
  *
  * @name Schema.typeGroupValidators
- * @type {Object}
+ * @type {object}
  */
 var typeGroupValidators = {
   /**
@@ -7018,7 +6881,7 @@ var typeGroupValidators = {
    * @name Schema.typeGroupValidators.array
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing at least one array keyword.
+   * @param {object} schema Schema containing at least one array keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -7138,10 +7001,10 @@ var typeGroupValidators = {
    *
    * @class Schema
    * @extends Component
-   * @param {Object} definition Schema definition according to json-schema.org
+   * @param {object} definition Schema definition according to json-schema.org
    */
 };function Schema(definition) {
-  var _this2 = this;
+  var _this = this;
 
   definition || (definition = {});
   // TODO: schema validation
@@ -7151,7 +7014,7 @@ var typeGroupValidators = {
     this.properties = this.properties || {};
     utils.forOwn(this.properties, function (_definition, prop) {
       if (!(_definition instanceof Schema)) {
-        _this2.properties[prop] = new Schema(_definition);
+        _this.properties[prop] = new Schema(_definition);
       }
     });
   } else if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
@@ -7161,10 +7024,10 @@ var typeGroupValidators = {
     this.extends = new Schema(this.extends);
   }
   ['allOf', 'anyOf', 'oneOf'].forEach(function (validationKeyword) {
-    if (_this2[validationKeyword]) {
-      _this2[validationKeyword].forEach(function (_definition, i) {
+    if (_this[validationKeyword]) {
+      _this[validationKeyword].forEach(function (_definition, i) {
         if (!(_definition instanceof Schema)) {
-          _this2[validationKeyword][i] = new Schema(_definition);
+          _this[validationKeyword][i] = new Schema(_definition);
         }
       });
     }
@@ -7181,9 +7044,11 @@ var Schema$1 = Component$1.extend({
    *
    * @name Schema#apply
    * @method
-   * @param {Object} target The prototype to which to apply this schema.
+   * @param {object} target The prototype to which to apply this schema.
    */
   apply: function apply(target, opts) {
+    var _this2 = this;
+
     opts || (opts = {});
     opts.getter || (opts.getter = '_get');
     opts.setter || (opts.setter = '_set');
@@ -7191,7 +7056,7 @@ var Schema$1 = Component$1.extend({
     opts.track || (opts.track = this.track);
     var properties = this.properties || {};
     utils.forOwn(properties, function (schema, prop) {
-      Object.defineProperty(target, prop, makeDescriptor(prop, schema, opts));
+      Object.defineProperty(target, prop, _this2.makeDescriptor(prop, schema, opts));
     });
   },
 
@@ -7201,7 +7066,7 @@ var Schema$1 = Component$1.extend({
    *
    * @name Schema#applyDefaults
    * @method
-   * @param {Object} target The target to which to apply values for missing values.
+   * @param {object} target The target to which to apply values for missing values.
    */
   applyDefaults: function applyDefaults(target) {
     if (!target) {
@@ -7233,6 +7098,152 @@ var Schema$1 = Component$1.extend({
 
 
   /**
+   * Assemble a property descriptor for tracking and validating changes to
+   * a property according to the given schema. This method is called when
+   * {@link Mapper#applySchema} is set to `true`.
+   *
+   * @name Schema#makeDescriptor
+   * @method
+   * @param {string} prop The property name.
+   * @param {(Schema|object)} schema The schema for the property.
+   * @param {object} [opts] Optional configuration.
+   * @param {function} [opts.getter] Custom getter function.
+   * @param {function} [opts.setter] Custom setter function.
+   * @param {function} [opts.track] Whether to track changes.
+   * @returns {object} A property descriptor for the given schema.
+   */
+  makeDescriptor: function makeDescriptor(prop, schema, opts) {
+    var descriptor = {
+      // Better to allow configurability, but at the user's own risk
+      configurable: true,
+      // These properties are enumerable by default, but regardless of their
+      // enumerability, they won't be "own" properties of individual records
+      enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
+      // Cache a few strings for optimal performance
+    };var keyPath = 'props.' + prop;
+    var previousPath = 'previous.' + prop;
+    var getter = opts.getter;
+    var setter = opts.setter;
+    var unsetter = opts.unsetter;
+    var track = utils.isBoolean(opts.track) ? opts.track : schema.track;
+
+    descriptor.get = function () {
+      return this._get(keyPath);
+    };
+
+    if (utils.isFunction(schema.get)) {
+      var originalGet = descriptor.get;
+      descriptor.get = function () {
+        return schema.get.call(this, originalGet);
+      };
+    }
+
+    descriptor.set = function (value) {
+      var _this3 = this;
+
+      // These are accessed a lot
+      var _get = this[getter];
+      var _set = this[setter];
+      var _unset = this[unsetter];
+      // Optionally check that the new value passes validation
+      if (!_get(noValidatePath$2)) {
+        var errors = schema.validate(value, { path: [prop] });
+        if (errors) {
+          // Immediately throw an error, preventing the record from getting into
+          // an invalid state
+          var error = new Error(validationFailureMsg);
+          error.errors = errors;
+          throw error;
+        }
+      }
+      // TODO: Make it so tracking can be turned on for all properties instead of
+      // only per-property
+      if (track && !_get(creatingPath$1)) {
+        // previous is versioned on database commit
+        // props are versioned on set()
+        var previous = _get(previousPath);
+        var current = _get(keyPath);
+        var changing = _get(changingPath);
+        var changed = _get(changedPath);
+
+        if (!changing) {
+          // Track properties that are changing in the current event loop
+          changed = [];
+        }
+
+        // Add changing properties to this array once at most
+        var index = changed.indexOf(prop);
+        if (current !== value && index === -1) {
+          changed.push(prop);
+        }
+        if (previous === value) {
+          if (index >= 0) {
+            changed.splice(index, 1);
+          }
+        }
+        // No changes in current event loop
+        if (!changed.length) {
+          changing = false;
+          _unset(changingPath);
+          _unset(changedPath);
+          // Cancel pending change event
+          if (_get(eventIdPath)) {
+            clearTimeout(_get(eventIdPath));
+            _unset(eventIdPath);
+          }
+        }
+        // Changes detected in current event loop
+        if (!changing && changed.length) {
+          _set(changedPath, changed);
+          _set(changingPath, true);
+          // Saving the timeout id allows us to batch all changes in the same
+          // event loop into a single "change"
+          // TODO: Optimize
+          _set(eventIdPath, setTimeout(function () {
+            // Previous event loop where changes were gathered has ended, so
+            // notify any listeners of those changes and prepare for any new
+            // changes
+            _unset(changedPath);
+            _unset(eventIdPath);
+            _unset(changingPath);
+            // TODO: Optimize
+            if (!_get(silentPath)) {
+              var i = void 0;
+              for (i = 0; i < changed.length; i++) {
+                _this3.emit('change:' + changed[i], _this3, utils.get(_this3, changed[i]));
+              }
+
+              var changes = utils.diffObjects(defineProperty({}, prop, value), defineProperty({}, prop, current));
+
+              if (_get(keepChangeHistoryPath$1)) {
+                var changeRecord = utils.plainCopy(changes);
+                changeRecord.timestamp = new Date().getTime();
+                var changeHistory = _get(changeHistoryPath);
+                !changeHistory && _set(changeHistoryPath, changeHistory = []);
+                changeHistory.push(changeRecord);
+              }
+              _this3.emit('change', _this3, changes);
+            }
+            _unset(silentPath);
+          }, 0));
+        }
+      }
+      _set(keyPath, value);
+      return value;
+    };
+
+    if (utils.isFunction(schema.set)) {
+      var originalSet = descriptor.set;
+      descriptor.set = function (value) {
+        return schema.set.call(this, value, originalSet);
+      };
+    }
+
+    return descriptor;
+  },
+
+
+  /**
    * Create a copy of the given value that contains only the properties defined
    * in this schema.
    *
@@ -7242,7 +7253,7 @@ var Schema$1 = Component$1.extend({
    * @returns {*} The copy.
    */
   pick: function pick(value) {
-    var _this3 = this;
+    var _this4 = this;
 
     if (value === undefined) {
       return;
@@ -7269,9 +7280,9 @@ var Schema$1 = Component$1.extend({
       return copy;
     } else if (this.type === 'array') {
       return value.map(function (item) {
-        var _copy = _this3.items ? _this3.items.pick(item) : {};
-        if (_this3.extends) {
-          utils.fillIn(_copy, _this3.extends.pick(item));
+        var _copy = _this4.items ? _this4.items.pick(item) : {};
+        if (_this4.extends) {
+          utils.fillIn(_copy, _this4.extends.pick(item));
         }
         return _copy;
       });
@@ -7286,7 +7297,7 @@ var Schema$1 = Component$1.extend({
    * @name Schema#validate
    * @method
    * @param {*} value Value to validate.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   validate: function validate(value, opts) {
@@ -7348,11 +7359,11 @@ var Schema$1 = Component$1.extend({
  * console.log(AnotherSchemaClass.beep())
  *
  * @method Schema.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Schema class.
  * @since 3.0.0
  */
@@ -14441,10 +14452,10 @@ var DataStore$1 = SimpleStore$1.extend(props$1);
  * @type {Object}
  */
 var version = {
-  full: '3.0.0',
+  full: '3.0.1',
   major: 3,
   minor: 0,
-  patch: 0
+  patch: 1
 };
 
 export { version, Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, SimpleStore$1 as SimpleStore, utils, belongsTo, hasMany, hasOne, belongsToType, hasManyType, hasOneType };
