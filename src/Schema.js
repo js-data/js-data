@@ -12,7 +12,7 @@ const DOMAIN = 'Schema'
  * ```
  * http://json-schema.org/latest/json-schema-core.html#anchor8
  * @name Schema.types
- * @type {Object}
+ * @type {object}
  */
 const types = {
   array: utils.isArray,
@@ -96,7 +96,7 @@ const minLengthCommon = function (keyword, value, schema, opts) {
 /**
  * A map of all object member validation functions for each keyword defined in the JSON Schema.
  * @name Schema.validationKeywords
- * @type {Object}
+ * @type {object}
  */
 const validationKeywords = {
   /**
@@ -111,8 +111,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.allOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} schema Schema containing the `allOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `allOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   allOf (value, schema, opts) {
@@ -135,8 +135,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.anyOf
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} schema Schema containing the `anyOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `anyOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   anyOf (value, schema, opts) {
@@ -159,8 +159,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.dependencies
    * @method
    * @param {*} value TODO
-   * @param {Object} schema TODO
-   * @param {Object} opts TODO
+   * @param {object} schema TODO
+   * @param {object} opts TODO
    */
   dependencies (value, schema, opts) {
     // TODO
@@ -174,8 +174,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.enum
    * @method
    * @param {*} value Value to validate
-   * @param {Object} schema Schema containing the `enum` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `enum` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   enum (value, schema, opts) {
@@ -192,8 +192,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.items
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the items keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the items keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   items (value, schema, opts) {
@@ -223,8 +223,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.maximum
    * @method
    * @param {*} value Number to validate against the keyword.
-   * @param {Object} schema Schema containing the `maximum` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maximum` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maximum (value, schema, opts) {
@@ -249,8 +249,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.maxItems
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the `maxItems` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maxItems` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxItems (value, schema, opts) {
@@ -267,8 +267,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.maxLength
    * @method
    * @param {*} value String to be validated.
-   * @param {Object} schema Schema containing the `maxLength` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maxLength` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxLength (value, schema, opts) {
@@ -283,8 +283,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.maxProperties
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `maxProperties` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `maxProperties` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   maxProperties (value, schema, opts) {
@@ -305,8 +305,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.minimum
    * @method
    * @param {*} value Number to validate against the keyword.
-   * @param {Object} schema Schema containing the `minimum` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minimum` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minimum (value, schema, opts) {
@@ -331,8 +331,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.minItems
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the `minItems` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minItems` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minItems (value, schema, opts) {
@@ -349,8 +349,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.minLength
    * @method
    * @param {*} value String to be validated.
-   * @param {Object} schema Schema containing the `minLength` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minLength` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minLength (value, schema, opts) {
@@ -365,8 +365,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.minProperties
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `minProperties` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `minProperties` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   minProperties (value, schema, opts) {
@@ -387,8 +387,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.multipleOf
    * @method
    * @param {*} value Number to be validated.
-   * @param {Object} schema Schema containing the `multipleOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `multipleOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   multipleOf (value, schema, opts) {
@@ -408,8 +408,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.not
    * @method
    * @param {*} value to be checked.
-   * @param {Object} schema Schema containing the not keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the not keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   not (value, schema, opts) {
@@ -427,8 +427,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.oneOf
    * @method
    * @param {*} value to be checked.
-   * @param {Object} schema Schema containing the `oneOf` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `oneOf` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   oneOf (value, schema, opts) {
@@ -457,8 +457,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.pattern
    * @method
    * @param {*} value String to be validated.
-   * @param {Object} schema Schema containing the `pattern` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `pattern` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   pattern (value, schema, opts) {
@@ -478,8 +478,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.properties
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `properties` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `properties` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   properties (value, schema, opts) {
@@ -545,8 +545,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.required
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing the `required` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `required` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   required (value, schema, opts) {
@@ -573,8 +573,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.type
    * @method
    * @param {*} value Value to be validated.
-   * @param {Object} schema Schema containing the `type` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `type` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   type (value, schema, opts) {
@@ -613,8 +613,8 @@ const validationKeywords = {
    * @name Schema.validationKeywords.uniqueItems
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing the `uniqueItems` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing the `uniqueItems` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   uniqueItems (value, schema, opts) {
@@ -729,8 +729,8 @@ const validateAny = function (value, schema, opts) {
  * @name Schema.validate
  * @method
  * @param {*} value Value to be validated.
- * @param {Object} schema Valid Schema according to the http://json-schema.org/ v4 specification.
- * @param {Object} [opts] Configuration options.
+ * @param {object} schema Valid Schema according to the http://json-schema.org/ v4 specification.
+ * @param {object} [opts] Configuration options.
  * @returns {(array|undefined)} Array of errors or `undefined` if valid.
  */
 const validate = function (value, schema, opts) {
@@ -805,146 +805,10 @@ const silentPath = 'silent'
 const validationFailureMsg = 'validation failed'
 
 /**
- * Assemble a property descriptor which will be added to the prototype of
- * {@link Mapper#recordClass}. This method is called when
- * {@link Mapper#applySchema} is set to `true`.
- *
- * @ignore
- */
-const makeDescriptor = function (prop, schema, opts) {
-  const descriptor = {
-    // Better to allow configurability, but at the user's own risk
-    configurable: true,
-    // These properties are enumerable by default, but regardless of their
-    // enumerability, they won't be "own" properties of individual records
-    enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
-  }
-  // Cache a few strings for optimal performance
-  const keyPath = `props.${prop}`
-  const previousPath = `previous.${prop}`
-  const getter = opts.getter
-  const setter = opts.setter
-  const unsetter = opts.unsetter
-  const track = utils.isBoolean(opts.track) ? opts.track : schema.track
-
-  descriptor.get = function () {
-    return this._get(keyPath)
-  }
-
-  if (utils.isFunction(schema.get)) {
-    const originalGet = descriptor.get
-    descriptor.get = function () {
-      return schema.get.call(this, originalGet)
-    }
-  }
-
-  descriptor.set = function (value) {
-    // These are accessed a lot
-    const _get = this[getter]
-    const _set = this[setter]
-    const _unset = this[unsetter]
-    // Optionally check that the new value passes validation
-    if (!_get(noValidatePath)) {
-      const errors = schema.validate(value, { path: [prop] })
-      if (errors) {
-        // Immediately throw an error, preventing the record from getting into
-        // an invalid state
-        const error = new Error(validationFailureMsg)
-        error.errors = errors
-        throw error
-      }
-    }
-    // TODO: Make it so tracking can be turned on for all properties instead of
-    // only per-property
-    if (track && !_get(creatingPath)) {
-      // previous is versioned on database commit
-      // props are versioned on set()
-      const previous = _get(previousPath)
-      const current = _get(keyPath)
-      let changing = _get(changingPath)
-      let changed = _get(changedPath)
-
-      if (!changing) {
-        // Track properties that are changing in the current event loop
-        changed = []
-      }
-
-      // Add changing properties to this array once at most
-      const index = changed.indexOf(prop)
-      if (current !== value && index === -1) {
-        changed.push(prop)
-      }
-      if (previous === value) {
-        if (index >= 0) {
-          changed.splice(index, 1)
-        }
-      }
-      // No changes in current event loop
-      if (!changed.length) {
-        changing = false
-        _unset(changingPath)
-        _unset(changedPath)
-        // Cancel pending change event
-        if (_get(eventIdPath)) {
-          clearTimeout(_get(eventIdPath))
-          _unset(eventIdPath)
-        }
-      }
-      // Changes detected in current event loop
-      if (!changing && changed.length) {
-        _set(changedPath, changed)
-        _set(changingPath, true)
-        // Saving the timeout id allows us to batch all changes in the same
-        // event loop into a single "change"
-        // TODO: Optimize
-        _set(eventIdPath, setTimeout(() => {
-          // Previous event loop where changes were gathered has ended, so
-          // notify any listeners of those changes and prepare for any new
-          // changes
-          _unset(changedPath)
-          _unset(eventIdPath)
-          _unset(changingPath)
-          // TODO: Optimize
-          if (!_get(silentPath)) {
-            let i
-            for (i = 0; i < changed.length; i++) {
-              this.emit('change:' + changed[i], this, utils.get(this, changed[i]))
-            }
-
-            const changes = utils.diffObjects({ [prop]: value }, { [prop]: current })
-
-            if (_get(keepChangeHistoryPath)) {
-              const changeRecord = utils.plainCopy(changes)
-              changeRecord.timestamp = new Date().getTime()
-              let changeHistory = _get(changeHistoryPath)
-              !changeHistory && _set(changeHistoryPath, (changeHistory = []))
-              changeHistory.push(changeRecord)
-            }
-            this.emit('change', this, changes)
-          }
-          _unset(silentPath)
-        }, 0))
-      }
-    }
-    _set(keyPath, value)
-    return value
-  }
-
-  if (utils.isFunction(schema.set)) {
-    const originalSet = descriptor.set
-    descriptor.set = function (value) {
-      return schema.set.call(this, value, originalSet)
-    }
-  }
-
-  return descriptor
-}
-
-/**
  * A map of validation functions grouped by type.
  *
  * @name Schema.typeGroupValidators
- * @type {Object}
+ * @type {object}
  */
 const typeGroupValidators = {
   /**
@@ -958,7 +822,7 @@ const typeGroupValidators = {
    * @name Schema.typeGroupValidators.array
    * @method
    * @param {*} value Array to be validated.
-   * @param {Object} schema Schema containing at least one array keyword.
+   * @param {object} schema Schema containing at least one array keyword.
    * @param {Object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
@@ -1079,7 +943,7 @@ const typeGroupValidators = {
  *
  * @class Schema
  * @extends Component
- * @param {Object} definition Schema definition according to json-schema.org
+ * @param {object} definition Schema definition according to json-schema.org
  */
 function Schema (definition) {
   definition || (definition = {})
@@ -1120,7 +984,7 @@ export default Component.extend({
    *
    * @name Schema#apply
    * @method
-   * @param {Object} target The prototype to which to apply this schema.
+   * @param {object} target The prototype to which to apply this schema.
    */
   apply (target, opts) {
     opts || (opts = {})
@@ -1129,11 +993,11 @@ export default Component.extend({
     opts.unsetter || (opts.unsetter = '_unset')
     opts.track || (opts.track = this.track)
     const properties = this.properties || {}
-    utils.forOwn(properties, function (schema, prop) {
+    utils.forOwn(properties, (schema, prop) => {
       Object.defineProperty(
         target,
         prop,
-        makeDescriptor(prop, schema, opts)
+        this.makeDescriptor(prop, schema, opts)
       )
     })
   },
@@ -1143,7 +1007,7 @@ export default Component.extend({
    *
    * @name Schema#applyDefaults
    * @method
-   * @param {Object} target The target to which to apply values for missing values.
+   * @param {object} target The target to which to apply values for missing values.
    */
   applyDefaults (target) {
     if (!target) {
@@ -1171,6 +1035,150 @@ export default Component.extend({
         schema.applyDefaults(utils.get(target, prop))
       }
     })
+  },
+
+  /**
+   * Assemble a property descriptor for tracking and validating changes to
+   * a property according to the given schema. This method is called when
+   * {@link Mapper#applySchema} is set to `true`.
+   *
+   * @name Schema#makeDescriptor
+   * @method
+   * @param {string} prop The property name.
+   * @param {(Schema|object)} schema The schema for the property.
+   * @param {object} [opts] Optional configuration.
+   * @param {function} [opts.getter] Custom getter function.
+   * @param {function} [opts.setter] Custom setter function.
+   * @param {function} [opts.track] Whether to track changes.
+   * @returns {object} A property descriptor for the given schema.
+   */
+  makeDescriptor (prop, schema, opts) {
+    const descriptor = {
+      // Better to allow configurability, but at the user's own risk
+      configurable: true,
+      // These properties are enumerable by default, but regardless of their
+      // enumerability, they won't be "own" properties of individual records
+      enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
+    }
+    // Cache a few strings for optimal performance
+    const keyPath = `props.${prop}`
+    const previousPath = `previous.${prop}`
+    const getter = opts.getter
+    const setter = opts.setter
+    const unsetter = opts.unsetter
+    const track = utils.isBoolean(opts.track) ? opts.track : schema.track
+
+    descriptor.get = function () {
+      return this._get(keyPath)
+    }
+
+    if (utils.isFunction(schema.get)) {
+      const originalGet = descriptor.get
+      descriptor.get = function () {
+        return schema.get.call(this, originalGet)
+      }
+    }
+
+    descriptor.set = function (value) {
+      // These are accessed a lot
+      const _get = this[getter]
+      const _set = this[setter]
+      const _unset = this[unsetter]
+      // Optionally check that the new value passes validation
+      if (!_get(noValidatePath)) {
+        const errors = schema.validate(value, { path: [prop] })
+        if (errors) {
+          // Immediately throw an error, preventing the record from getting into
+          // an invalid state
+          const error = new Error(validationFailureMsg)
+          error.errors = errors
+          throw error
+        }
+      }
+      // TODO: Make it so tracking can be turned on for all properties instead of
+      // only per-property
+      if (track && !_get(creatingPath)) {
+        // previous is versioned on database commit
+        // props are versioned on set()
+        const previous = _get(previousPath)
+        const current = _get(keyPath)
+        let changing = _get(changingPath)
+        let changed = _get(changedPath)
+
+        if (!changing) {
+          // Track properties that are changing in the current event loop
+          changed = []
+        }
+
+        // Add changing properties to this array once at most
+        const index = changed.indexOf(prop)
+        if (current !== value && index === -1) {
+          changed.push(prop)
+        }
+        if (previous === value) {
+          if (index >= 0) {
+            changed.splice(index, 1)
+          }
+        }
+        // No changes in current event loop
+        if (!changed.length) {
+          changing = false
+          _unset(changingPath)
+          _unset(changedPath)
+          // Cancel pending change event
+          if (_get(eventIdPath)) {
+            clearTimeout(_get(eventIdPath))
+            _unset(eventIdPath)
+          }
+        }
+        // Changes detected in current event loop
+        if (!changing && changed.length) {
+          _set(changedPath, changed)
+          _set(changingPath, true)
+          // Saving the timeout id allows us to batch all changes in the same
+          // event loop into a single "change"
+          // TODO: Optimize
+          _set(eventIdPath, setTimeout(() => {
+            // Previous event loop where changes were gathered has ended, so
+            // notify any listeners of those changes and prepare for any new
+            // changes
+            _unset(changedPath)
+            _unset(eventIdPath)
+            _unset(changingPath)
+            // TODO: Optimize
+            if (!_get(silentPath)) {
+              let i
+              for (i = 0; i < changed.length; i++) {
+                this.emit('change:' + changed[i], this, utils.get(this, changed[i]))
+              }
+
+              const changes = utils.diffObjects({ [prop]: value }, { [prop]: current })
+
+              if (_get(keepChangeHistoryPath)) {
+                const changeRecord = utils.plainCopy(changes)
+                changeRecord.timestamp = new Date().getTime()
+                let changeHistory = _get(changeHistoryPath)
+                !changeHistory && _set(changeHistoryPath, (changeHistory = []))
+                changeHistory.push(changeRecord)
+              }
+              this.emit('change', this, changes)
+            }
+            _unset(silentPath)
+          }, 0))
+        }
+      }
+      _set(keyPath, value)
+      return value
+    }
+
+    if (utils.isFunction(schema.set)) {
+      const originalSet = descriptor.set
+      descriptor.set = function (value) {
+        return schema.set.call(this, value, originalSet)
+      }
+    }
+
+    return descriptor
   },
 
   /**
@@ -1224,7 +1232,7 @@ export default Component.extend({
    * @name Schema#validate
    * @method
    * @param {*} value Value to validate.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   validate (value, opts) {
@@ -1286,11 +1294,11 @@ export default Component.extend({
  * console.log(AnotherSchemaClass.beep())
  *
  * @method Schema.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Schema class.
  * @since 3.0.0
  */
