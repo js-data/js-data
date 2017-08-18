@@ -358,6 +358,9 @@ export class Schema extends Component {
   properties: any
   constructor(definition: any)
   apply(target: any, opts?: any): void
+  applyDefaults(target: any): void
+  makeDescriptor(prop: string, schema: Schema, opts?: any): any
+  pick(value: any): any
   validate(value: any, opts?: any): SchemaValidationError[]
 }
 export class Index {
