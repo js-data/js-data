@@ -251,6 +251,7 @@ export default Component.extend({
    */
   commit (opts) {
     this._set('changed') // unset
+    this._set('changing', false)
     this._set('history', []) // clear history
     this._set('previous', this.toJSON(opts))
   },
