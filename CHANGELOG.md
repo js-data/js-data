@@ -1,3 +1,8 @@
+##### 2.10.1 - 13 February 2018
+
+###### Bug fixes
+- #492 - Fixed bug where pending queries were used even when pending queries were set to disabled. Thanks @eldridge
+
 ##### 2.10.0 - 22 September 2016
 
 ###### Backwards compatible changes
