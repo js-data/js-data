@@ -29,12 +29,16 @@ const escape = function (pattern) {
  * shouldn't have to create them yourself. Just use {@link Collection#query}.
  *
  * ```javascript
- * import {Query} from 'js-data'
+ * import { Query } from 'js-data';
  * ```
  *
- * @example
- * const store = new JSData.DataStore()
- * store.defineMapper('post')
+ * @example <caption>Query intro</caption>
+ * const JSData = require('js-data');
+ * const { DataStore } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * const store = new DataStore();
+ * store.defineMapper('post');
  * const posts = [
  *   { author: 'John', age: 30, status: 'published', id: 1 },
  *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
@@ -42,9 +46,9 @@ const escape = function (pattern) {
  *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
  *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
  * ]
- * store.add('post', posts)
- * const drafts = store.query('post').filter({ status: 'draft' }).limit(2).run()
- * console.log(drafts)
+ * store.add('post', posts);
+ * const drafts = store.query('post').filter({ status: 'draft' }).limit(2).run();
+ * console.log(drafts);
  *
  * @class Query
  * @extends Component
@@ -161,37 +165,51 @@ export default Component.extend({
    * Find all entities between two boundaries.
    *
    * @example <caption>Get the users ages 18 to 30.</caption>
-   * const store = new JSData.DataStore()
-   * store.defineMapper('user')
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new DataStore();
+   * store.defineMapper('user');
    * const users = [
    *   { name: 'Peter', age: 25, id: 1 },
    *   { name: 'Jim', age: 19, id: 2 },
    *   { name: 'Mike', age: 17, id: 3 },
    *   { name: 'Alan', age: 29, id: 4 },
    *   { name: 'Katie', age: 33, id: 5 }
-   * ]
-   * store.add('post', posts)
-   * const filteredUsers = store.query('user').between(18, 30, { index: 'age' }).run()
-   * console.log(filteredUsers)
+   * ];
+   * store.add('user', users)
+   * const filteredUsers = store
+   *   .query('user')
+   *   .between(18, 30, { index: 'age' })
+   *   .run();
+   * console.log(filteredUsers);
    *
    * @example <caption>Same as above.</caption>
-   * const store = new JSData.DataStore()
-   * store.defineMapper('user')
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new DataStore();
+   * store.defineMapper('user');
    * const users = [
    *   { name: 'Peter', age: 25, id: 1 },
    *   { name: 'Jim', age: 19, id: 2 },
    *   { name: 'Mike', age: 17, id: 3 },
    *   { name: 'Alan', age: 29, id: 4 },
    *   { name: 'Katie', age: 33, id: 5 }
-   * ]
-   * store.add('post', posts)
-   * const filteredUsers = store.query('user').between([18], [30], { index: 'age' }).run()
-   * console.log(filteredUsers)
+   * ];
+   * store.add('user', users)
+   * const filteredUsers = store
+   *   .query('user')
+   *   .between([18], [30], { index: 'age' })
+   *   .run();
+   * console.log(filteredUsers);
    *
    * @method Query#between
-   * @param {Array} leftKeys Keys defining the left boundary.
-   * @param {Array} rightKeys Keys defining the right boundary.
-   * @param {Object} [opts] Configuration options.
+   * @param {array} leftKeys Keys defining the left boundary.
+   * @param {array} rightKeys Keys defining the right boundary.
+   * @param {object} [opts] Configuration options.
    * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @param {boolean} [opts.leftInclusive=true] Whether to include entities
@@ -216,7 +234,7 @@ export default Component.extend({
    * The comparison function used by the {@link Query} class.
    *
    * @method Query#compare
-   * @param {Array} orderBy An orderBy clause used for sorting and sub-sorting.
+   * @param {array} orderBy An orderBy clause used for sorting and sub-sorting.
    * @param {number} index The index of the current orderBy clause being used.
    * @param {*} a The first item in the comparison.
    * @param {*} b The second item in the comparison.
@@ -285,7 +303,11 @@ export default Component.extend({
    * the provided filter function.
    *
    * @example <caption>Get the draft posts by authors younger than 30</caption>
-   * const store = new JSData.DataStore()
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new DataStore();
    * store.defineMapper('post')
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
@@ -298,24 +320,29 @@ export default Component.extend({
    *   { author: 'Jim', age: 27, status: 'draft', id: 8 },
    *   { author: 'Jim', age: 27, status: 'published', id: 9 },
    *   { author: 'Jason', age: 55, status: 'published', id: 10 }
-   * ]
-   * store.add('post', posts)
-   * let results = store.query('post').filter({
-   *   where: {
-   *     status: {
-   *       '==': 'draft'
-   *     },
-   *     age: {
-   *       '<': 30
+   * ];
+   * store.add('post', posts);
+   * const results = store
+   *   .query('post')
+   *   .filter({
+   *     where: {
+   *       status: {
+   *         '==': 'draft'
+   *       },
+   *       age: {
+   *         '<': 30
+   *       }
    *     }
-   *   }
-   * }).run()
-   * console.log(results)
+   *   })
+   *   .run();
+   * console.log(results);
    *
    * @example <caption>Use a custom filter function</caption>
-   * const posts = query.filter(function (post) {
-   *   return post.isReady()
-   * }).run()
+   * const posts = query
+   *   .filter(function (post) {
+   *     return post.isReady();
+   *   })
+   *   .run();
    *
    * @method Query#filter
    * @param {(Object|Function)} [queryOrFn={}] Selection query or filter
@@ -332,24 +359,36 @@ export default Component.extend({
      * [querysyntax]: http://www.js-data.io/v3.0/docs/query-syntax
      *
      * @example <caption>Empty "findAll" query</caption>
-     * const store = new JSData.DataStore()
+     * const JSData = require('js-data');
+     * const { DataStore } = JSData;
+     * console.log('Using JSData v' + JSData.version.full);
+     *
+     * const store = new DataStore();
      * store.defineMapper('post')
      * store.findAll('post').then((posts) => {
-     *   console.log(posts) // [...]
-     * })
+     *   console.log(posts); // [...]
+     * });
      *
      * @example <caption>Empty "filter" query</caption>
-     * const store = new JSData.DataStore()
-     * store.defineMapper('post')
-     * const posts = store.filter('post')
-     * console.log(posts) // [...]
+     * const JSData = require('js-data');
+     * const { DataStore } = JSData;
+     * console.log('Using JSData v' + JSData.version.full);
+     *
+     * const store = new DataStore();
+     * store.defineMapper('post');
+     * const posts = store.filter('post');
+     * console.log(posts); // [...]
      *
      * @example <caption>Complex "filter" query</caption>
-     * const PAGE_SIZE = 2
-     * let currentPage = 3
+     * const JSData = require('js-data');
+     * const { DataStore } = JSData;
+     * console.log('Using JSData v' + JSData.version.full);
      *
-     * const store = new JSData.DataStore()
-     * store.defineMapper('post')
+     * const store = new DataStore();
+     * const PAGE_SIZE = 2;
+     * let currentPage = 3;
+     *
+     * store.defineMapper('post');
      * const posts = [
      *   { author: 'John', age: 30, status: 'published', id: 1 },
      *   { author: 'Sally', age: 31, status: 'published', id: 2 },
@@ -361,11 +400,11 @@ export default Component.extend({
      *   { author: 'Jim', age: 27, status: 'draft', id: 8 },
      *   { author: 'Jim', age: 27, status: 'published', id: 9 },
      *   { author: 'Jason', age: 55, status: 'published', id: 10 }
-     * ]
-     * store.add('post', posts)
+     * ];
+     * store.add('post', posts);
      * // Retrieve a filtered page of blog posts
      * // Would typically replace filter with findAll
-     * store.filter('post', {
+     * const results = store.filter('post', {
      *   where: {
      *     status: {
      *       // WHERE status = 'published'
@@ -388,7 +427,8 @@ export default Component.extend({
      *   limit: PAGE_SIZE,
      *   // SKIP 4
      *   offset: PAGE_SIZE * (currentPage - 1)
-     * })
+     * });
+     * console.log(results);
      *
      * @namespace query
      * @property {number} [limit] See {@link query.limit}.
@@ -410,7 +450,11 @@ export default Component.extend({
        * from the result.
        *
        * @example <caption>Return posts where author is at least 32 years old</caption>
-       * const store = new JSData.DataStore()
+       * const JSData = require('js-data');
+       * const { DataStore } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * const store = new DataStore();
        * store.defineMapper('post')
        * const posts = [
        *   { author: 'John', age: 30, id: 5 },
@@ -418,16 +462,16 @@ export default Component.extend({
        *   { author: 'Mike', age: 32, id: 7 },
        *   { author: 'Adam', age: 33, id: 8 },
        *   { author: 'Adam', age: 33, id: 9 }
-       * ]
-       * store.add('post', posts)
-       * store.filter('post', {
+       * ];
+       * store.add('post', posts);
+       * const results = store.filter('post', {
        *   where: {
        *     age: {
        *       '>=': 30
        *     }
        *   }
-       * })
-       * console.log(results)
+       * });
+       * console.log(results);
        *
        * @name query.where
        * @type {Object}
@@ -473,7 +517,11 @@ export default Component.extend({
        * Determines how records should be ordered in the result.
        *
        * @example <caption>Order posts by `author` then by `id` descending </caption>
-       * const store = new JSData.DataStore()
+       * const JSData = require('js-data');
+       * const { DataStore } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * const store = new DataStore();
        * store.defineMapper('post')
        * const posts = [
        *   { author: 'John', age: 30, id: 5 },
@@ -481,12 +529,12 @@ export default Component.extend({
        *   { author: 'Mike', age: 32, id: 7 },
        *   { author: 'Adam', age: 33, id: 8 },
        *   { author: 'Adam', age: 33, id: 9 }
-       * ]
-       * store.add('post', posts)
-       * store.filter('post', {
+       * ];
+       * store.add('post', posts);
+       * const results = store.filter('post', {
        *     orderBy:[['author','ASC'],['id','DESC']]
-       * })
-       * console.log(results)
+       * });
+       * console.log(results);
        *
        * @name query.orderBy
        * @type {string|Array[]}
@@ -507,18 +555,29 @@ export default Component.extend({
        * Number of records to skip.
        *
        * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
-       * const PAGE_SIZE = 10
-       * let currentPage = 1
-       * PostMapper.findAll({
+       * const JSData = require('js-data');
+       * const { DataStore } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * const store = new DataStore();
+       * store.defineMapper('post');
+       * const PAGE_SIZE = 10;
+       * let currentPage = 1;
+       * store.findAll('post', {
        *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
-       * })
+       * });
        *
        * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
-       * const PAGE_SIZE = 5
-       * let currentPage = 2
-       * const store = new JSData.DataStore()
-       * store.defineMapper('post')
+       * const JSData = require('js-data');
+       * const { DataStore } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * const store = new DataStore();
+       *
+       * const PAGE_SIZE = 5;
+       * let currentPage = 2;
+       * store.defineMapper('post');
        * const posts = [
        *   { author: 'John', age: 30, id: 1 },
        *   { author: 'Sally', age: 31, id: 2 },
@@ -530,13 +589,12 @@ export default Component.extend({
        *   { author: 'Jim', age: 27, id: 8 },
        *   { author: 'Jim', age: 27, id: 9 },
        *   { author: 'Jason', age: 55, id: 10 }
-       * ]
-       * store.add('post', posts)
-       * store.filter('post', {
+       * ];
+       * store.add('post', posts);
+       * const results = store.filter('post', {
        *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
-       * })
-       *
+       * });
        * console.log(results)
        *
        * @name query.offset
@@ -554,17 +612,29 @@ export default Component.extend({
        * Maximum number of records to retrieve.
        *
        * @example <caption>Retrieve the first "page" of blog posts using findAll</caption>
+       * const JSData = require('js-data');
+       * const { DataStore } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * const store = new DataStore();
+       * store.defineMapper('post');
+       *
        * const PAGE_SIZE = 10
        * let currentPage = 1
-       * PostMapper.findAll({
+       * store.findAll('post', {
        *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
-       * })
+       * });
        *
        * @example <caption>Retrieve the last "page" of blog posts using filter</caption>
+       * const JSData = require('js-data');
+       * const { DataStore } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * const store = new DataStore();
+       *
        * const PAGE_SIZE = 5
        * let currentPage = 2
-       * const store = new JSData.DataStore()
        * store.defineMapper('post')
        * const posts = [
        *   { author: 'John', age: 30, id: 1 },
@@ -577,14 +647,14 @@ export default Component.extend({
        *   { author: 'Jim', age: 27, id: 8 },
        *   { author: 'Jim', age: 27, id: 9 },
        *   { author: 'Jason', age: 55, id: 10 }
-       * ]
-       * store.add('post', posts)
-       * store.filter('post', {
+       * ];
+       * store.add('post', posts);
+       * const results = store.filter('post', {
        *   offset: PAGE_SIZE * (currentPage 1)
        *   limit: PAGE_SIZE
-       * })
-       *
+       * });
        * console.log(results)
+       *
        * @name query.limit
        * @type {number}
        * @see http://www.js-data.io/v3.0/docs/query-syntax
@@ -617,26 +687,26 @@ export default Component.extend({
    * Find the entity or entities that match the provided key.
    *
    * @example <caption>Get the entity whose primary key is 25.</caption>
-   * const entities = query.get(25).run()
+   * const entities = query.get(25).run();
    *
    * @example <caption>Same as above.</caption>
-   * const entities = query.get([25]).run()
+   * const entities = query.get([25]).run();
    *
    * @example <caption>Get all users who are active and have the "admin" role.</caption>
    * const activeAdmins = query.get(['active', 'admin'], {
    *   index: 'activityAndRoles'
-   * }).run()
+   * }).run();
    *
    * @example <caption>Get all entities that match a certain weather condition.</caption>
    * const niceDays = query.get(['sunny', 'humid', 'calm'], {
    *   index: 'weatherConditions'
-   * }).run()
+   * }).run();
    *
    * @method Query#get
-   * @param {Array} keyList Key(s) defining the entity to retrieve. If
+   * @param {array} keyList Key(s) defining the entity to retrieve. If
    * `keyList` is not an array (i.e. for a single-value key), it will be
    * wrapped in an array.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @param {string} [opts.string] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @returns {Query} A reference to itself for chaining.
@@ -663,16 +733,16 @@ export default Component.extend({
    * Find the entity or entities that match the provided keyLists.
    *
    * @example <caption>Get the posts where "status" is "draft" or "inReview".</caption>
-   * const posts = query.getAll('draft', 'inReview', { index: 'status' }).run()
+   * const posts = query.getAll('draft', 'inReview', { index: 'status' }).run();
    *
    * @example <caption>Same as above.</caption>
-   * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run()
+   * const posts = query.getAll(['draft'], ['inReview'], { index: 'status' }).run();
    *
    * @method Query#getAll
    * @param {...Array} [keyList] Provide one or more keyLists, and all
    * entities matching each keyList will be retrieved. If no keyLists are
    * provided, all entities will be returned.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @param {string} [opts.index] Name of the secondary index to use in the
    * query. If no index is specified, the main index is used.
    * @returns {Query} A reference to itself for chaining.
@@ -731,18 +801,18 @@ export default Component.extend({
    * Limit the result.
    *
    * @example <caption>Get only the first 2 posts.</caption>
-   * const store = new JSData.DataStore()
-   * store.defineMapper('post')
+   * const store = new JSData.DataStore();
+   * store.defineMapper('post');
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
    *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
    *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
    *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
    *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
-   * ]
-   * store.add('post', posts)
-   * const results = store.query('post').limit(2).run()
-   * console.log(results)
+   * ];
+   * store.add('post', posts);
+   * const results = store.query('post').limit(2).run();
+   * console.log(results);
    *
    * @method Query#limit
    * @param {number} num The maximum number of entities to keep in the result.
@@ -762,21 +832,27 @@ export default Component.extend({
    * Apply a mapping function to the result data.
    *
    * @example
-   * // Return the age of all users
-   * const store = new JSData.DataStore()
-   * store.defineMapper('user')
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new DataStore();
+   * store.defineMapper('user');
    * const users = [
    *   { name: 'Peter', age: 25, id: 1 },
    *   { name: 'Jim', age: 19, id: 2 },
    *   { name: 'Mike', age: 17, id: 3 },
    *   { name: 'Alan', age: 29, id: 4 },
    *   { name: 'Katie', age: 33, id: 5 }
-   * ]
-   * store.add('post', posts)
-   * const ages = store.query('user').map((user) => {
-   *   return user.age
-   * }).run()
-   * console.log(ages)
+   * ];
+   * store.add('user', users);
+   * const ages = store
+   *   .query('user')
+   *   .map(function (user) {
+   *     return user.age;
+   *   })
+   *   .run();
+   * console.log(ages);
    *
    * @method Query#map
    * @param {Function} mapFn Mapping function.
@@ -794,7 +870,7 @@ export default Component.extend({
    * collection's main index.
    *
    * @example
-   * const stringAges = UserCollection.query().mapCall('toString').run()
+   * const stringAges = UserCollection.query().mapCall('toString').run();
    *
    * @method Query#mapCall
    * @param {string} funcName Name of function to call
@@ -826,18 +902,22 @@ export default Component.extend({
    * Skip a number of results.
    *
    * @example <caption>Get all but the first 2 posts.</caption>
-   * const store = new JSData.DataStore()
-   * store.defineMapper('post')
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new DataStore();
+   * store.defineMapper('post');
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
    *   { author: 'Sally', age: 31, status: 'draft', id: 2 },
    *   { author: 'Mike', age: 32, status: 'draft', id: 3 },
    *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
    *   { author: 'Adam', age: 33, status: 'draft', id: 5 }
-   * ]
-   * store.add('post', posts)
-   * const results = store.query('post').skip(2).run()
-   * console.log(results)
+   * ];
+   * store.add('post', posts);
+   * const results = store.query('post').skip(2).run();
+   * console.log(results);
    *
    * @method Query#skip
    * @param {number} num The number of entities to skip.
@@ -862,29 +942,33 @@ export default Component.extend({
    * implemented by adapters (for the most part).
    *
    * @example <caption>Variant 1</caption>
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new JSData.DataStore()
-   * store.defineMapper('post')
+   * const store = new DataStore();
+   * store.defineMapper('post');
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
    *   { author: 'Sally', age: 31, status: 'published', id: 2 },
    *   { author: 'Mike', age: 32, status: 'published', id: 3 },
    *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
    *   { author: 'Adam', age: 33, status: 'published', id: 5 }
-   * ]
-   * store.add('post', posts)
-   *
+   * ];
+   * store.add('post', posts);
    * const publishedPosts = store.filter('post', {
    *   status: 'published',
    *   limit: 2
-   * })
-   *
-   * console.log(publishedPosts)
+   * });
+   * console.log(publishedPosts);
    *
    *
    * @example <caption>Variant 2</caption>
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new JSData.DataStore()
+   * const store = new DataStore();
    * store.defineMapper('post')
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
@@ -892,9 +976,8 @@ export default Component.extend({
    *   { author: 'Mike', age: 32, status: 'published', id: 3 },
    *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
    *   { author: 'Adam', age: 33, status: 'published', id: 5 }
-   * ]
-   * store.add('post', posts)
-   *
+   * ];
+   * store.add('post', posts);
    * const publishedPosts = store.filter('post', {
    *   where: {
    *     status: {
@@ -902,64 +985,74 @@ export default Component.extend({
    *     }
    *   },
    *   limit: 2
-   * })
-   *
-   * console.log(publishedPosts)
+   * });
+   * console.log(publishedPosts);
    *
    * @example <caption>Variant 3</caption>
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new JSData.DataStore()
-   * store.defineMapper('post')
+   * const store = new DataStore();
+   * store.defineMapper('post');
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
    *   { author: 'Sally', age: 31, status: 'published', id: 2 },
    *   { author: 'Mike', age: 32, status: 'published', id: 3 },
    *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
    *   { author: 'Adam', age: 33, status: 'published', id: 5 }
-   * ]
-   * store.add('post', posts)
-   *
-   * const publishedPosts = store.query('post').filter({
-   *   status: 'published'
-   * }).limit(2).run()
-   *
-   * console.log(publishedPosts)
+   * ];
+   * store.add('post', posts);
+   * const publishedPosts = store
+   *   .query('post')
+   *   .filter({ status: 'published' })
+   *   .limit(2)
+   *   .run();
+   * console.log(publishedPosts);
    *
    * @example <caption>Variant 4</caption>
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new JSData.DataStore()
-   * store.defineMapper('post')
+   * const store = new DataStore();
+   * store.defineMapper('post');
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
    *   { author: 'Sally', age: 31, status: 'published', id: 2 },
    *   { author: 'Mike', age: 32, status: 'published', id: 3 },
    *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
    *   { author: 'Adam', age: 33, status: 'published', id: 5 }
-   * ]
-   * store.add('post', posts)
-   *
-   * const publishedPosts = store.query('post').filter({
-   *   where: {
-   *     status: {
-   *       '==': 'published'
+   * ];
+   * store.add('post', posts);
+   * const publishedPosts = store
+   *   .query('post')
+   *   .filter({
+   *     where: {
+   *       status: {
+   *         '==': 'published'
+   *       }
    *     }
-   *   }
-   * }).limit(2).run()
-   *
-   * console.log(publishedPosts)
+   *   })
+   *   .limit(2)
+   *   .run();
+   * console.log(publishedPosts);
    *
    * @example <caption>Multiple operators</caption>
+   * const JSData = require('js-data');
+   * const { DataStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const store = new JSData.DataStore()
-   * store.defineMapper('post')
+   * const store = new DataStore();
+   * store.defineMapper('post');
    * const posts = [
    *   { author: 'John', age: 30, status: 'published', id: 1 },
    *   { author: 'Sally', age: 31, status: 'published', id: 2 },
    *   { author: 'Mike', age: 32, status: 'published', id: 3 },
    *   { author: 'Adam', age: 33, status: 'deleted', id: 4 },
    *   { author: 'Adam', age: 33, status: 'published', id: 5 }
-   * ]
-   * store.add('post', posts)
+   * ];
+   * store.add('post', posts);
    *
    * const myPublishedPosts = store.filter('post', {
    *   where: {
@@ -970,9 +1063,9 @@ export default Component.extend({
    *       '==': currentUser.id
    *     }
    *   }
-   * })
+   * });
    *
-   * console.log(myPublishedPosts)
+   * console.log(myPublishedPosts);
    *
    * @name Query.ops
    * @property {Function} == Equality operator.
@@ -1048,52 +1141,51 @@ export default Component.extend({
 /**
  * Create a subclass of this Query:
  * @example <caption>Query.extend</caption>
- * // Normally you would do: import {Query} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Query} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { Query } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomQueryClass extends Query {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
  * }
- * const customQuery = new CustomQueryClass()
- * console.log(customQuery.foo())
- * console.log(CustomQueryClass.beep())
+ * const customQuery = new CustomQueryClass();
+ * console.log(customQuery.foo());
+ * console.log(CustomQueryClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherQueryClass = Query.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherQuery = new OtherQueryClass()
- * console.log(otherQuery.foo())
- * console.log(OtherQueryClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherQuery = new OtherQueryClass();
+ * console.log(otherQuery.foo());
+ * console.log(OtherQueryClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherQueryClass (collection) {
- *   Query.call(this, collection)
- *   this.created_at = new Date().getTime()
+ *   Query.call(this, collection);
+ *   this.created_at = new Date().getTime();
  * }
  * Query.extend({
  *   constructor: AnotherQueryClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const anotherQuery = new AnotherQueryClass()
- * console.log(anotherQuery.created_at)
- * console.log(anotherQuery.foo())
- * console.log(AnotherQueryClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const anotherQuery = new AnotherQueryClass();
+ * console.log(anotherQuery.created_at);
+ * console.log(anotherQuery.foo());
+ * console.log(AnotherQueryClass.beep());
  *
  * @method Query.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Query class.
  * @since 3.0.0
  */

@@ -16,7 +16,7 @@ import Settable from './Settable'
  * ```
  *
  * @class Component
- * @param {Object} [opts] Configuration options.
+ * @param {object} [opts] Configuration options.
  * @param {boolean} [opts.debug=false] See {@link Component#debug}.
  * @returns {Component} A new {@link Component} instance.
  * @since 3.0.0
@@ -31,16 +31,15 @@ function Component (opts) {
    * functionality.
    *
    * @example <caption>Component#debug</caption>
-   * // Normally you would do: import {Component} from 'js-data'
-   * const JSData = require('js-data@3.0.0-rc.4')
-   * const {Component} = JSData
-   * console.log('Using JSData v' + JSData.version.full)
+   * const JSData = require('js-data');
+   * const { Component } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
    *
-   * const component = new Component()
-   * component.log('debug', 'some message') // nothing gets logged
+   * const component = new Component();
+   * component.log('debug', 'some message'); // nothing gets logged
    * // Display debug logs:
-   * component.debug = true
-   * component.log('debug', 'other message') // this DOES get logged
+   * component.debug = true;
+   * component.log('debug', 'other message'); // this DOES get logged
    *
    * @default false
    * @name Component#debug
@@ -70,52 +69,51 @@ export default Settable.extend({
  * Create a subclass of this Component:
  *
  * @example <caption>Component.extend</caption>
- * // Normally you would do: import {Component} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Component} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { Component } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomComponentClass extends Component {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
  * }
- * const customComponent = new CustomComponentClass()
- * console.log(customComponent.foo())
- * console.log(CustomComponentClass.beep())
+ * const customComponent = new CustomComponentClass();
+ * console.log(customComponent.foo());
+ * console.log(CustomComponentClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherComponentClass = Component.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherComponent = new OtherComponentClass()
- * console.log(otherComponent.foo())
- * console.log(OtherComponentClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherComponent = new OtherComponentClass();
+ * console.log(otherComponent.foo());
+ * console.log(OtherComponentClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherComponentClass () {
- *   Component.call(this)
- *   this.created_at = new Date().getTime()
+ *   Component.call(this);
+ *   this.created_at = new Date().getTime();
  * }
  * Component.extend({
  *   constructor: AnotherComponentClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
+ *   beep () { return 'boop'; }
  * })
- * const anotherComponent = new AnotherComponentClass()
- * console.log(anotherComponent.created_at)
- * console.log(anotherComponent.foo())
- * console.log(AnotherComponentClass.beep())
+ * const anotherComponent = new AnotherComponentClass();
+ * console.log(anotherComponent.created_at);
+ * console.log(anotherComponent.foo());
+ * console.log(AnotherComponentClass.beep());
  *
  * @method Component.extend
- * @param {Object} [props={}] Properties to add to the prototype of the
+ * @param {object} [props={}] Properties to add to the prototype of the
  * subclass.
- * @param {Object} [props.constructor] Provide a custom constructor function
+ * @param {object} [props.constructor] Provide a custom constructor function
  * to be used as the subclass itself.
- * @param {Object} [classProps={}] Static properties to add to the subclass.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
  * @returns {Constructor} Subclass of this Component class.
  * @since 3.0.0
  */
@@ -150,26 +148,26 @@ utils.logify(Component.prototype)
  * @example
  * // Listen for all "afterCreate" events in a DataStore
  * store.on('afterCreate', (mapperName, props, opts, result) => {
- *   console.log(mapperName) // "post"
- *   console.log(props.id) // undefined
- *   console.log(result.id) // 1234
- * })
+ *   console.log(mapperName); // "post"
+ *   console.log(props.id); // undefined
+ *   console.log(result.id); // 1234
+ * });
  * store.create('post', { title: 'Modeling your data' }).then((post) => {
- *   console.log(post.id) // 1234
- * })
+ *   console.log(post.id); // 1234
+ * });
  *
  * @example
  * // Listen for the "add" event on a collection
  * collection.on('add', (records) => {
- *   console.log(records) // [...]
- * })
+ *   console.log(records); // [...]
+ * });
  *
  * @example
  * // Listen for "change" events on a record
  * post.on('change', (record, changes) => {
- *   console.log(changes) // { changed: { title: 'Modeling your data' } }
- * })
- * post.title = 'Modeling your data'
+ *   console.log(changes); // { changed: { title: 'Modeling your data' } }
+ * });
+ * post.title = 'Modeling your data';
  *
  * @method Component#on
  * @param {string} event Name of event to subsribe to.
@@ -184,15 +182,15 @@ utils.logify(Component.prototype)
  *
  * @example
  * // Remove a particular listener for a particular event
- * collection.off('add', handler)
+ * collection.off('add', handler);
  *
  * @example
  * // Remove all listeners for a particular event
- * record.off('change')
+ * record.off('change');
  *
  * @example
  * // Remove all listeners to all events
- * store.off()
+ * store.off();
  *
  * @method Component#off
  * @param {string} [event] Name of event to unsubsribe to.
@@ -203,21 +201,21 @@ utils.logify(Component.prototype)
  * Trigger an event on this Component.
  *
  * @example <caption>Component#emit</caption>
- * // import {Collection, DataStore} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Collection, DataStore} = JSData
+ * // import { Collection, DataStore } from 'js-data';
+ * const JSData = require('js-data');
+ * const { Collection, DataStore } = JSData;
  *
- * const collection = new Collection()
+ * const collection = new Collection();
  * collection.on('foo', function (msg) {
- *   console.log(msg)
- * })
- * collection.emit('foo', 'bar')
+ *   console.log(msg);
+ * });
+ * collection.emit('foo', 'bar');
  *
- * const store = new DataStore()
+ * const store = new DataStore();
  * store.on('beep', function (msg) {
- *   console.log(msg)
- * })
- * store.emit('beep', 'boop')
+ *   console.log(msg);
+ * });
+ * store.emit('beep', 'boop');
  *
  * @method Component#emit
  * @param {string} event Name of event to emit.

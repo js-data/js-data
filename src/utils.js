@@ -2,8 +2,8 @@
  * Utility methods used by JSData.
  *
  * @example
- * import {utils} from 'js-data'
- * console.log(utils.isString('foo')) // true
+ * import { utils } from 'js-data';
+ * console.log(utils.isString('foo')); // true
  *
  * @namespace utils
  * @type {Object}
@@ -70,9 +70,9 @@ const utils = {
    * `window.Promise` or `global.Promise`.
    *
    * @example <caption>Make JSData use a different `Promise` constructor</caption>
-   * import Promise from 'bluebird'
-   * import {utils} from 'js-data'
-   * utils.Promise = Promise
+   * import Promise from 'bluebird';
+   * import { utils } from 'js-data';
+   * utils.Promise = Promise;
    *
    * @name utils.Promise
    * @since 3.0.0
@@ -89,8 +89,8 @@ const utils = {
    * - does not start with "_"
    *
    * @method utils._
-   * @param {Object} dest Destination object.
-   * @param {Object} src Source object.
+   * @param {object} dest Destination object.
+   * @param {object} src Source object.
    * @private
    * @since 3.0.0
    */
@@ -106,7 +106,7 @@ const utils = {
    * Recursively iterates over relations found in `opts.with`.
    *
    * @method utils._forRelation
-   * @param {Object} opts Configuration options.
+   * @param {object} opts Configuration options.
    * @param {Relation} def Relation definition.
    * @param {Function} fn Callback function.
    * @param {*} [thisArg] Execution context for the callback function.
@@ -177,19 +177,19 @@ const utils = {
    * provided `props`.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    * function Cat () {}
    * utils.addHiddenPropsToTarget(Cat.prototype, {
    *   say () {
-   *     console.log('meow')
+   *     console.log('meow');
    *   }
-   * })
-   * const cat = new Cat()
-   * cat.say() // "meow"
+   * });
+   * const cat = new Cat();
+   * cat.say(); // "meow"
    *
    * @method utils.addHiddenPropsToTarget
-   * @param {Object} target That to which `props` should be added.
-   * @param {Object} props Properties to be added to `target`.
+   * @param {object} target That to which `props` should be added.
+   * @param {object} props Properties to be added to `target`.
    * @since 3.0.0
    */
   addHiddenPropsToTarget (target, props) {
@@ -207,17 +207,17 @@ const utils = {
    * Return whether the two objects are deeply different.
    *
    * @example
-   * import {utils} from 'js-data'
-   * utils.areDifferent({}, {}) // false
-   * utils.areDifferent({ a: 1 }, { a: 1 }) // false
-   * utils.areDifferent({ foo: 'bar' }, {}) // true
+   * import { utils } from 'js-data';
+   * utils.areDifferent({}, {}); // false
+   * utils.areDifferent({ a: 1 }, { a: 1 }); // false
+   * utils.areDifferent({ foo: 'bar' }, {}); // true
    *
    * @method utils.areDifferent
-   * @param {Object} a Base object.
-   * @param {Object} b Comparison object.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} a Base object.
+   * @param {object} b Comparison object.
+   * @param {object} [opts] Configuration options.
    * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
-   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @param {array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
    * @returns {boolean} Whether the two objects are deeply different.
    * @see utils.diffObjects
    * @since 3.0.0
@@ -236,12 +236,12 @@ const utils = {
    * to just being called like a normal function.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    * function Cat () {
-   *   utils.classCallCheck(this, Cat)
+   *   utils.classCallCheck(this, Cat);
    * }
-   * const cat = new Cat() // this is ok
-   * Cat() // this throws an error
+   * const cat = new Cat(); // this is ok
+   * Cat(); // this throws an error
    *
    * @method utils.classCallCheck
    * @param {*} instance Instance that is being constructed.
@@ -261,11 +261,11 @@ const utils = {
    * Deep copy a value.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { foo: { bar: 'baz' } }
-   * const b = utils.copy(a)
-   * a === b // false
-   * utils.areDifferent(a, b) // false
+   * import { utils } from 'js-data';
+   * const a = { foo: { bar: 'baz' } };
+   * const b = utils.copy(a);
+   * a === b; // false
+   * utils.areDifferent(a, b); // false
    *
    * @param {*} from Value to deep copy.
    * @param {*} [to] Destination object for the copy operation.
@@ -358,15 +358,15 @@ const utils = {
    * `dest`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { foo: { bar: 'baz' }, beep: 'boop' }
-   * const b = { beep: 'bip' }
-   * utils.deepFillIn(b, a)
-   * console.log(b) // {"foo":{"bar":"baz"},"beep":"bip"}
+   * import { utils } from 'js-data';
+   * const a = { foo: { bar: 'baz' }, beep: 'boop' };
+   * const b = { beep: 'bip' };
+   * utils.deepFillIn(b, a);
+   * console.log(b); // {"foo":{"bar":"baz"},"beep":"bip"}
    *
    * @method utils.deepFillIn
-   * @param {Object} dest The destination object.
-   * @param {Object} source The source object.
+   * @param {object} dest The destination object.
+   * @param {object} source The source object.
    * @see utils.fillIn
    * @see utils.deepMixIn
    * @since 3.0.0
@@ -389,15 +389,15 @@ const utils = {
    * Recursively shallow copy enumerable properties from `source` to `dest`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { foo: { bar: 'baz' }, beep: 'boop' }
-   * const b = { beep: 'bip' }
-   * utils.deepFillIn(b, a)
-   * console.log(b) // {"foo":{"bar":"baz"},"beep":"boop"}
+   * import { utils } from 'js-data';
+   * const a = { foo: { bar: 'baz' }, beep: 'boop' };
+   * const b = { beep: 'bip' };
+   * utils.deepFillIn(b, a);
+   * console.log(b); // {"foo":{"bar":"baz"},"beep":"boop"}
    *
    * @method utils.deepMixIn
-   * @param {Object} dest The destination object.
-   * @param {Object} source The source object.
+   * @param {object} dest The destination object.
+   * @param {object} source The source object.
    * @see utils.fillIn
    * @see utils.deepFillIn
    * @since 3.0.0
@@ -421,20 +421,20 @@ const utils = {
    * Return a diff of the base object to the comparison object.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const oldObject = { foo: 'bar', a: 1234 }
-   * const newObject = { beep: 'boop', a: 5678 }
-   * const diff = utils.diffObjects(oldObject, newObject)
-   * console.log(diff.added) // {"beep":"boop"}
-   * console.log(diff.changed) // {"a":5678}
-   * console.log(diff.removed) // {"foo":undefined}
+   * import { utils } from 'js-data';
+   * const oldObject = { foo: 'bar', a: 1234 };
+   * const newObject = { beep: 'boop', a: 5678 };
+   * const diff = utils.diffObjects(oldObject, newObject);
+   * console.log(diff.added); // {"beep":"boop"}
+   * console.log(diff.changed); // {"a":5678}
+   * console.log(diff.removed); // {"foo":undefined}
    *
    * @method utils.diffObjects
-   * @param {Object} newObject Comparison object.
-   * @param {Object} oldObject Base object.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} newObject Comparison object.
+   * @param {object} oldObject Base object.
+   * @param {object} [opts] Configuration options.
    * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
-   * @param {Array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @param {array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
    * @returns {Object} The diff from the base object to the comparison object.
    * @see utils.areDifferent
    * @since 3.0.0
@@ -489,10 +489,10 @@ const utils = {
    * Return whether the two values are equal according to the `==` operator.
    *
    * @example
-   * import {utils} from 'js-data'
-   * console.log(utils.equal(1,1)) // true
-   * console.log(utils.equal(1,'1')) // true
-   * console.log(utils.equal(93, 66)) // false
+   * import { utils } from 'js-data';
+   * console.log(utils.equal(1,1)); // true
+   * console.log(utils.equal(1,'1')); // true
+   * console.log(utils.equal(93, 66)); // false
    *
    * @method utils.equal
    * @param {*} a First value in the comparison.
@@ -509,10 +509,10 @@ const utils = {
    * metadata. Used throughout the various js-data components.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const errorFactory = utils.err('domain', 'target')
-   * const error400 = errorFactory(400, 'expected type', 'actual type')
-   * console.log(error400) // [Error: [domain:target] expected: expected type, found: string
+   * import { utils } from 'js-data';
+   * const errorFactory = utils.err('domain', 'target');
+   * const error400 = errorFactory(400, 'expected type', 'actual type');
+   * console.log(error400); // [Error: [domain:target] expected: expected type, found: string
 http://www.js-data.io/v3.0/docs/errors#400]
    * @method utils.err
    * @param {string} domain Namespace.
@@ -534,14 +534,14 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Add eventing capabilities into the target object.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const user = { name: 'John' }
-   * utils.eventify(user)
-   * user.on('foo', () => console.log(arguments))
-   * user.emit('foo', 1, 'bar') // should log to console values (1, "bar")
+   * import { utils } from 'js-data';
+   * const user = { name: 'John' };
+   * utils.eventify(user);
+   * user.on('foo', () => console.log(arguments));
+   * user.emit('foo', 1, 'bar'); // should log to console values (1, "bar")
    *
    * @method utils.eventify
-   * @param {Object} target Target object.
+   * @param {object} target Target object.
    * @param {Function} [getter] Custom getter for retrieving the object's event
    * listeners.
    * @param {Function} [setter] Custom setter for setting the object's event
@@ -611,24 +611,24 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * to produce a subclass based on `props` and `classProps`.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    * function Animal () {}
-   * Animal.extend = utils.extend
+   * Animal.extend = utils.extend;
    * const Cat = Animal.extend({
    *   say () {
-   *     console.log('meow')
+   *     console.log('meow');
    *   }
-   * })
-   * const cat = new Cat()
-   * cat instanceof Animal // true
-   * cat instanceof Cat // true
-   * cat.say() // "meow"
+   * });
+   * const cat = new Cat();
+   * cat instanceof Animal; // true
+   * cat instanceof Cat; // true
+   * cat.say(); // "meow"
    *
    * @method utils.extend
-   * @param {Object} props Instance properties for the subclass.
-   * @param {Object} [props.constructor] Provide a custom constructor function
+   * @param {object} props Instance properties for the subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
    * to use as the subclass.
-   * @param {Object} props Static properties for the subclass.
+   * @param {object} props Static properties for the subclass.
    * @returns {Constructor} A new subclass.
    * @since 3.0.0
    */
@@ -688,15 +688,15 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * `src` but are missing from `dest.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { foo: 'bar', beep: 'boop' }
-   * const b = { beep: 'bip' }
-   * utils.fillIn(b, a)
-   * console.log(b) // {"foo":"bar","beep":"bip"}
+   * import { utils } from 'js-data';
+   * const a = { foo: 'bar', beep: 'boop' };
+   * const b = { beep: 'bip' };
+   * utils.fillIn(b, a);
+   * console.log(b); // {"foo":"bar","beep":"bip"}
    *
    * @method utils.fillIn
-   * @param {Object} dest The destination object.
-   * @param {Object} source The source object.
+   * @param {object} dest The destination object.
+   * @param {object} source The source object.
    * @see utils.deepFillIn
    * @see utils.deepMixIn
    * @since 3.0.0
@@ -713,20 +713,20 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Find the last index of an item in an array according to the given checker function.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
-   * const john = { name: 'John', age: 20 }
-   * const sara = { name: 'Sara', age: 25 }
-   * const dan = { name: 'Dan', age: 20 }
-   * const users = [john, sara, dan]
+   * const john = { name: 'John', age: 20 };
+   * const sara = { name: 'Sara', age: 25 };
+   * const dan = { name: 'Dan', age: 20 };
+   * const users = [john, sara, dan];
    *
-   * console.log(utils.findIndex(users, (user) => user.age === 25)) // 1
-   * console.log(utils.findIndex(users, (user) => user.age > 19)) // 2
-   * console.log(utils.findIndex(users, (user) => user.name === 'John')) // 0
-   * console.log(utils.findIndex(users, (user) => user.name === 'Jimmy')) // -1
+   * console.log(utils.findIndex(users, (user) => user.age === 25)); // 1
+   * console.log(utils.findIndex(users, (user) => user.age > 19)); // 2
+   * console.log(utils.findIndex(users, (user) => user.name === 'John')); // 0
+   * console.log(utils.findIndex(users, (user) => user.name === 'Jimmy')); // -1
    *
    * @method utils.findIndex
-   * @param {Array} array The array to search.
+   * @param {array} array The array to search.
    * @param {Function} fn Checker function.
    * @returns {number} Index if found or -1 if not found.
    * @since 3.0.0
@@ -751,7 +751,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    *
    * @method utils.forEachRelation
    * @param {Mapper} mapper Mapper.
-   * @param {Object} opts Configuration options.
+   * @param {object} opts Configuration options.
    * @param {Function} fn Callback function.
    * @param {*} thisArg Execution context for the callback function.
    * @since 3.0.0
@@ -770,18 +770,18 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Iterate over an object's own enumerable properties.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { b: 1, c: 4 }
-   * let sum = 0
+   * import { utils } from 'js-data';
+   * const a = { b: 1, c: 4 };
+   * let sum = 0;
    * utils.forOwn(a, function (value, key) {
-   *   sum += value
-   * })
-   * console.log(sum) // 5
+   *   sum += value;
+   * });
+   * console.log(sum); // 5
    *
    * @method utils.forOwn
-   * @param {Object} object The object whose properties are to be enumerated.
+   * @param {object} object The object whose properties are to be enumerated.
    * @param {Function} fn Iteration function.
-   * @param {Object} [thisArg] Content to which to bind `fn`.
+   * @param {object} [thisArg] Content to which to bind `fn`.
    * @since 3.0.0
    */
   forOwn (obj, fn, thisArg) {
@@ -799,10 +799,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Proxy for `JSON.parse`.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
-   * const a = utils.fromJson('{"name" : "John"}')
-   * console.log(a) // { name: 'John' }
+   * const a = utils.fromJson('{"name" : "John"}');
+   * console.log(a); // { name: 'John' }
    *
    * @method utils.fromJson
    * @param {string} json JSON to parse.
@@ -819,13 +819,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * nested properties.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { foo: { bar: 'baz' }, beep: 'boop' }
-   * console.log(utils.get(a, 'beep')) // "boop"
-   * console.log(utils.get(a, 'foo.bar')) // "baz"
+   * import { utils } from 'js-data';
+   * const a = { foo: { bar: 'baz' }, beep: 'boop' };
+   * console.log(utils.get(a, 'beep')); // "boop"
+   * console.log(utils.get(a, 'foo.bar')); // "baz"
    *
    * @method utils.get
-   * @param {Object} object Object from which to retrieve a property's value.
+   * @param {object} object Object from which to retrieve a property's value.
    * @param {string} prop Property to retrieve.
    * @returns {*} Value of the specified property.
    * @see utils.set
@@ -853,21 +853,21 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * provided, then finds the parent class of the instance's constructor.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    * // using ES2015 classes
    * class Foo {}
    * class Bar extends Foo {}
-   * const barInstance = new Bar()
-   * let baseType = utils.getSuper(barInstance)
-   * console.log(Foo === baseType) // true
+   * const barInstance = new Bar();
+   * let baseType = utils.getSuper(barInstance);
+   * console.log(Foo === baseType); // true
    *
    * // using Function constructor with utils.extend
    * function Foo () {}
-   * Foo.extend = utils.extend
-   * const Bar = Foo.extend()
-   * const barInstance = new Bar()
-   * let baseType = utils.getSuper(barInstance)
-   * console.log(Foo === baseType) // true
+   * Foo.extend = utils.extend;
+   * const Bar = Foo.extend();
+   * const barInstance = new Bar();
+   * let baseType = utils.getSuper(barInstance);
+   * console.log(Foo === baseType); // true
    *
    * @method utils.getSuper
    * @param {Object|Function} instance Instance or constructor.
@@ -887,16 +887,16 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return the intersection of two arrays.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const arrA = ['green', 'red', 'blue', 'red']
-   * const arrB = ['green', 'yellow', 'red']
-   * const intersected = utils.intersection(arrA, arrB)
+   * import { utils } from 'js-data';
+   * const arrA = ['green', 'red', 'blue', 'red'];
+   * const arrB = ['green', 'yellow', 'red'];
+   * const intersected = utils.intersection(arrA, arrB);
    *
-   * console.log(intersected) // ['green', 'red'])
+   * console.log(intersected); // ['green', 'red'])
    *
    * @method utils.intersection
-   * @param {Array} array1 First array.
-   * @param {Array} array2 Second array.
+   * @param {array} array1 First array.
+   * @param {array} array2 Second array.
    * @returns {Array} Array of elements common to both arrays.
    * @since 3.0.0
    */
@@ -924,11 +924,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Proxy for `Array.isArray`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = [1,2,3,4,5]
-   * const b = { foo: "bar" }
-   * console.log(utils.isArray(a)) // true
-   * console.log(utils.isArray(b)) // false
+   * import { utils } from 'js-data';
+   * const a = [1,2,3,4,5];
+   * const b = { foo: "bar" };
+   * console.log(utils.isArray(a)); // true
+   * console.log(utils.isArray(b)); // false
    *
    * @method utils.isArray
    * @param {*} value The value to test.
@@ -942,16 +942,16 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * `blacklist`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const blacklist = [/^\$hashKey/g, /^_/g, 'id']
-   * console.log(utils.isBlacklisted("$hashKey", blacklist)) // true
-   * console.log(utils.isBlacklisted("id", blacklist)) // true
-   * console.log(utils.isBlacklisted("_myProp", blacklist)) // true
-   * console.log(utils.isBlacklisted("my_id", blacklist)) // false
+   * import { utils } from 'js-data';
+   * const blacklist = [/^\$hashKey/g, /^_/g, 'id'];
+   * console.log(utils.isBlacklisted("$hashKey", blacklist)); // true
+   * console.log(utils.isBlacklisted("id", blacklist)); // true
+   * console.log(utils.isBlacklisted("_myProp", blacklist)); // true
+   * console.log(utils.isBlacklisted("my_id", blacklist)); // false
    *
    * @method utils.isBlacklisted
    * @param {string} prop The name of a property to check.
-   * @param {Array} blacklist Array of strings and regular expressions.
+   * @param {array} blacklist Array of strings and regular expressions.
    * @returns {boolean} Whether `prop` was matched.
    * @since 3.0.0
    */
@@ -973,11 +973,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a boolean.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = true
-   * const b = { foo: "bar" }
-   * console.log(utils.isBoolean(a)) // true
-   * console.log(utils.isBoolean(b)) // false
+   * import { utils } from 'js-data';
+   * const a = true;
+   * const b = { foo: "bar" };
+   * console.log(utils.isBoolean(a)); // true
+   * console.log(utils.isBoolean(b)); // false
    *
    * @method utils.isBoolean
    * @param {*} value The value to test.
@@ -992,11 +992,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a date.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = new Date()
-   * const b = { foo: "bar" }
-   * console.log(utils.isDate(a)) // true
-   * console.log(utils.isDate(b)) // false
+   * import { utils } from 'js-data';
+   * const a = new Date();
+   * const b = { foo: "bar" };
+   * console.log(utils.isDate(a)); // true
+   * console.log(utils.isDate(b)); // false
    *
    * @method utils.isDate
    * @param {*} value The value to test.
@@ -1011,11 +1011,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a function.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = function (){ console.log('foo bar')}
-   * const b = { foo: "bar" }
-   * console.log(utils.isFunction(a)) // true
-   * console.log(utils.isFunction(b)) // false
+   * import { utils } from 'js-data';
+   * const a = function () { console.log('foo bar'); };
+   * const b = { foo: "bar" };
+   * console.log(utils.isFunction(a)); // true
+   * console.log(utils.isFunction(b)); // false
    *
    * @method utils.isFunction
    * @param {*} value The value to test.
@@ -1030,13 +1030,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is an integer.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = 1
-   * const b = 1.25
-   * const c = '1'
-   * console.log(utils.isInteger(a)) // true
-   * console.log(utils.isInteger(b)) // false
-   * console.log(utils.isInteger(c)) // false
+   * import { utils } from 'js-data';
+   * const a = 1;
+   * const b = 1.25;
+   * const c = '1';
+   * console.log(utils.isInteger(a)); // true
+   * console.log(utils.isInteger(b)); // false
+   * console.log(utils.isInteger(c)); // false
    *
    * @method utils.isInteger
    * @param {*} value The value to test.
@@ -1051,11 +1051,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is `null`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = null
-   * const b = { foo: "bar" }
-   * console.log(utils.isNull(a)) // true
-   * console.log(utils.isNull(b)) // false
+   * import { utils } from 'js-data';
+   * const a = null;
+   * const b = { foo: "bar" };
+   * console.log(utils.isNull(a)); // true
+   * console.log(utils.isNull(b)); // false
    *
    * @method utils.isNull
    * @param {*} value The value to test.
@@ -1070,13 +1070,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a number.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = 1
-   * const b = -1.25
-   * const c = '1'
-   * console.log(utils.isNumber(a)) // true
-   * console.log(utils.isNumber(b)) // true
-   * console.log(utils.isNumber(c)) // false
+   * import { utils } from 'js-data';
+   * const a = 1;
+   * const b = -1.25;
+   * const c = '1';
+   * console.log(utils.isNumber(a)); // true
+   * console.log(utils.isNumber(b)); // true
+   * console.log(utils.isNumber(c)); // false
    *
    * @method utils.isNumber
    * @param {*} value The value to test.
@@ -1092,11 +1092,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is an object.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { foo: "bar" }
-   * const b = 'foo bar'
-   * console.log(utils.isObject(a)) // true
-   * console.log(utils.isObject(b)) // false
+   * import { utils } from 'js-data';
+   * const a = { foo: "bar" };
+   * const b = 'foo bar';
+   * console.log(utils.isObject(a)); // true
+   * console.log(utils.isObject(b)); // false
    *
    * @method utils.isObject
    * @param {*} value The value to test.
@@ -1111,13 +1111,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a regular expression.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = /^\$.+$/ig
-   * const b = new RegExp('^\$.+$', 'ig')
-   * const c = { foo: "bar" }
-   * console.log(utils.isRegExp(a)) // true
-   * console.log(utils.isRegExp(b)) // true
-   * console.log(utils.isRegExp(c)) // false
+   * import { utils } from 'js-data';
+   * const a = /^\$.+$/ig;
+   * const b = new RegExp('^\$.+$', 'ig');
+   * const c = { foo: "bar" };
+   * console.log(utils.isRegExp(a)); // true
+   * console.log(utils.isRegExp(b)); // true
+   * console.log(utils.isRegExp(c)); // false
    *
    * @method utils.isRegExp
    * @param {*} value The value to test.
@@ -1132,12 +1132,12 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a string or a number.
    *
    * @example
-   * import {utils} from 'js-data'
-   * console.log(utils.isSorN('')) // true
-   * console.log(utils.isSorN(-1.65)) // true
-   * console.log(utils.isSorN('my string')) // true
-   * console.log(utils.isSorN({})) // false
-   * console.log(utils.isSorN([1,2,4])) // false
+   * import { utils } from 'js-data';
+   * console.log(utils.isSorN('')); // true
+   * console.log(utils.isSorN(-1.65)); // true
+   * console.log(utils.isSorN('my string')); // true
+   * console.log(utils.isSorN({})); // false
+   * console.log(utils.isSorN([1,2,4])); // false
    *
    * @method utils.isSorN
    * @param {*} value The value to test.
@@ -1152,11 +1152,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a string.
    *
    * @example
-   * import {utils} from 'js-data'
-   * console.log(utils.isString('')) // true
-   * console.log(utils.isString('my string')) // true
-   * console.log(utils.isString(100)) // false
-   * console.log(utils.isString([1,2,4])) // false
+   * import { utils } from 'js-data';
+   * console.log(utils.isString('')); // true
+   * console.log(utils.isString('my string')); // true
+   * console.log(utils.isString(100)); // false
+   * console.log(utils.isString([1,2,4])); // false
    *
    * @method utils.isString
    * @param {*} value The value to test.
@@ -1171,13 +1171,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return whether the provided value is a `undefined`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = undefined
-   * const b = { foo: "bar"}
-   * console.log(utils.isUndefined(a)) // true
-   * console.log(utils.isUndefined(b.baz)) // true
-   * console.log(utils.isUndefined(b)) // false
-   * console.log(utils.isUndefined(b.foo)) // false
+   * import { utils } from 'js-data';
+   * const a = undefined;
+   * const b = { foo: "bar"};
+   * console.log(utils.isUndefined(a)); // true
+   * console.log(utils.isUndefined(b.baz)); // true
+   * console.log(utils.isUndefined(b)); // false
+   * console.log(utils.isUndefined(b.foo)); // false
    *
    * @method utils.isUndefined
    * @param {*} value The value to test.
@@ -1192,17 +1192,17 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Mix in logging capabilities to the target.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { foo: "bar"}
+   * import { utils } from 'js-data';
+   * const a = { foo: "bar"};
    *
    * // Add standard logging to an object
-   * utils.logify(a)
-   * a.log('info', 'test log info') // output 'test log info' to console.
+   * utils.logify(a);
+   * a.log('info', 'test log info'); // output 'test log info' to console.
    *
    * // Toggle debug output of an object
-   * a.dbg('test debug output') // does not output because debug is off.
-   * a.debug = true
-   * a.dbg('test debug output') // output 'test debug output' to console.
+   * a.dbg('test debug output'); // does not output because debug is off.
+   * a.debug = true;
+   * a.dbg('test debug output'); // output 'test debug output' to console.
    *
    * @method utils.logify
    * @param {*} target The target.
@@ -1238,18 +1238,18 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * array.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const colors = ['red', 'green', 'yellow']
+   * import { utils } from 'js-data';
+   * const colors = ['red', 'green', 'yellow'];
    *
-   * console.log(colors.length) // 3
-   * utils.noDupeAdd(colors, 'red')
-   * console.log(colors.length) // 3, red already exists
+   * console.log(colors.length); // 3
+   * utils.noDupeAdd(colors, 'red');
+   * console.log(colors.length); // 3, red already exists
    *
-   * utils.noDupeAdd(colors, 'blue')
-   * console.log(colors.length) // 4, blue was added
+   * utils.noDupeAdd(colors, 'blue');
+   * console.log(colors.length); // 4, blue was added
    *
    * @method utils.noDupeAdd
-   * @param {Array} array The array.
+   * @param {array} array The array.
    * @param {*} record The value to add.
    * @param {Function} fn Callback function passed to {@link utils.findIndex}.
    * @since 3.0.0
@@ -1269,14 +1269,14 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * specified in `keys`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { name: 'John', $hashKey: 1214910 }
+   * import { utils } from 'js-data';
+   * const a = { name: 'John', $hashKey: 1214910 };
    *
-   * let b = utils.omit(a, ['$hashKey'])
-   * console.log(b) // { name: 'John' }
+   * let b = utils.omit(a, ['$hashKey']);
+   * console.log(b); // { name: 'John' }
    *
    * @method utils.omit
-   * @param {Object} props The object to copy.
+   * @param {object} props The object to copy.
    * @param {string[]} keys Array of strings, representing properties to skip.
    * @returns {Object} Shallow copy of `props`, minus `keys`.
    * @since 3.0.0
@@ -1296,14 +1296,14 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * properties specified in `keys`.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { name: 'John', $hashKey: 1214910 }
+   * import { utils } from 'js-data';
+   * const a = { name: 'John', $hashKey: 1214910 };
    *
-   * let b = utils.pick(a, ['$hashKey'])
-   * console.log(b) // { $hashKey: 1214910 }
+   * let b = utils.pick(a, ['$hashKey']);
+   * console.log(b); // { $hashKey: 1214910 }
    *
    * @method utils.pick
-   * @param {Object} props The object to copy.
+   * @param {object} props The object to copy.
    * @param {string[]} keys Array of strings, representing properties to keep.
    * @returns {Object} Shallow copy of `props`, but only including `keys`.
    * @since 3.0.0
@@ -1319,10 +1319,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Return a plain copy of the given value.
    *
    * @example
-   * import {utils} from 'js-data'
-   * const a = { name: 'John' }
-   * let b = utils.plainCopy(a)
-   * console.log(a === b) // false
+   * import { utils } from 'js-data';
+   * const a = { name: 'John' };
+   * let b = utils.plainCopy(a);
+   * console.log(a === b); // false
    *
    * @method utils.plainCopy
    * @param {*} value The value to copy.
@@ -1338,13 +1338,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Shortcut for `utils.Promise.reject(value)`.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
-   * utils.reject("Testing static reject").then(function(data) {
+   * utils.reject("Testing static reject").then(function (data) {
    *   // not called
-   * }).catch(function(reason) {
+   * }).catch(function (reason) {
    *   console.log(reason); // "Testing static reject"
-   * })
+   * });
    *
    * @method utils.reject
    * @param {*} [value] Value with which to reject the Promise.
@@ -1360,14 +1360,14 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Remove the last item found in array according to the given checker function.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
-   * const colors = ['red', 'green', 'yellow', 'red']
-   * utils.remove(colors, (color) => color === 'red')
-   * console.log(colors) // ['red', 'green', 'yellow']
+   * const colors = ['red', 'green', 'yellow', 'red'];
+   * utils.remove(colors, (color) => color === 'red');
+   * console.log(colors); // ['red', 'green', 'yellow']
    *
    * @method utils.remove
-   * @param {Array} array The array to search.
+   * @param {array} array The array to search.
    * @param {Function} fn Checker function.
    */
   remove (array, fn) {
@@ -1384,13 +1384,13 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Shortcut for `utils.Promise.resolve(value)`.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
-   * utils.resolve("Testing static resolve").then(function(data) {
+   * utils.resolve("Testing static resolve").then(function (data) {
    *   console.log(data); // "Testing static resolve"
-   * }).catch(function(reason) {
+   * }).catch(function (reason) {
    *   // not called
-   * })
+   * });
    *
    * @param {*} [value] Value with which to resolve the Promise.
    * @returns {Promise} Promise resolved with `value`.
@@ -1405,7 +1405,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Set the value at the provided key or path.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
    * const john = {
    *   name: 'John',
@@ -1414,27 +1414,27 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    *     name: 'John's Mom',
    *     age: 50
    *   }
-   * }
+   * };
    * // set value by key
-   * utils.set(john, 'id', 98)
-   * console.log(john.id) // 98
+   * utils.set(john, 'id', 98);
+   * console.log(john.id); // 98
    *
    * // set value by path
-   * utils.set(john, 'parent.id', 20)
-   * console.log(john.parent.id) // 20
+   * utils.set(john, 'parent.id', 20);
+   * console.log(john.parent.id); // 20
    *
    * // set value by path/value map
    * utils.set(john, {
    *   'id': 1098,
    *   'parent': { id: 1020 },
    *   'parent.age': '55'
-   * })
-   * console.log(john.id) // 1098
-   * console.log(john.parent.id) // 1020
-   * console.log(john.parent.age) // 55
+   * });
+   * console.log(john.id); // 1098
+   * console.log(john.parent.id); // 1020
+   * console.log(john.parent.age); // 55
    *
    * @method utils.set
-   * @param {Object} object The object on which to set a property.
+   * @param {object} object The object on which to set a property.
    * @param {(string|Object)} path The key or path to the property. Can also
    * pass in an object of path/value pairs, which will all be set on the target
    * object.
@@ -1459,7 +1459,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Check whether the two provided objects are deeply equal.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
    * const objA = {
    *   name: 'John',
@@ -1468,7 +1468,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    *     item: 'item 1',
    *     colors: ['red', 'green', 'blue']
    *   }
-   * }
+   * };
    *
    * const objB = {
    *   name: 'John',
@@ -1477,15 +1477,15 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    *     item: 'item 1',
    *     colors: ['red', 'green', 'blue']
    *   }
-   * }
+   * };
    *
-   * console.log(utils.deepEqual(a,b)) // true
-   * objB.nested.colors.add('yellow') // make a change to a nested object's array
-   * console.log(utils.deepEqual(a,b)) // false
+   * console.log(utils.deepEqual(a,b)); // true
+   * objB.nested.colors.add('yellow'); // make a change to a nested object's array
+   * console.log(utils.deepEqual(a,b)); // false
    *
    * @method utils.deepEqual
-   * @param {Object} a First object in the comparison.
-   * @param {Object} b Second object in the comparison.
+   * @param {object} a First object in the comparison.
+   * @param {object} b Second object in the comparison.
    * @returns {boolean} Whether the two provided objects are deeply equal.
    * @see utils.equal
    * @since 3.0.0
@@ -1530,11 +1530,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Proxy for `JSON.stringify`.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
-   * const a = { name: 'John' }
-   * let jsonVal = utils.toJson(a)
-   * console.log(jsonVal) // '{"name" : "John"}'
+   * const a = { name: 'John' };
+   * let jsonVal = utils.toJson(a);
+   * console.log(jsonVal); // '{"name" : "John"}'
    *
    * @method utils.toJson
    * @param {*} value Value to serialize to JSON.
@@ -1548,7 +1548,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * Unset the value at the provided key or path.
    *
    * @example
-   * import {utils} from 'js-data'
+   * import { utils } from 'js-data';
    *
    * const john = {
    *   name: 'John',
@@ -1557,16 +1557,16 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    *     name: 'John's Mom',
    *     age: 50
    *   }
-   * }
+   * };
    *
-   * utils.unset(john, age)
-   * utils.unset(john, parent.age)
+   * utils.unset(john, age);
+   * utils.unset(john, parent.age);
    *
-   * console.log(john.age) // null
-   * console.log(john.parent.age) // null
+   * console.log(john.age); // null
+   * console.log(john.parent.age); // null
    *
    * @method utils.unset
-   * @param {Object} object The object from which to delete the property.
+   * @param {object} object The object from which to delete the property.
    * @param {string} path The key or path to the property.
    * @see utils.set
    * @since 3.0.0

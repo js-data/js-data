@@ -823,7 +823,7 @@ const typeGroupValidators = {
    * @method
    * @param {*} value Array to be validated.
    * @param {object} schema Schema containing at least one array keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   array: function (value, schema, opts) {
@@ -839,8 +839,8 @@ const typeGroupValidators = {
    * @name Schema.typeGroupValidators.integer
    * @method
    * @param {*} value Number to be validated.
-   * @param {Object} schema Schema containing at least one `integer` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing at least one `integer` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   integer: function (value, schema, opts) {
@@ -857,8 +857,8 @@ const typeGroupValidators = {
    * @name Schema.typeGroupValidators.number
    * @method
    * @param {*} value Number to be validated.
-   * @param {Object} schema Schema containing at least one `number` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing at least one `number` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   number: function (value, schema, opts) {
@@ -877,8 +877,8 @@ const typeGroupValidators = {
    * @name Schema.typeGroupValidators.numeric
    * @method
    * @param {*} value Number to be validated.
-   * @param {Object} schema Schema containing at least one `numeric` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing at least one `numeric` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   numeric: function (value, schema, opts) {
@@ -896,8 +896,8 @@ const typeGroupValidators = {
    * @name Schema.typeGroupValidators.object
    * @method
    * @param {*} value Object to be validated.
-   * @param {Object} schema Schema containing at least one `object` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing at least one `object` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   object: function (value, schema, opts) {
@@ -915,8 +915,8 @@ const typeGroupValidators = {
    * @name Schema.typeGroupValidators.string
    * @method
    * @param {*} value String to be validated.
-   * @param {Object} schema Schema containing at least one `string` keyword.
-   * @param {Object} [opts] Configuration options.
+   * @param {object} schema Schema containing at least one `string` keyword.
+   * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   string: function (value, schema, opts) {
@@ -928,18 +928,17 @@ const typeGroupValidators = {
  * js-data's Schema class.
  *
  * @example <caption>Schema#constructor</caption>
- * // Normally you would do:  import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Schema} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { Schema } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * const PostSchema = new Schema({
  *   type: 'object',
  *   properties: {
  *     title: { type: 'string' }
  *   }
- * })
- * PostSchema.validate({ title: 1234 })
+ * });
+ * PostSchema.validate({ title: 1234 });
  *
  * @class Schema
  * @extends Component
@@ -1253,45 +1252,44 @@ export default Component.extend({
 /**
  * Create a subclass of this Schema:
  * @example <caption>Schema.extend</caption>
- * // Normally you would do: import {Schema} from 'js-data'
- * const JSData = require('js-data@3.0.0-rc.4')
- * const {Schema} = JSData
- * console.log('Using JSData v' + JSData.version.full)
+ * const JSData = require('js-data');
+ * const { Schema } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
  *
  * // Extend the class using ES2015 class syntax.
  * class CustomSchemaClass extends Schema {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
  * }
- * const customSchema = new CustomSchemaClass()
- * console.log(customSchema.foo())
- * console.log(CustomSchemaClass.beep())
+ * const customSchema = new CustomSchemaClass();
+ * console.log(customSchema.foo());
+ * console.log(CustomSchemaClass.beep());
  *
  * // Extend the class using alternate method.
  * const OtherSchemaClass = Schema.extend({
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const otherSchema = new OtherSchemaClass()
- * console.log(otherSchema.foo())
- * console.log(OtherSchemaClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const otherSchema = new OtherSchemaClass();
+ * console.log(otherSchema.foo());
+ * console.log(OtherSchemaClass.beep());
  *
  * // Extend the class, providing a custom constructor.
  * function AnotherSchemaClass () {
- *   Schema.call(this)
- *   this.created_at = new Date().getTime()
+ *   Schema.call(this);
+ *   this.created_at = new Date().getTime();
  * }
  * Schema.extend({
  *   constructor: AnotherSchemaClass,
- *   foo () { return 'bar' }
+ *   foo () { return 'bar'; }
  * }, {
- *   beep () { return 'boop' }
- * })
- * const anotherSchema = new AnotherSchemaClass()
- * console.log(anotherSchema.created_at)
- * console.log(anotherSchema.foo())
- * console.log(AnotherSchemaClass.beep())
+ *   beep () { return 'boop'; }
+ * });
+ * const anotherSchema = new AnotherSchemaClass();
+ * console.log(anotherSchema.created_at);
+ * console.log(anotherSchema.foo());
+ * console.log(AnotherSchemaClass.beep());
  *
  * @method Schema.extend
  * @param {object} [props={}] Properties to add to the prototype of the
