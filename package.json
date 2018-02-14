@@ -56,7 +56,7 @@
     "mocha": "mocha --recursive -t 20000 -R dot -r babel-core/register -r babel-polyfill",
     "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha  --recursive -t 20000 -R dot && nyc report --reporter=html",
     "test": "npm run build && npm run cover && npm run karma",
-    "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors"
+    "release": "npm test && repo-tools changelog && repo-tools authors"
   },
   "devDependencies": {
     "babel-core": "6.26.0",
