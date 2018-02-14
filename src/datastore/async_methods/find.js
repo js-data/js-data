@@ -54,8 +54,9 @@ module.exports = function find (resourceName, id, options) {
     }
   }).then(function (item) {
     if (!item) {
+      let query
       const usePendingFind = DSUtils.isFunction(options.usePendingFind) ? options.usePendingFind.call(this, resourceName, id, options) : options.usePendingFind
-      if (!(id in resource.pendingQueries) && usePendingFind) {
+      if (!(id in resource.pendingQueries) || !usePendingFind) {
         let promise
         let strategy = options.findStrategy || options.strategy
 
@@ -80,7 +81,7 @@ module.exports = function find (resourceName, id, options) {
           promise = _this.adapters[adapter].find(definition, id, options)
         }
 
-        resource.pendingQueries[id] = promise
+        query = promise
           .then(function (data) { return options.afterFind.call(data, options, data) })
           .then(function (data) {
             // Query is no longer pending
@@ -97,8 +98,14 @@ module.exports = function find (resourceName, id, options) {
               return definition.createInstance(data, options.orig())
             }
           })
+
+        if (usePendingFind) {
+          resource.pendingQueries[id] = query
+        }
+      } else {
+        query = resource.pendingQueries[id]
       }
-      return resource.pendingQueries[id]
+      return query
     } else {
       // resolve immediately with the item
       return item

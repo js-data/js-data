@@ -465,4 +465,44 @@ describe('DS#findAll', function () {
       assert.equal(p.length, 3);
     });
   });
+
+  it('should track pending queries if usePendingFindAll is enabled', function () {
+    var _this = this;
+
+    Post.ejectAll();
+
+    var promise = Post.findAll(null, { usePendingFindAll : true });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length, 'has pending request');
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts', 'pending request url');
+      assert.equal(_this.requests[0].method, 'GET', 'pending request method');
+      assert.deepEqual(Object.keys(store.store.post.pendingQueries), ['{}'], 'pending query list contains hashed query');
+      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify([p1, p2, p3, p4]));
+    }, 100);
+
+    return promise.then(function (data) {
+      assert.equal(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+    });
+  });
+
+  it('should not track pending queries if usePendingFindAll is disabled', function () {
+    var _this = this;
+
+    Post.ejectAll();
+
+    var promise = Post.findAll(null, { usePendingFindAll : false });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length, 'has pending request');
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts', 'pending request url');
+      assert.equal(_this.requests[0].method, 'GET', 'pending request method');
+      assert.deepEqual(Object.keys(store.store.post.pendingQueries), [], 'pending query list is empty');
+      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify([p1, p2, p3, p4]));
+    }, 100);
+
+    return promise.then(function (data) {
+      assert.equal(JSON.stringify(data), JSON.stringify([p1, p2, p3, p4]));
+    });
+  });
 });

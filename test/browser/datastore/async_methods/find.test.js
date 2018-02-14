@@ -15,7 +15,7 @@ describe('DS#find', function () {
     // Should have no effect because there is already a pending query
     return Post.find(5)
       .then(function (post) {
-        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1));
+        assert.deepEqual(JSON.stringify(post), JSON.stringify(p1), 'Post.find result');
         assert.deepEqual(JSON.stringify(Post.get(5)), JSON.stringify(p1), 'The post is now in the datastore');
         assert.isNumber(Post.lastModified(5));
         assert.isNumber(Post.lastSaved(5));
@@ -434,5 +434,45 @@ describe('DS#find', function () {
         assert.equal(lifecycle.serialize.callCount, 0, 'serialize should have been called');
         assert.equal(lifecycle.deserialize.callCount, 2, 'deserialize should have been called');
       });
+  });
+
+  it('should track pending queries if usePendingFind is enabled', function () {
+    var _this = this;
+
+    Post.ejectAll();
+
+    var promise = Post.find(5, { usePendingFind : true });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length, 'has pending request');
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5', 'pending request url');
+      assert.equal(_this.requests[0].method, 'GET', 'pending request method');
+      assert.deepEqual(Object.keys(store.store.post.pendingQueries), ['5'], 'pending query list contains hashed query');
+      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify(p1));
+    }, 100);
+
+    return promise.then(function (data) {
+      assert.equal(JSON.stringify(data), JSON.stringify(p1), 'response data');
+    });
+  });
+
+  it('should not track pending queries if usePendingFind is disabled', function () {
+    var _this = this;
+
+    Post.ejectAll();
+
+    var promise = Post.find(5, { usePendingFind : false });
+
+    setTimeout(function () {
+      assert.equal(1, _this.requests.length, 'has pending request');
+      assert.equal(_this.requests[0].url, 'http://test.js-data.io/posts/5', 'pending request url');
+      assert.equal(_this.requests[0].method, 'GET', 'pending request method');
+      assert.deepEqual(Object.keys(store.store.post.pendingQueries), [], 'pending query list is empty');
+      _this.requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify(p1));
+    }, 100);
+
+    return promise.then(function (data) {
+      assert.equal(JSON.stringify(data), JSON.stringify(p1), 'response data');
+    });
   });
 });

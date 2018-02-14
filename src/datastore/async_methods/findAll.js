@@ -97,8 +97,9 @@ module.exports = function findAll (resourceName, params, options) {
     }
   }).then(function (items) {
     if (!items) {
+      let query
       const usePendingFindAll = DSUtils.isFunction(options.usePendingFindAll) ? options.usePendingFindAll.call(this, resourceName, params, options) : options.usePendingFindAll
-      if (!(queryHash in resource.pendingQueries) && usePendingFindAll) {
+      if (!(queryHash in resource.pendingQueries) || !usePendingFindAll) {
         let promise
         let strategy = options.findAllStrategy || options.strategy
 
@@ -123,7 +124,7 @@ module.exports = function findAll (resourceName, params, options) {
           promise = _this.adapters[adapter].findAll(definition, params, options)
         }
 
-        resource.pendingQueries[queryHash] = promise
+        query = promise
           .then(function (data) { return options.afterFindAll.call(data, options, data) })
           .then(function (data) {
             // Query is no longer pending
@@ -140,9 +141,15 @@ module.exports = function findAll (resourceName, params, options) {
               return data
             }
           })
+
+        if (usePendingFindAll) {
+          resource.pendingQueries[queryHash] = query
+        }
+      } else {
+        query = resource.pendingQueries[queryHash]
       }
 
-      return resource.pendingQueries[queryHash]
+      return query
     } else {
       // resolve immediately with the items
       return items
