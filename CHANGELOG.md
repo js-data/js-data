@@ -1,3 +1,8 @@
+##### 3.0.2 - 13 February 2018
+
+###### Bug fixes
+- [#493] - Fixes #416. Thanks @lumimies
+
 ##### 3.0.1 - 18 August 2017
 
 ###### Backwards compatible changes

@@ -31,3 +31,5 @@ node_modules/
 dist/*.js
 dist/*.map
 typings
+yarn.lock
+package-lock.json
