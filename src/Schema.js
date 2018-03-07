@@ -33,7 +33,7 @@ const segmentToString = (segment, prev) => segment &&
     ? `[${segment}]`
     : prev
       ? `.${segment}`
-      : `${segment}`
+      : String(segment)
 
 /**
  * @ignore
