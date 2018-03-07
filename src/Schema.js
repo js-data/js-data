@@ -27,13 +27,11 @@ const types = {
 /**
  * @ignore
  */
-const segmentToString = (segment, prev) => segment &&
-  typeof +segment === 'number' &&
-  !isNaN(+segment)
-    ? `[${segment}]`
-    : prev
-      ? `.${segment}`
-      : String(segment)
+const segmentToString = (segment, prev) => utils.isNumber(segment)
+  ? `[${segment}]`
+  : prev
+    ? `.${segment}`
+    : String(segment)
 
 /**
  * @ignore
