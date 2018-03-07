@@ -27,7 +27,9 @@ const types = {
 /**
  * @ignore
  */
-const segmentToString = (segment, prev) => segment && typeof +segment === 'number' && +segment !== NaN
+const segmentToString = (segment, prev) => segment &&
+  typeof +segment === 'number' &&
+  !isNaN(+segment)
     ? `[${segment}]`
     : prev
       ? `.${segment}`
