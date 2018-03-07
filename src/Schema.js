@@ -27,13 +27,12 @@ const types = {
 /**
  * @ignore
  */
-const segmentToString = (segment, prev) => {
-  return segment && typeof +segment === 'number'
+const segmentToString = (segment, prev) => segment &&
+  typeof +segment === 'number'
     ? `[${segment}]`
     : prev
       ? `.${segment}`
       : `${segment}`
-}
 
 /**
  * @ignore
