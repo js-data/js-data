@@ -54,6 +54,15 @@ describe('utils.deepMixIn', function () {
     assert.deepEqual(expected, actual, 'sorce own properties recursivly copied and overriden into dest')
     assert.equal(dest, utils.deepMixIn(dest), 'empty source argument returns dest')
   })
+
+  it('skips source properties that resolve to undefined if a destination value exists', function () {
+    const dest = { name: 'John', age: 90 }
+    const src = { name: 'John', age: undefined }
+    const expected = { name: 'John', age: 90 }
+    const actual = utils.deepMixIn(dest, src)
+
+    assert.deepEqual(expected, actual)
+  })
 })
 
 describe('utils.extend', function () {
