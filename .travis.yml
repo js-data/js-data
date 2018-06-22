@@ -1,12 +1,12 @@
 sudo: false
 language: node_js
 node_js:
-- "6"
-- "4"
+  - "10"
+  - "8"
 cache:
   yarn: true
   directories:
-  - node_modules/
+    - node_modules/
 before_install:
   - npm i -g nyc codecov
 after_success:

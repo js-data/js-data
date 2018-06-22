@@ -62,7 +62,7 @@ export const HasManyRelation = Relation.extend({
   findExistingLinksByLocalKeys (ids) {
     return this.relatedCollection.filter({
       where: {
-        [this.mapper.idAttribute]: {
+        [this.relatedCollection.mapper.idAttribute]: {
           'in': ids
         }
       }
