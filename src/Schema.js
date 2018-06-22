@@ -44,15 +44,15 @@ const segmentToString = function (segment, prev) {
 /**
  * @ignore
  */
-const makePath = function (opts) {
-  opts || (opts = {})
-  let path = ''
-  const segments = opts.path || []
-  segments.forEach(function (segment) {
-    path += segmentToString(segment, path)
-  })
-  path += segmentToString(opts.prop, path)
-  return path
+const makePath = (opts = {}) => {
+  opts.path = opts.path || []
+  return segmentToString(
+    opts.prop,
+    opts.path.reduce((acc, cur) => {
+      acc += segmentToString(cur, acc === '' ? undefined : acc)
+      return acc
+    }, '')
+  )
 }
 
 /**
