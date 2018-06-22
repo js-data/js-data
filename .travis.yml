@@ -12,3 +12,6 @@ before_install:
   - npm i -g nyc codecov
 after_success:
   - nyc report --reporter=lcov > coverage.lcov && codecov
+test:
+  pre:
+    - npm run karma
