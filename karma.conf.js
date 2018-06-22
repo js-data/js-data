@@ -19,12 +19,6 @@ var customLaunchers = {
     platform: 'OS X 10.11',
     version: '9.0'
   },
-  sl_ios_9: {
-    base: 'SauceLabs',
-    browserName: 'iphone',
-    platform: 'OS X 10.10',
-    version: '9.1'
-  },
   sl_edge: {
     base: 'SauceLabs',
     browserName: 'microsoftedge',
