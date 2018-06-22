@@ -653,4 +653,54 @@ describe('DataStore integration tests', function () {
     assert.equal(nodes[4].parent, nodes[3])
     assert.deepEqual(nodes[4].children, [])
   })
+
+  it('should find hasMany foreignKeys with custom idAttribute', function () {
+    const store = new JSData.DataStore()
+
+    store.defineMapper('foo', {
+      relations: {
+        hasMany: {
+          bar: {
+            localField: 'bars',
+            localKeys: 'barIds'
+          }
+        }
+      },
+      idAttribute: 'fooId'
+    })
+    store.defineMapper('bar', {
+      relations: {
+        hasMany: {
+          foo: {
+            localField: 'foos',
+            foreignKeys: 'barIds'
+          }
+        }
+      }
+    })
+
+    const bars = store.add('bar', [
+      {
+        id: 0,
+        name: 'A'
+      },
+      {
+        id: 1,
+        name: 'B'
+      },
+      {
+        id: 2,
+        name: 'C'
+      }
+    ])
+
+    const foo = store.add('foo', {
+      fooId: 9,
+      name: 'Z',
+      barIds: [0, 2]
+    })
+
+    assert.isOk(foo.bars)
+    assert.deepEqual(foo.bars, [bars[0], bars[2]])
+  })
 })
