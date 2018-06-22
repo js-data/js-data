@@ -178,7 +178,7 @@ const props = {
           const inverseDef = def.getInverse(mapper)
           const currentParentId = currentParent ? utils.get(currentParent, def.getRelation().idAttribute) : undefined
 
-          if (currentParent && currentParentId !== undefined && currentParentId !== value) {
+          if (inverseDef && currentParent && currentParentId !== undefined && currentParentId !== value) {
             if (inverseDef.type === hasOneType) {
               safeSetLink(currentParent, inverseDef.localField, undefined)
             } else if (inverseDef.type === hasManyType) {
