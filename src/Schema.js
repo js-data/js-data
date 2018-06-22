@@ -27,19 +27,11 @@ const types = {
 /**
  * @ignore
  */
-const segmentToString = function (segment, prev) {
-  let str = ''
-  if (segment) {
-    if (utils.isNumber(segment)) {
-      str += `[${segment}]`
-    } else if (prev) {
-      str += `.${segment}`
-    } else {
-      str += `${segment}`
-    }
-  }
-  return str
-}
+const segmentToString = (segment, prev) => utils.isNumber(segment)
+  ? `[${segment}]`
+  : prev
+    ? `.${segment}`
+    : String(segment)
 
 /**
  * @ignore
