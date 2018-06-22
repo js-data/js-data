@@ -409,7 +409,7 @@ const utils = {
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepMixIn(existing, value)
-        } else {
+        } else if (existing === undefined || value !== undefined) {
           dest[key] = value
         }
       }
