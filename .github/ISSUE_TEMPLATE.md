@@ -10,8 +10,14 @@ operating system:
 
 ## Steps to reproduce
 
-<It's helpful to have a code example - consider forking this plunk template and adding reproducible code that will help resolve your issue: https://next.plnkr.co/edit/YmRdhVMRfc1qpm22>
+<!---
+It's helpful to have a code example - consider one of these options to quickly provide a 
+reporducible example that will help others with this issue:
 
-<steps_to_reproduce>
+1) Fork this Plunker https://next.plnkr.co/edit/YmRdhVMRfc1qpm22
+2) Use Runkit.com - ie: https://runkit.com/crobinson42/github-com-js-data-js-data-issues-501
 
 Thanks!
+-->
+
+<steps_to_reproduce>
