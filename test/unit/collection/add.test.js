@@ -298,4 +298,27 @@ describe('Collection#add', function () {
     // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
     // console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
   })
+  it('should update a records relation when the inverse relation does not exist', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('user')
+    store.defineMapper('post', {
+      relations: {
+        belongsTo: {
+          user: {
+            localKey: 'user_id',
+            localField: 'user'
+          }
+        }
+      }
+    })
+    const [user1, user2] = store.add('user', [{
+      id: 1, name: 'John'
+    }, {
+      id: 2, name: 'Jane'
+    }])
+    const post = store.add('post', { id: 2, title: 'foo', user_id: 1 })
+    assert.strictEqual(post.user, user1)
+    store.add('post', { id: 2, title: 'foo', user_id: 2 })
+    assert.strictEqual(post.user, user2)
+  })
 })
