@@ -4,9 +4,9 @@
 
 ## Environment
 
-js-data version:
-node or browser version:
-operating system:
+- js-data version:
+- node or browser version:
+- operating system:
 
 ## Steps to reproduce
 
