@@ -1,3 +1,8 @@
+##### 3.0.3 - 18 August 2018
+
+###### Bug fixes
+- [#499] - Fixes #498. Thanks @mikeu
+
 ##### 3.0.2 - 13 February 2018
 
 ###### Bug fixes
