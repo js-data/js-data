@@ -411,7 +411,7 @@ export default Component.extend({
   },
 
   setupInverseRelation (record, id, inverseDef, idAttribute) {
-      // Update (set) inverse relation
+    // Update (set) inverse relation
     if (inverseDef.type === hasOneType) {
       // e.g. someUser.profile = profile
       safeSetLink(record, inverseDef.localField, this)
