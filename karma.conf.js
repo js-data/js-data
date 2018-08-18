@@ -92,7 +92,16 @@ module.exports = function (config) {
     },
     babelPreprocessor: {
       options: {
-        presets: ['es2015'],
+        presets: [
+          ['env', {
+            'targets': {
+              'browsers': ['last 2 versions', 'safari >= 7',
+                '> 1%',
+                'IE 11'
+              ]
+            }
+          }]
+        ],
         plugins: [
           'syntax-async-functions',
           'transform-regenerator',
