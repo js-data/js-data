@@ -8,14 +8,15 @@ export default {
   plugins: [
     babel({
       babelrc: false,
-      plugins: [
-        'external-helpers'
-      ],
+      plugins: ['external-helpers'],
       presets: [
         [
-          'es2015',
+          'env',
           {
-            modules: false
+            modules: false,
+            targets: {
+              browsers: ['last 2 versions', 'safari >= 7', '> 1%', 'IE 11']
+            }
           }
         ]
       ],
