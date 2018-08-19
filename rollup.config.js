@@ -1,9 +1,11 @@
 import babel from 'rollup-plugin-babel'
 
 export default {
-  moduleName: 'JSData',
-  amd: {
-    id: 'js-data'
+  output: {
+    amd: {
+      id: 'js-data'
+    },
+    name: 'JSData'
   },
   plugins: [
     babel({
