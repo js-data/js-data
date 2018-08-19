@@ -43,22 +43,30 @@
     ]
   },
   "scripts": {
+    "banner": "node scripts/banner.js",
     "build": "npm run lint && npm run bundle && npm run min && npm run banner",
     "bundle:es5": "rollup src/index.js -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
     "bundle:next": "rollup src/index.js -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es",
     "bundle": "npm run bundle:es5 && npm run bundle:next && repo-tools write-version dist/js-data.js dist/js-data.es2015.js",
     "cover": "nyc --require babel-core/register --require babel-polyfill --cache mocha  --recursive -t 20000 -R dot && nyc report --reporter=html",
     "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
-    "banner": "node scripts/banner.js",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
     "karma": "karma start",
     "lint": "eslint --fix src/**/*.js && standard 'src/**/*.js' 'test/**/*.js' 'scripts/*.js' 'lib/**/*.js' '*.config.js'",
     "min": "uglifyjs -o dist/js-data.min.js --source-map url=js-data.min.map -v -m -c --keep-fnames --screw-ie8 -- dist/js-data.js",
     "mocha": "mocha --recursive -t 20000 -R dot -r babel-core/register -r babel-polyfill",
-    "precommit": "npm run lint",
+    "precommit": "lint-staged && npm run lint",
     "prepush": "npm test",
     "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors",
     "test": "npm run build && npm run cover && npm run karma"
+  },
+  "lint-staged": {
+    "linters": {
+      "src/**/*.js": [
+        "prettier-standard",
+        "git add"
+      ]
+    }
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
@@ -88,9 +96,11 @@
     "karma-phantomjs-launcher": "1.0.4",
     "karma-sauce-launcher": "1.2.0",
     "karma-sinon": "1.0.5",
+    "lint-staged": "^7.2.2",
     "mocha": "5.2.0",
     "nyc": "12.0.2",
     "phantomjs-prebuilt": "2.1.16",
+    "prettier-standard": "^8.0.1",
     "rollup": "0.64.1",
     "rollup-plugin-babel": "3.0.7",
     "sinon": "6.1.5",
