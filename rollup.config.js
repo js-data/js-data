@@ -1,21 +1,24 @@
 import babel from 'rollup-plugin-babel'
 
 export default {
-  moduleName: 'JSData',
-  amd: {
-    id: 'js-data'
+  output: {
+    amd: {
+      id: 'js-data'
+    },
+    name: 'JSData'
   },
   plugins: [
     babel({
       babelrc: false,
-      plugins: [
-        'external-helpers'
-      ],
+      plugins: ['external-helpers'],
       presets: [
         [
-          'es2015',
+          'env',
           {
-            modules: false
+            modules: false,
+            targets: {
+              browsers: ['last 2 versions', 'safari >= 7', '> 1%', 'IE 11']
+            }
           }
         ]
       ],

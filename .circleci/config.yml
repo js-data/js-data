@@ -2,10 +2,13 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/node:8
+      - image: circleci/node:10
     steps:
       - checkout
       - run: npm install
+      # bug in npm package requires this for windows saucelabs tests
+      # https://github.com/karma-runner/karma-sauce-launcher/issues/117
+      - run: npm uninstall wd && npm install wd
       - run:
           name: Test
           command: npm test

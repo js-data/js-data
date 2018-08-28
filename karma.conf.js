@@ -31,18 +31,6 @@ var customLaunchers = {
     platform: 'Windows 8.1',
     version: '11'
   },
-  sl_ie_10: {
-    base: 'SauceLabs',
-    browserName: 'internet explorer',
-    platform: 'Windows 2012',
-    version: '10'
-  },
-  sl_ie_9: {
-    base: 'SauceLabs',
-    browserName: 'internet explorer',
-    platform: 'Windows 2008',
-    version: '9'
-  },
   sl_android_5: {
     base: 'SauceLabs',
     browserName: 'android',
@@ -104,7 +92,16 @@ module.exports = function (config) {
     },
     babelPreprocessor: {
       options: {
-        presets: ['es2015'],
+        presets: [
+          ['env', {
+            'targets': {
+              'browsers': ['last 2 versions', 'safari >= 7',
+                '> 1%',
+                'IE 11'
+              ]
+            }
+          }]
+        ],
         plugins: [
           'syntax-async-functions',
           'transform-regenerator',
