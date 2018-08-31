@@ -17,7 +17,7 @@
 [9]: https://saucelabs.com/browser-matrix/jsdata.svg
 [10]: https://saucelabs.com/u/jsdata
 [11]: https://img.shields.io/circleci/project/js-data/js-data.svg
-[12]: https://circleci.com/gh/js-data/js-data
+[12]: https://circleci.com/gh/js-data/js-data.svg?style=svg
 [13]: https://img.shields.io/badge/Node.js-v6.x-brightgreen.svg
 [14]: https://img.shields.io/badge/Node.js-v5.x-brightgreen.svg
 [15]: https://img.shields.io/badge/Node.js-v4.x-brightgreen.svg
