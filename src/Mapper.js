@@ -1435,7 +1435,7 @@ export default Component.extend({
       return utils.resolve(this.getAdapter(adapter)[op](this, ...args))
     }).then((result) => {
       // force noValidate on find/findAll
-      const noValidate = /find/.test(op)
+      const noValidate = /find/.test(op) || opts.noValidate
       const _opts = Object.assign({}, opts, { noValidate })
 
       result = this._end(result, _opts, !!config.skip)
