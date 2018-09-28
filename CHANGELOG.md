@@ -1,3 +1,8 @@
+##### 3.0.4 - 28 September 2018
+
+###### Bug fixes
+- [#523] - Fixes #522
+
 ##### 3.0.3 - 18 August 2018
 
 ###### Bug fixes

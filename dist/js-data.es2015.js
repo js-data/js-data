@@ -8507,7 +8507,11 @@ var Mapper$1 = Component$1.extend({
       _this6.dbg.apply(_this6, [op].concat(toConsumableArray(args)));
       return utils.resolve((_getAdapter = _this6.getAdapter(adapter))[op].apply(_getAdapter, [_this6].concat(toConsumableArray(args))));
     }).then(function (result) {
-      result = _this6._end(result, opts, !!config.skip);
+      // force noValidate on find/findAll
+      var noValidate = /find/.test(op) || opts.noValidate;
+      var _opts = Object.assign({}, opts, { noValidate: noValidate });
+
+      result = _this6._end(result, _opts, !!config.skip);
       args.push(result);
       // after lifecycle hook
       op = opts.op = after;
