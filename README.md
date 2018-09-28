@@ -24,9 +24,8 @@
 [16]: https://img.shields.io/badge/Node.js-v0.12.x-brightgreen.svg
 [17]: https://img.shields.io/badge/Node.js-v0.10.x-brightgreen.svg
 
-__JSData v3 is now stable!. Some adapters still need to be updated to work
-with v3. Message @jmdobry on the JSData Slack channel if you want to help with
-tests, documentation, tutorials, adapters, etc.__
+__Community & Maintainers always welcome - message in #jsdata-core-discuss Slack channel if you want to help with
+issues, improvements, tests, documentation, tutorials, adapters, etc.. There are several adapters that could use minor maintenance as well as new adapters to be written.__
 
 JSData is a framework-agnostic, datastore-agnostic ORM for Node.js and the
 Browser.
