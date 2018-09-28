@@ -1434,7 +1434,11 @@ export default Component.extend({
       this.dbg(op, ...args)
       return utils.resolve(this.getAdapter(adapter)[op](this, ...args))
     }).then((result) => {
-      result = this._end(result, opts, !!config.skip)
+      // force noValidate on find/findAll
+      const noValidate = /find/.test(op)
+      const _opts = Object.assign({}, opts, { noValidate })
+
+      result = this._end(result, _opts, !!config.skip)
       args.push(result)
       // after lifecycle hook
       op = opts.op = after
