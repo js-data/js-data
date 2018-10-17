@@ -28,9 +28,6 @@ jsconfig.json
 coverage/
 doc/
 node_modules/
-dist/*.js
-!dist/*.flow.js
-dist/*.map
 typings
 yarn.lock
 package-lock.json
