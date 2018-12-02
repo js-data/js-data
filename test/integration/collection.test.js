@@ -47,6 +47,27 @@ describe('Collection integration tests', function () {
     }, 30)
   })
 
+  it('should emit remove events', function (done) {
+    const mapper = new JSData.Mapper({ name: 'user' })
+    const data = mapper.createRecord({ id: 2, age: 19 })
+    const collection = new JSData.Collection([], {
+      mapper
+    })
+    const listener = sinon.stub()
+    const listener2 = sinon.stub()
+    collection.add(data)
+    collection.on('remove', listener)
+    collection.on('all', listener2)
+    const records = collection.remove(data)
+    setTimeout(() => {
+      assert(listener.calledOnce, 'listener should have been called once')
+      assert.deepEqual(listener.firstCall.args, [records], 'should have been called with the correct args')
+      assert(listener2.calledOnce, 'listener2 should have been called once')
+      assert.deepEqual(listener2.firstCall.args, ['remove', records], 'should have been called with the correct args')
+      done()
+    }, 30)
+  })
+
   it('should bubble up record events', function (done) {
     const mapper = new JSData.Mapper({ name: 'user' })
     const data = [
