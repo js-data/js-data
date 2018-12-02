@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.3 - Homepage <http://www.js-data.io/>
+* @version 3.0.4 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -5657,9 +5657,9 @@
           });
           if (utils.isFunction(record.off)) {
             record.off('all', this._onRecordEvent, this);
-            if (!opts.silent) {
-              this.emit('remove', record);
-            }
+          }
+          if (!opts.silent) {
+            this.emit('remove', record);
           }
         }
       }
@@ -13691,10 +13691,10 @@
    * @type {Object}
    */
   var version = {
-  full: '3.0.3',
+  full: '3.0.4',
   major: 3,
   minor: 0,
-  patch: 3
+  patch: 4
 };
 
   exports.version = version;

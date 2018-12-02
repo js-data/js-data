@@ -239,7 +239,11 @@ export default Component.extend({
         records = [records]
         singular = true
       } else {
-        throw utils.err(`${DOMAIN}#add`, 'records')(400, 'object or array', records)
+        throw utils.err(`${DOMAIN}#add`, 'records')(
+          400,
+          'object or array',
+          records
+        )
       }
     }
 
@@ -247,7 +251,7 @@ export default Component.extend({
     // New records will be inserted. If any records map to existing records,
     // they will be merged into the existing records according to the onConflict
     // option.
-    records = records.map((record) => {
+    records = records.map(record => {
       let id = this.recordId(record)
       // Grab existing record if there is one
       const existing = id === undefined ? id : this.get(id)
@@ -261,8 +265,17 @@ export default Component.extend({
         // Here, the currently visited record corresponds to a record already
         // in the collection, so we need to merge them
         const onConflict = opts.onConflict || this.onConflict
-        if (onConflict !== 'merge' && onConflict !== 'replace' && onConflict !== 'skip') {
-          throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(400, 'one of (merge, replace, skip)', onConflict, true)
+        if (
+          onConflict !== 'merge' &&
+          onConflict !== 'replace' &&
+          onConflict !== 'skip'
+        ) {
+          throw utils.err(`${DOMAIN}#add`, 'opts.onConflict')(
+            400,
+            'one of (merge, replace, skip)',
+            onConflict,
+            true
+          )
         }
         const existingNoValidate = existing._get(noValidatePath)
         if (opts.noValidate) {
@@ -411,7 +424,9 @@ export default Component.extend({
    * @returns {Object[]|Record[]} The result.
    */
   between (leftKeys, rightKeys, opts) {
-    return this.query().between(leftKeys, rightKeys, opts).run()
+    return this.query()
+      .between(leftKeys, rightKeys, opts)
+      .run()
   },
 
   /**
@@ -437,8 +452,8 @@ export default Component.extend({
       fieldList = [name]
     }
     opts || (opts = {})
-    opts.hashCode || (opts.hashCode = (obj) => this.recordId(obj))
-    const index = this.indexes[name] = new Index(fieldList, opts)
+    opts.hashCode || (opts.hashCode = obj => this.recordId(obj))
+    const index = (this.indexes[name] = new Index(fieldList, opts))
     this.index.visitAll(index.insertRecord, index)
   },
 
@@ -483,7 +498,9 @@ export default Component.extend({
    * @since 3.0.0
    */
   filter (query, thisArg) {
-    return this.query().filter(query, thisArg).run()
+    return this.query()
+      .filter(query, thisArg)
+      .run()
   },
 
   /**
@@ -513,7 +530,12 @@ export default Component.extend({
    * @returns {(Object|Record)} The record with the given id.
    */
   get (id) {
-    const instances = id === undefined ? [] : this.query().get(id).run()
+    const instances =
+      id === undefined
+        ? []
+        : this.query()
+          .get(id)
+          .run()
     return instances.length ? instances[0] : undefined
   },
 
@@ -541,7 +563,9 @@ export default Component.extend({
    * @returns {Array} The result.
    */
   getAll (...args) {
-    return this.query().getAll(...args).run()
+    return this.query()
+      .getAll(...args)
+      .run()
   },
 
   /**
@@ -574,7 +598,9 @@ export default Component.extend({
    * @returns {Array} The result.
    */
   limit (num) {
-    return this.query().limit(num).run()
+    return this.query()
+      .limit(num)
+      .run()
   },
 
   /**
@@ -710,9 +736,9 @@ export default Component.extend({
         })
         if (utils.isFunction(record.off)) {
           record.off('all', this._onRecordEvent, this)
-          if (!opts.silent) {
-            this.emit('remove', record)
-          }
+        }
+        if (!opts.silent) {
+          this.emit('remove', record)
         }
       }
     }
@@ -737,14 +763,16 @@ export default Component.extend({
     // Default values for arguments
     opts || (opts = {})
     this.beforeRemoveAll(queryOrRecords, opts)
-    let records = utils.isArray(queryOrRecords) ? queryOrRecords.slice() : this.filter(queryOrRecords)
+    let records = utils.isArray(queryOrRecords)
+      ? queryOrRecords.slice()
+      : this.filter(queryOrRecords)
 
     // Remove each selected record from the collection
     const optsCopy = utils.plainCopy(opts)
     optsCopy.silent = true
     records = records
-      .map((record) => this.remove(record, optsCopy))
-      .filter((record) => record)
+      .map(record => this.remove(record, optsCopy))
+      .filter(record => record)
     if (!opts.silent) {
       this.emit('remove', records)
     }
@@ -765,7 +793,9 @@ export default Component.extend({
    * @returns {Array} The result.
    */
   skip (num) {
-    return this.query().skip(num).run()
+    return this.query()
+      .skip(num)
+      .run()
   },
 
   /**
