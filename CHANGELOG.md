@@ -1,3 +1,8 @@
+##### 3.0.5 - 2 December 2018
+
+###### Bug fixes
+- [#530] - Fixes #530 fire remove event
+
 ##### 3.0.4 - 28 September 2018
 
 ###### Bug fixes

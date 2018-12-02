@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.4 - Homepage <http://www.js-data.io/>
+* @version 3.0.5 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -13691,10 +13691,10 @@
    * @type {Object}
    */
   var version = {
-  full: '3.0.4',
+  full: '3.0.5',
   major: 3,
   minor: 0,
-  patch: 4
+  patch: 5
 };
 
   exports.version = version;
