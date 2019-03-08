@@ -1,11 +1,7 @@
 import utils from './utils'
 
-import {
-  belongsToType,
-  hasManyType,
-  hasOneType
-} from './decorators'
-import {proxiedMapperMethods, Container} from './Container'
+import { belongsToType, hasManyType, hasOneType } from './decorators'
+import { proxiedMapperMethods, Container } from './Container'
 import Collection from './Collection'
 
 const DOMAIN = 'SimpleStore'
@@ -359,6 +355,7 @@ function SimpleStore (opts) {
   this._collections = {}
   this._pendingQueries = {}
   this._completedQueries = {}
+  this._completedQueriesHighestFindLimit = {}
 }
 
 const props = {
@@ -727,7 +724,42 @@ const props = {
    * @since 3.0.0
    */
   cacheFindAll (name, data, hash, opts) {
-    this._completedQueries[name][hash] = (name, hash, opts) => this.filter(name, utils.fromJson(hash))
+    const query = utils.fromJson(hash)
+
+    if (query.limit) {
+      const _hash = utils.toJson(query.where)
+      const currentHFL =
+        this._completedQueriesHighestFindLimit[name][_hash] || 0
+
+      if ((query.offset || 0) + query.limit > currentHFL) {
+        this._completedQueriesHighestFindLimit[name][_hash] =
+          (query.offset || 0) - currentHFL
+      }
+    }
+
+    this._completedQueries[name][hash] = (name, hash, opts) => {
+      const query = utils.fromJson(hash)
+      const _hash = utils.toJson(query.where)
+
+      // const currentHFL = this._completedQueriesHighestFindLimit[name][_hash]
+      // console.log('currentHFL', currentHFL)
+      // console.log('query.offset', query.offset)
+      // console.log('query.limit', query.limit)
+
+      if (
+        query.offset >
+        this._completedQueriesHighestFindLimit[name][_hash] - query.limit
+      ) {
+        query.offset =
+          this._completedQueriesHighestFindLimit[name][_hash] - query.limit
+      }
+
+      // console.log('after adj.')
+      // console.log('query.offset', query.offset)
+      // console.log('query.limit', query.limit)
+
+      return this.filter(name, query)
+    }
   },
 
   /**
@@ -837,8 +869,9 @@ const props = {
    */
   create (name, record, opts) {
     opts || (opts = {})
-    return Container.prototype.create.call(this, name, record, opts)
-      .then((result) => this._end(name, result, opts))
+    return Container.prototype.create
+      .call(this, name, record, opts)
+      .then(result => this._end(name, result, opts))
   },
 
   /**
@@ -934,8 +967,9 @@ const props = {
    */
   createMany (name, records, opts) {
     opts || (opts = {})
-    return Container.prototype.createMany.call(this, name, records, opts)
-      .then((result) => this._end(name, result, opts))
+    return Container.prototype.createMany
+      .call(this, name, records, opts)
+      .then(result => this._end(name, result, opts))
   },
 
   defineMapper (name, opts) {
@@ -943,7 +977,9 @@ const props = {
     const mapper = Container.prototype.defineMapper.call(self, name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
-    mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
+    self._completedQueriesHighestFindLimit[name] = {}
+    mapper.relationList ||
+      Object.defineProperty(mapper, 'relationList', { value: [] })
 
     let collectionOpts = {
       // Make sure the collection has somewhere to store "added" timestamps
@@ -954,12 +990,15 @@ const props = {
       mapper
     }
 
-    if (opts && ('onConflict' in opts)) {
+    if (opts && 'onConflict' in opts) {
       collectionOpts.onConflict = opts.onConflict
     }
 
     // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
-    const collection = self._collections[name] = new self.collectionClass(null, collectionOpts)  // eslint-disable-line
+    const collection = (self._collections[name] = new self.collectionClass( // eslint-disable-line
+      null,
+      collectionOpts
+    ))
 
     const schema = mapper.schema || {}
     const properties = schema.properties || {}
@@ -1078,18 +1117,20 @@ const props = {
    */
   destroy (name, id, opts) {
     opts || (opts = {})
-    return Container.prototype.destroy.call(this, name, id, opts).then((result) => {
-      const record = this.getCollection(name).remove(id, opts)
+    return Container.prototype.destroy
+      .call(this, name, id, opts)
+      .then(result => {
+        const record = this.getCollection(name).remove(id, opts)
 
-      if (opts.raw) {
-        result.data = record
-      } else {
-        result = record
-      }
-      delete this._pendingQueries[name][id]
-      delete this._completedQueries[name][id]
-      return result
-    })
+        if (opts.raw) {
+          result.data = record
+        } else {
+          result = record
+        }
+        delete this._pendingQueries[name][id]
+        delete this._completedQueries[name][id]
+        return result
+      })
   },
 
   /**
@@ -1183,19 +1224,21 @@ const props = {
    */
   destroyAll (name, query, opts) {
     opts || (opts = {})
-    return Container.prototype.destroyAll.call(this, name, query, opts).then((result) => {
-      const records = this.getCollection(name).removeAll(query, opts)
+    return Container.prototype.destroyAll
+      .call(this, name, query, opts)
+      .then(result => {
+        const records = this.getCollection(name).removeAll(query, opts)
 
-      if (opts.raw) {
-        result.data = records
-      } else {
-        result = records
-      }
-      const hash = this.hashQuery(name, query, opts)
-      delete this._pendingQueries[name][hash]
-      delete this._completedQueries[name][hash]
-      return result
-    })
+        if (opts.raw) {
+          result.data = records
+        } else {
+          result = records
+        }
+        const hash = this.hashQuery(name, query, opts)
+        delete this._pendingQueries[name][hash]
+        delete this._completedQueries[name][hash]
+        return result
+      })
   },
 
   eject (name, id, opts) {
@@ -1204,7 +1247,9 @@ const props = {
   },
 
   ejectAll (name, query, opts) {
-    console.warn('DEPRECATED: "ejectAll" is deprecated, use "removeAll" instead')
+    console.warn(
+      'DEPRECATED: "ejectAll" is deprecated, use "removeAll" instead'
+    )
     return this.removeAll(name, query, opts)
   },
 
@@ -1295,26 +1340,38 @@ const props = {
     opts || (opts = {})
     const mapper = this.getMapper(name)
     const pendingQuery = this._pendingQueries[name][id]
-    const usePendingFind = opts.usePendingFind === undefined ? this.usePendingFind : opts.usePendingFind
+    const usePendingFind =
+      opts.usePendingFind === undefined
+        ? this.usePendingFind
+        : opts.usePendingFind
     utils._(opts, mapper)
 
-    if (pendingQuery && (utils.isFunction(usePendingFind) ? usePendingFind.call(this, name, id, opts) : usePendingFind)) {
+    if (
+      pendingQuery &&
+      (utils.isFunction(usePendingFind)
+        ? usePendingFind.call(this, name, id, opts)
+        : usePendingFind)
+    ) {
       return pendingQuery
     }
     const item = this.cachedFind(name, id, opts)
 
     if (opts.force || !item) {
-      const promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts)
-      return promise
-        .then((result) => {
+      const promise = (this._pendingQueries[name][
+        id
+      ] = Container.prototype.find.call(this, name, id, opts))
+      return promise.then(
+        result => {
           delete this._pendingQueries[name][id]
           result = this._end(name, result, opts)
           this.cacheFind(name, result, id, opts)
           return result
-        }, (err) => {
+        },
+        err => {
           delete this._pendingQueries[name][id]
           return utils.reject(err)
-        })
+        }
+      )
     }
 
     return utils.resolve(item)
@@ -1408,27 +1465,39 @@ const props = {
     const mapper = this.getMapper(name)
     const hash = this.hashQuery(name, query, opts)
     const pendingQuery = this._pendingQueries[name][hash]
-    const usePendingFindAll = opts.usePendingFindAll === undefined ? this.usePendingFindAll : opts.usePendingFindAll
+    const usePendingFindAll =
+      opts.usePendingFindAll === undefined
+        ? this.usePendingFindAll
+        : opts.usePendingFindAll
     utils._(opts, mapper)
 
-    if (pendingQuery && (utils.isFunction(usePendingFindAll) ? usePendingFindAll.call(this, name, query, opts) : usePendingFindAll)) {
+    if (
+      pendingQuery &&
+      (utils.isFunction(usePendingFindAll)
+        ? usePendingFindAll.call(this, name, query, opts)
+        : usePendingFindAll)
+    ) {
       return pendingQuery
     }
 
     const items = this.cachedFindAll(name, hash, opts)
 
     if (opts.force || !items) {
-      const promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts)
-      return promise
-        .then((result) => {
+      const promise = (this._pendingQueries[name][
+        hash
+      ] = Container.prototype.findAll.call(this, name, query, opts))
+      return promise.then(
+        result => {
           delete this._pendingQueries[name][hash]
           result = this._end(name, result, opts)
           this.cacheFindAll(name, result, hash, opts)
           return result
-        }, (err) => {
+        },
+        err => {
           delete this._pendingQueries[name][hash]
           return utils.reject(err)
-        })
+        }
+      )
     }
 
     return utils.resolve(items)
@@ -1551,7 +1620,9 @@ const props = {
     if (!query || !Object.keys(query).length) {
       this._completedQueries[name] = {}
     } else {
-      this._completedQueries[name][this.hashQuery(name, query, opts)] = undefined
+      this._completedQueries[name][
+        this.hashQuery(name, query, opts)
+      ] = undefined
     }
     const records = this.getCollection(name).removeAll(query, opts)
     if (records.length) {
@@ -1579,16 +1650,19 @@ const props = {
       records = [records]
     }
     utils.forEachRelation(this.getMapper(name), opts, (def, optsCopy) => {
-      records.forEach((record) => {
+      records.forEach(record => {
         let relatedData
         let query
-        if (def.foreignKey && (def.type === hasOneType || def.type === hasManyType)) {
+        if (
+          def.foreignKey &&
+          (def.type === hasOneType || def.type === hasManyType)
+        ) {
           query = { [def.foreignKey]: def.getForeignKey(record) }
         } else if (def.type === hasManyType && def.localKeys) {
           query = {
             where: {
               [def.getRelation().idAttribute]: {
-                'in': utils.get(record, def.localKeys)
+                in: utils.get(record, def.localKeys)
               }
             }
           }
@@ -1596,12 +1670,16 @@ const props = {
           query = {
             where: {
               [def.foreignKeys]: {
-                'contains': def.getForeignKey(record)
+                contains: def.getForeignKey(record)
               }
             }
           }
         } else if (def.type === belongsToType) {
-          relatedData = this.remove(def.relation, def.getForeignKey(record), optsCopy)
+          relatedData = this.remove(
+            def.relation,
+            def.getForeignKey(record),
+            optsCopy
+          )
         }
         if (query) {
           relatedData = this.removeAll(def.relation, query, optsCopy)
@@ -1707,8 +1785,9 @@ const props = {
    */
   update (name, id, record, opts) {
     opts || (opts = {})
-    return Container.prototype.update.call(this, name, id, record, opts)
-      .then((result) => this._end(name, result, opts))
+    return Container.prototype.update
+      .call(this, name, id, record, opts)
+      .then(result => this._end(name, result, opts))
   },
 
   /**
@@ -1799,8 +1878,9 @@ const props = {
    */
   updateAll (name, props, query, opts) {
     opts || (opts = {})
-    return Container.prototype.updateAll.call(this, name, props, query, opts)
-      .then((result) => this._end(name, result, opts))
+    return Container.prototype.updateAll
+      .call(this, name, props, query, opts)
+      .then(result => this._end(name, result, opts))
   },
 
   /**
@@ -1891,8 +1971,9 @@ const props = {
    */
   updateMany (name, records, opts) {
     opts || (opts = {})
-    return Container.prototype.updateMany.call(this, name, records, opts)
-      .then((result) => this._end(name, result, opts))
+    return Container.prototype.updateMany
+      .call(this, name, records, opts)
+      .then(result => this._end(name, result, opts))
   }
 }
 
