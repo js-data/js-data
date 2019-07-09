@@ -52,7 +52,7 @@ var toConsumableArray = function (arr) {
 var DOMAIN = 'utils';
 
 var INFINITY = 1 / 0;
-var MAX_INTEGER = 1.7976931348623157e+308;
+var MAX_INTEGER = 1.7976931348623157e308;
 var BOOL_TAG = '[object Boolean]';
 var DATE_TAG = '[object Date]';
 var FUNC_TAG = '[object Function]';
@@ -905,7 +905,7 @@ var utils = {
    * @see utils.set
    * @since 3.0.0
    */
-  'get': function get$$1(object, prop) {
+  get: function get$$1(object, prop) {
     if (!prop) {
       return;
     }
@@ -981,6 +981,8 @@ var utils = {
     if (!array1 || !array2) {
       return [];
     }
+    array1 = Array.isArray(array1) ? array1 : [array1];
+    array2 = Array.isArray(array2) ? array2 : [array2];
     var result = [];
     var item = void 0;
     var i = void 0;

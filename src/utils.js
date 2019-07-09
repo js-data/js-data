@@ -12,7 +12,7 @@
 const DOMAIN = 'utils'
 
 const INFINITY = 1 / 0
-const MAX_INTEGER = 1.7976931348623157e+308
+const MAX_INTEGER = 1.7976931348623157e308
 const BOOL_TAG = '[object Boolean]'
 const DATE_TAG = '[object Date]'
 const FUNC_TAG = '[object Function]'
@@ -24,8 +24,14 @@ const objToString = Object.prototype.toString
 const PATH = /^(.+)\.(.+)$/
 
 const ERRORS = {
-  '400' () { return `expected: ${arguments[0]}, found: ${arguments[2] ? arguments[1] : typeof arguments[1]}` },
-  '404' () { return `${arguments[0]} not found` }
+  '400' () {
+    return `expected: ${arguments[0]}, found: ${
+      arguments[2] ? arguments[1] : typeof arguments[1]
+    }`
+  },
+  '404' () {
+    return `${arguments[0]} not found`
+  }
 }
 
 const toInteger = function (value) {
@@ -35,7 +41,7 @@ const toInteger = function (value) {
   // Coerce to number
   value = +value
   if (value === INFINITY || value === -INFINITY) {
-    const sign = (value < 0 ? -1 : 1)
+    const sign = value < 0 ? -1 : 1
     return sign * MAX_INTEGER
   }
   const remainder = value % 1
@@ -47,7 +53,7 @@ const toStr = function (value) {
 }
 
 const isPlainObject = function (value) {
-  return (!!value && typeof value === 'object' && value.constructor === Object)
+  return !!value && typeof value === 'object' && value.constructor === Object
 }
 
 const mkdirP = function (object, path) {
@@ -96,7 +102,12 @@ const utils = {
    */
   _ (dest, src) {
     utils.forOwn(src, function (value, key) {
-      if (key && dest[key] === undefined && !utils.isFunction(value) && key.indexOf('_') !== 0) {
+      if (
+        key &&
+        dest[key] === undefined &&
+        !utils.isFunction(value) &&
+        key.indexOf('_') !== 0
+      ) {
         dest[key] = value
       }
     })
@@ -138,7 +149,12 @@ const utils = {
     optsCopy.with = opts.with.slice()
     optsCopy._activeWith = optsCopy.with.splice(index, 1)[0]
     optsCopy.with.forEach(function (relation, i) {
-      if (relation && relation.indexOf(containedName) === 0 && relation.length >= containedName.length && relation[containedName.length] === '.') {
+      if (
+        relation &&
+        relation.indexOf(containedName) === 0 &&
+        relation.length >= containedName.length &&
+        relation[containedName.length] === '.'
+      ) {
         optsCopy.with[i] = relation.substr(containedName.length + 1)
       } else {
         optsCopy.with[i] = ''
@@ -225,9 +241,10 @@ const utils = {
   areDifferent (newObject, oldObject, opts) {
     opts || (opts = {})
     const diff = utils.diffObjects(newObject, oldObject, opts)
-    const diffCount = Object.keys(diff.added).length +
-    Object.keys(diff.removed).length +
-    Object.keys(diff.changed).length
+    const diffCount =
+      Object.keys(diff.added).length +
+      Object.keys(diff.removed).length +
+      Object.keys(diff.changed).length
     return diffCount > 0
   },
 
@@ -293,13 +310,23 @@ const utils = {
           if (plain) {
             to = utils.copy(from, {}, stackFrom, stackTo, blacklist, plain)
           } else {
-            to = utils.copy(from, Object.create(Object.getPrototypeOf(from)), stackFrom, stackTo, blacklist, plain)
+            to = utils.copy(
+              from,
+              Object.create(Object.getPrototypeOf(from)),
+              stackFrom,
+              stackTo,
+              blacklist,
+              plain
+            )
           }
         }
       }
     } else {
       if (from === to) {
-        throw utils.err(`${DOMAIN}.copy`)(500, 'Cannot copy! Source and destination are identical.')
+        throw utils.err(`${DOMAIN}.copy`)(
+          500,
+          'Cannot copy! Source and destination are identical.'
+        )
       }
 
       stackFrom = stackFrom || []
@@ -320,7 +347,14 @@ const utils = {
         let i
         to.length = 0
         for (i = 0; i < from.length; i++) {
-          result = utils.copy(from[i], null, stackFrom, stackTo, blacklist, plain)
+          result = utils.copy(
+            from[i],
+            null,
+            stackFrom,
+            stackTo,
+            blacklist,
+            plain
+          )
           if (utils.isObject(from[i])) {
             stackFrom.push(from[i])
             stackTo.push(result)
@@ -340,7 +374,14 @@ const utils = {
             if (utils.isBlacklisted(key, blacklist)) {
               continue
             }
-            result = utils.copy(from[key], null, stackFrom, stackTo, blacklist, plain)
+            result = utils.copy(
+              from[key],
+              null,
+              stackFrom,
+              stackTo,
+              blacklist,
+              plain
+            )
             if (utils.isObject(from[key])) {
               stackFrom.push(from[key])
               stackTo.push(result)
@@ -523,7 +564,10 @@ http://www.js-data.io/v3.0/docs/errors#400]
   err (domain, target) {
     return function (code) {
       const prefix = `[${domain}:${target}] `
-      let message = ERRORS[code].apply(null, Array.prototype.slice.call(arguments, 1))
+      let message = ERRORS[code].apply(
+        null,
+        Array.prototype.slice.call(arguments, 1)
+      )
       message = `${prefix}${message}
 http://www.js-data.io/v3.0/docs/errors#${code}`
       return new Error(message)
@@ -552,8 +596,12 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     target = target || this
     let _events = {}
     if (!getter && !setter) {
-      getter = function () { return _events }
-      setter = function (value) { _events = value }
+      getter = function () {
+        return _events
+      }
+      setter = function (value) {
+        _events = value
+      }
     }
     Object.defineProperties(target, {
       emit: {
@@ -831,16 +879,18 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * @see utils.set
    * @since 3.0.0
    */
-  'get': function (object, prop) {
+  get: function (object, prop) {
     if (!prop) {
       return
     }
     const parts = prop.split('.')
     const last = parts.pop()
 
-    while (prop = parts.shift()) { // eslint-disable-line
+    while ((prop = parts.shift())) {
+      // eslint-disable-line
       object = object[prop]
-      if (object == null) { // eslint-disable-line
+      if (object == null) {
+        // eslint-disable-line
         return
       }
     }
@@ -904,6 +954,8 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     if (!array1 || !array2) {
       return []
     }
+    array1 = Array.isArray(array1) ? array1 : [array1]
+    array2 = Array.isArray(array2) ? array2 : [array2]
     const result = []
     let item
     let i
@@ -961,7 +1013,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     }
     let matches
     for (var i = 0; i < blacklist.length; i++) {
-      if ((toStr(blacklist[i]) === REGEXP_TAG && blacklist[i].test(prop)) || blacklist[i] === prop) {
+      if (
+        (toStr(blacklist[i]) === REGEXP_TAG && blacklist[i].test(prop)) ||
+        blacklist[i] === prop
+      ) {
         matches = prop
         return !!matches
       }
@@ -1004,7 +1059,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * @since 3.0.0
    */
   isDate (value) {
-    return (value && typeof value === 'object' && toStr(value) === DATE_TAG)
+    return value && typeof value === 'object' && toStr(value) === DATE_TAG
   },
 
   /**
@@ -1085,7 +1140,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    */
   isNumber (value) {
     const type = typeof value
-    return type === 'number' || (value && type === 'object' && toStr(value) === NUMBER_TAG)
+    return (
+      type === 'number' ||
+      (value && type === 'object' && toStr(value) === NUMBER_TAG)
+    )
   },
 
   /**
@@ -1164,7 +1222,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    * @since 3.0.0
    */
   isString (value) {
-    return typeof value === 'string' || (value && typeof value === 'object' && toStr(value) === STRING_TAG)
+    return (
+      typeof value === 'string' ||
+      (value && typeof value === 'object' && toStr(value) === STRING_TAG)
+    )
   },
 
   /**
@@ -1223,7 +1284,8 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
         if (level === 'debug' && !this.debug) {
           return
         }
-        const prefix = `${level.toUpperCase()}: (${this.name || this.constructor.name})`
+        const prefix = `${level.toUpperCase()}: (${this.name ||
+          this.constructor.name})`
         if (utils.isFunction(console[level])) {
           console[level](prefix, ...args)
         } else {
@@ -1575,9 +1637,11 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     const parts = path.split('.')
     const last = parts.pop()
 
-    while (path = parts.shift()) { // eslint-disable-line
+    while ((path = parts.shift())) {
+      // eslint-disable-line
       object = object[path]
-      if (object == null) { // eslint-disable-line
+      if (object == null) {
+        // eslint-disable-line
         return
       }
     }
