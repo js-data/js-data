@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.5 - Homepage <http://www.js-data.io/>
+* @version 3.0.6 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -8028,7 +8028,9 @@ var Mapper$1 = Component$1.extend({
     opts.adapter = this.getAdapterName(opts);
 
     opts.op = 'beforeCreate';
-    return this._runHook(opts.op, props, opts).then(function (props) {
+    return this._runHook(opts.op, props, opts).then(function (_value) {
+      // Allow for re-assignment from lifecycle hook
+      props = _value !== undefined ? _value : props;
       opts.with || (opts.with = []);
       return _this2._createParentRecordIfRequired(props, opts);
     }).then(function (relationMap) {
@@ -8271,7 +8273,9 @@ var Mapper$1 = Component$1.extend({
 
     // beforeCreateMany lifecycle hook
     opts.op = 'beforeCreateMany';
-    return this._runHook(opts.op, records, opts).then(function (records) {
+    return this._runHook(opts.op, records, opts).then(function (_recordValues) {
+      // Allow for re-assignment from lifecycle hook
+      records = _recordValues !== undefined ? _recordValues : records;
       // Deep pre-create belongsTo relations
       var belongsToRelationData = {};
       opts.with || (opts.with = []);
@@ -13687,10 +13691,10 @@ var DataStore$1 = SimpleStore$1.extend(props$2);
  * @type {Object}
  */
 var version = {
-  full: '3.0.5',
+  full: '3.0.6',
   major: 3,
   minor: 0,
-  patch: 5
+  patch: 6
 };
 
 export { version, Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, SimpleStore$1 as SimpleStore, utils, belongsTo, hasMany, hasOne, belongsToType, hasManyType, hasOneType };

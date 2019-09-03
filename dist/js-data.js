@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.5 - Homepage <http://www.js-data.io/>
+* @version 3.0.6 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -8034,7 +8034,9 @@
       opts.adapter = this.getAdapterName(opts);
 
       opts.op = 'beforeCreate';
-      return this._runHook(opts.op, props, opts).then(function (props) {
+      return this._runHook(opts.op, props, opts).then(function (_value) {
+        // Allow for re-assignment from lifecycle hook
+        props = _value !== undefined ? _value : props;
         opts.with || (opts.with = []);
         return _this2._createParentRecordIfRequired(props, opts);
       }).then(function (relationMap) {
@@ -8277,7 +8279,9 @@
 
       // beforeCreateMany lifecycle hook
       opts.op = 'beforeCreateMany';
-      return this._runHook(opts.op, records, opts).then(function (records) {
+      return this._runHook(opts.op, records, opts).then(function (_recordValues) {
+        // Allow for re-assignment from lifecycle hook
+        records = _recordValues !== undefined ? _recordValues : records;
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
         opts.with || (opts.with = []);
@@ -13693,10 +13697,10 @@
    * @type {Object}
    */
   var version = {
-  full: '3.0.5',
+  full: '3.0.6',
   major: 3,
   minor: 0,
-  patch: 5
+  patch: 6
 };
 
   exports.version = version;
