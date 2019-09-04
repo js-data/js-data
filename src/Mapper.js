@@ -971,7 +971,6 @@ export default Component.extend({
     // Default values for arguments
     props || (props = {})
     opts || (opts = {})
-    const originalRecord = props
     let parentRelationMap = {}
     let adapterResponse = {}
 
@@ -1001,7 +1000,7 @@ export default Component.extend({
         originalProps: props
       })
     }).then((createdProps) => {
-      return this._commitChanges(originalRecord, createdProps)
+      return this._commitChanges(props, createdProps)
     }).then((record) => {
       if (opts.raw) {
         adapterResponse.data = record
@@ -1206,7 +1205,6 @@ export default Component.extend({
     // Default values for arguments
     records || (records = [])
     opts || (opts = {})
-    const originalRecords = records
     let adapterResponse
 
     // Fill in "opts" with the Mapper's configuration
@@ -1282,7 +1280,7 @@ export default Component.extend({
           }
         })
         return utils.Promise.all(tasks).then(() => {
-          return this._commitChanges(originalRecords, createdRecordsData)
+          return this._commitChanges(records, createdRecordsData)
         })
       })
     }).then((records) => {

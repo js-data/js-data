@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.6 - Homepage <http://www.js-data.io/>
+* @version 3.0.7 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -8025,7 +8025,6 @@
       // Default values for arguments
       props || (props = {});
       opts || (opts = {});
-      var originalRecord = props;
       var parentRelationMap = {};
       var adapterResponse = {};
 
@@ -8055,7 +8054,7 @@
           originalProps: props
         });
       }).then(function (createdProps) {
-        return _this2._commitChanges(originalRecord, createdProps);
+        return _this2._commitChanges(props, createdProps);
       }).then(function (record) {
         if (opts.raw) {
           adapterResponse.data = record;
@@ -8270,7 +8269,6 @@
       // Default values for arguments
       records || (records = []);
       opts || (opts = {});
-      var originalRecords = records;
       var adapterResponse = void 0;
 
       // Fill in "opts" with the Mapper's configuration
@@ -8348,7 +8346,7 @@
             }
           });
           return utils.Promise.all(tasks).then(function () {
-            return _this4._commitChanges(originalRecords, createdRecordsData);
+            return _this4._commitChanges(records, createdRecordsData);
           });
         });
       }).then(function (records) {
@@ -13697,10 +13695,10 @@
    * @type {Object}
    */
   var version = {
-  full: '3.0.6',
+  full: '3.0.7',
   major: 3,
   minor: 0,
-  patch: 6
+  patch: 7
 };
 
   exports.version = version;

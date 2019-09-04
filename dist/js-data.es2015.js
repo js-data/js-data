@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.6 - Homepage <http://www.js-data.io/>
+* @version 3.0.7 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -8019,7 +8019,6 @@ var Mapper$1 = Component$1.extend({
     // Default values for arguments
     props || (props = {});
     opts || (opts = {});
-    var originalRecord = props;
     var parentRelationMap = {};
     var adapterResponse = {};
 
@@ -8049,7 +8048,7 @@ var Mapper$1 = Component$1.extend({
         originalProps: props
       });
     }).then(function (createdProps) {
-      return _this2._commitChanges(originalRecord, createdProps);
+      return _this2._commitChanges(props, createdProps);
     }).then(function (record) {
       if (opts.raw) {
         adapterResponse.data = record;
@@ -8264,7 +8263,6 @@ var Mapper$1 = Component$1.extend({
     // Default values for arguments
     records || (records = []);
     opts || (opts = {});
-    var originalRecords = records;
     var adapterResponse = void 0;
 
     // Fill in "opts" with the Mapper's configuration
@@ -8342,7 +8340,7 @@ var Mapper$1 = Component$1.extend({
           }
         });
         return utils.Promise.all(tasks).then(function () {
-          return _this4._commitChanges(originalRecords, createdRecordsData);
+          return _this4._commitChanges(records, createdRecordsData);
         });
       });
     }).then(function (records) {
@@ -13691,10 +13689,10 @@ var DataStore$1 = SimpleStore$1.extend(props$2);
  * @type {Object}
  */
 var version = {
-  full: '3.0.6',
+  full: '3.0.7',
   major: 3,
   minor: 0,
-  patch: 6
+  patch: 7
 };
 
 export { version, Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, SimpleStore$1 as SimpleStore, utils, belongsTo, hasMany, hasOne, belongsToType, hasManyType, hasOneType };
