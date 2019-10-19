@@ -883,6 +883,9 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     if (!prop) {
       return
     }
+    if(utils.isFunction(prop)){
++      return prop(object);
++   }
     const parts = prop.split('.')
     const last = parts.pop()
 
