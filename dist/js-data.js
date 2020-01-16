@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.5 - Homepage <http://www.js-data.io/>
+* @version 3.0.6 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -10,16 +10,24 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define('js-data', ['exports'], factory) :
-  (factory((global.JSData = {})));
+  (global = global || self, factory(global.JSData = {}));
 }(this, (function (exports) { 'use strict';
 
-  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-    return typeof obj;
-  } : function (obj) {
-    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  };
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
 
-  var defineProperty = function (obj, key, value) {
+    return _typeof(obj);
+  }
+
+  function _defineProperty(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -32,17 +40,27 @@
     }
 
     return obj;
-  };
+  }
 
-  var toConsumableArray = function (arr) {
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+  }
+
+  function _arrayWithoutHoles(arr) {
     if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
 
       return arr2;
-    } else {
-      return Array.from(arr);
     }
-  };
+  }
+
+  function _iterableToArray(iter) {
+    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+  }
+
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance");
+  }
 
   /**
    * Utility methods used by JSData.
@@ -54,9 +72,7 @@
    * @namespace utils
    * @type {Object}
    */
-
   var DOMAIN = 'utils';
-
   var INFINITY = 1 / 0;
   var MAX_INTEGER = 1.7976931348623157e308;
   var BOOL_TAG = '[object Boolean]';
@@ -68,26 +84,28 @@
   var STRING_TAG = '[object String]';
   var objToString = Object.prototype.toString;
   var PATH = /^(.+)\.(.+)$/;
-
   var ERRORS = {
     '400': function _() {
-      return 'expected: ' + arguments[0] + ', found: ' + (arguments[2] ? arguments[1] : _typeof(arguments[1]));
+      return "expected: ".concat(arguments[0], ", found: ").concat(arguments[2] ? arguments[1] : _typeof(arguments[1]));
     },
     '404': function _() {
-      return arguments[0] + ' not found';
+      return "".concat(arguments[0], " not found");
     }
   };
 
   var toInteger = function toInteger(value) {
     if (!value) {
       return 0;
-    }
-    // Coerce to number
+    } // Coerce to number
+
+
     value = +value;
+
     if (value === INFINITY || value === -INFINITY) {
       var sign = value < 0 ? -1 : 1;
       return sign * MAX_INTEGER;
     }
+
     var remainder = value % 1;
     return value === value ? remainder ? value - remainder : value : 0; // eslint-disable-line
   };
@@ -97,18 +115,20 @@
   };
 
   var isPlainObject = function isPlainObject(value) {
-    return !!value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && value.constructor === Object;
+    return !!value && _typeof(value) === 'object' && value.constructor === Object;
   };
 
   var mkdirP = function mkdirP(object, path) {
     if (!path) {
       return object;
     }
+
     var parts = path.split('.');
     parts.forEach(function (key) {
       if (!object[key]) {
         object[key] = {};
       }
+
       object = object[key];
     });
     return object;
@@ -152,7 +172,6 @@
       });
     },
 
-
     /**
      * Recursively iterates over relations found in `opts.with`.
      *
@@ -167,7 +186,7 @@
     _forRelation: function _forRelation(opts, def, fn, thisArg) {
       var relationName = def.relation;
       var containedName = null;
-      var index = void 0;
+      var index;
       opts || (opts = {});
       opts.with || (opts.with = []);
 
@@ -183,6 +202,7 @@
       } else if (!containedName) {
         return;
       }
+
       var optsCopy = {};
       utils.fillIn(optsCopy, def.getRelation());
       utils.fillIn(optsCopy, opts);
@@ -197,7 +217,6 @@
       });
       fn.call(thisArg, def, optsCopy);
     },
-
 
     /**
      * Find the index of a relation in the given list
@@ -224,7 +243,6 @@
       return index;
     },
 
-
     /**
      * Define hidden (non-enumerable), writable properties on `target` from the
      * provided `props`.
@@ -249,13 +267,11 @@
       var map = {};
       Object.keys(props).forEach(function (propName) {
         var descriptor = Object.getOwnPropertyDescriptor(props, propName);
-
         descriptor.enumerable = false;
         map[propName] = descriptor;
       });
       Object.defineProperties(target, map);
     },
-
 
     /**
      * Return whether the two objects are deeply different.
@@ -283,7 +299,6 @@
       return diffCount > 0;
     },
 
-
     /**
      * Verified that the given constructor is being invoked via `new`, as opposed
      * to just being called like a normal function.
@@ -304,12 +319,11 @@
      * @throws {Error} Throws an error if the constructor is being improperly
      * invoked.
      */
-    classCallCheck: function classCallCheck$$1(instance, ctor) {
+    classCallCheck: function classCallCheck(instance, ctor) {
       if (!(instance instanceof ctor)) {
-        throw utils.err('' + ctor.name)(500, 'Cannot call a class as a function');
+        throw utils.err("".concat(ctor.name))(500, 'Cannot call a class as a function');
       }
     },
-
 
     /**
      * Deep copy a value.
@@ -335,6 +349,7 @@
     copy: function copy(from, to, stackFrom, stackTo, blacklist, plain) {
       if (!to) {
         to = from;
+
         if (from) {
           if (utils.isArray(from)) {
             to = utils.copy(from, [], stackFrom, stackTo, blacklist, plain);
@@ -353,7 +368,7 @@
         }
       } else {
         if (from === to) {
-          throw utils.err(DOMAIN + '.copy')(500, 'Cannot copy! Source and destination are identical.');
+          throw utils.err("".concat(DOMAIN, ".copy"))(500, 'Cannot copy! Source and destination are identical.');
         }
 
         stackFrom = stackFrom || [];
@@ -361,6 +376,7 @@
 
         if (utils.isObject(from)) {
           var index = stackFrom.indexOf(from);
+
           if (index !== -1) {
             return stackTo[index];
           }
@@ -369,16 +385,20 @@
           stackTo.push(to);
         }
 
-        var result = void 0;
+        var result;
+
         if (utils.isArray(from)) {
-          var i = void 0;
+          var i;
           to.length = 0;
+
           for (i = 0; i < from.length; i++) {
             result = utils.copy(from[i], null, stackFrom, stackTo, blacklist, plain);
+
             if (utils.isObject(from[i])) {
               stackFrom.push(from[i]);
               stackTo.push(result);
             }
+
             to.push(result);
           }
         } else {
@@ -389,24 +409,28 @@
               delete to[key];
             });
           }
+
           for (var key in from) {
             if (from.hasOwnProperty(key)) {
               if (utils.isBlacklisted(key, blacklist)) {
                 continue;
               }
+
               result = utils.copy(from[key], null, stackFrom, stackTo, blacklist, plain);
+
               if (utils.isObject(from[key])) {
                 stackFrom.push(from[key]);
                 stackTo.push(result);
               }
+
               to[key] = result;
             }
           }
         }
       }
+
       return to;
     },
-
 
     /**
      * Recursively shallow fill in own enumerable properties from `source` to
@@ -430,6 +454,7 @@
       if (source) {
         utils.forOwn(source, function (value, key) {
           var existing = dest[key];
+
           if (isPlainObject(value) && isPlainObject(existing)) {
             utils.deepFillIn(existing, value);
           } else if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
@@ -437,9 +462,9 @@
           }
         });
       }
+
       return dest;
     },
-
 
     /**
      * Recursively shallow copy enumerable properties from `source` to `dest`.
@@ -463,6 +488,7 @@
         for (var key in source) {
           var value = source[key];
           var existing = dest[key];
+
           if (isPlainObject(value) && isPlainObject(existing)) {
             utils.deepMixIn(existing, value);
           } else {
@@ -470,9 +496,9 @@
           }
         }
       }
+
       return dest;
     },
-
 
     /**
      * Return a diff of the base object to the comparison object.
@@ -505,6 +531,7 @@
         changed: {},
         removed: {}
       };
+
       if (!utils.isFunction(equalsFn)) {
         equalsFn = utils.deepEqual;
       }
@@ -514,34 +541,33 @@
       });
       var oldKeys = Object.keys(oldObject).filter(function (key) {
         return !utils.isBlacklisted(key, blacklist);
-      });
+      }); // Check for properties that were added or changed
 
-      // Check for properties that were added or changed
       newKeys.forEach(function (key) {
         var oldValue = oldObject[key];
         var newValue = newObject[key];
+
         if (equalsFn(oldValue, newValue)) {
           return;
         }
+
         if (oldValue === undefined) {
           diff.added[key] = newValue;
         } else {
           diff.changed[key] = newValue;
         }
-      });
+      }); // Check for properties that were removed
 
-      // Check for properties that were removed
       oldKeys.forEach(function (key) {
         var oldValue = oldObject[key];
         var newValue = newObject[key];
+
         if (newValue === undefined && oldValue !== undefined) {
           diff.removed[key] = undefined;
         }
       });
-
       return diff;
     },
-
 
     /**
      * Return whether the two values are equal according to the `==` operator.
@@ -562,7 +588,6 @@
       return a == b; // eslint-disable-line
     },
 
-
     /**
      * Produce a factory function for making Error objects with the provided
      * metadata. Used throughout the various js-data components.
@@ -581,13 +606,12 @@
      */
     err: function err(domain, target) {
       return function (code) {
-        var prefix = '[' + domain + ':' + target + '] ';
+        var prefix = "[".concat(domain, ":").concat(target, "] ");
         var message = ERRORS[code].apply(null, Array.prototype.slice.call(arguments, 1));
-        message = '' + prefix + message + '\nhttp://www.js-data.io/v3.0/docs/errors#' + code;
+        message = "".concat(prefix).concat(message, "\nhttp://www.js-data.io/v3.0/docs/errors#").concat(code);
         return new Error(message);
       };
     },
-
 
     /**
      * Add eventing capabilities into the target object.
@@ -610,31 +634,37 @@
     eventify: function eventify(target, getter, setter) {
       target = target || this;
       var _events = {};
+
       if (!getter && !setter) {
         getter = function getter() {
           return _events;
         };
+
         setter = function setter(value) {
           _events = value;
         };
       }
+
       Object.defineProperties(target, {
         emit: {
           value: function value() {
             var events = getter.call(this) || {};
 
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
               args[_key] = arguments[_key];
             }
 
             var type = args.shift();
             var listeners = events[type] || [];
-            var i = void 0;
+            var i;
+
             for (i = 0; i < listeners.length; i++) {
               listeners[i].f.apply(listeners[i].c, args);
             }
+
             listeners = events.all || [];
             args.unshift(type);
+
             for (i = 0; i < listeners.length; i++) {
               listeners[i].f.apply(listeners[i].c, args);
             }
@@ -644,6 +674,7 @@
           value: function value(type, func) {
             var events = getter.call(this);
             var listeners = events[type];
+
             if (!listeners) {
               setter.call(this, {});
             } else if (func) {
@@ -663,6 +694,7 @@
             if (!getter.call(this)) {
               setter.call(this, {});
             }
+
             var events = getter.call(this);
             events[type] = events[type] || [];
             events[type].push({
@@ -673,7 +705,6 @@
         }
       });
     },
-
 
     /**
      * Used for sublcassing. Invoke this method in the context of a superclass to
@@ -703,7 +734,8 @@
      */
     extend: function extend(props, classProps) {
       var superClass = this;
-      var _subClass = void 0;
+
+      var _subClass;
 
       props || (props = {});
       classProps || (classProps = {});
@@ -715,15 +747,15 @@
         _subClass = function subClass() {
           utils.classCallCheck(this, _subClass);
 
-          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
             args[_key2] = arguments[_key2];
           }
 
           superClass.apply(this, args);
         };
-      }
+      } // Setup inheritance of instance members
 
-      // Setup inheritance of instance members
+
       _subClass.prototype = Object.create(superClass && superClass.prototype, {
         constructor: {
           configurable: true,
@@ -732,9 +764,8 @@
           writable: true
         }
       });
+      var obj = Object; // Setup inheritance of static members
 
-      var obj = Object;
-      // Setup inheritance of static members
       if (obj.setPrototypeOf) {
         obj.setPrototypeOf(_subClass, superClass);
       } else if (classProps.strictEs6Class) {
@@ -744,6 +775,7 @@
           _subClass[key] = value;
         });
       }
+
       if (!_subClass.hasOwnProperty('__super__')) {
         Object.defineProperty(_subClass, '__super__', {
           configurable: true,
@@ -753,10 +785,8 @@
 
       utils.addHiddenPropsToTarget(_subClass.prototype, props);
       utils.fillIn(_subClass, classProps);
-
       return _subClass;
     },
-
 
     /**
      * Shallow copy own enumerable properties from `src` to `dest` that are on
@@ -784,7 +814,6 @@
       });
     },
 
-
     /**
      * Find the last index of an item in an array according to the given checker function.
      *
@@ -809,9 +838,11 @@
      */
     findIndex: function findIndex(array, fn) {
       var index = -1;
+
       if (!array) {
         return index;
       }
+
       array.forEach(function (record, i) {
         if (fn(record)) {
           index = i;
@@ -820,7 +851,6 @@
       });
       return index;
     },
-
 
     /**
      * Recursively iterate over a {@link Mapper}'s relations according to
@@ -835,14 +865,15 @@
      */
     forEachRelation: function forEachRelation(mapper, opts, fn, thisArg) {
       var relationList = mapper.relationList || [];
+
       if (!relationList.length) {
         return;
       }
+
       relationList.forEach(function (def) {
         utils._forRelation(opts, def, fn, thisArg);
       });
     },
-
 
     /**
      * Iterate over an object's own enumerable properties.
@@ -865,14 +896,14 @@
     forOwn: function forOwn(obj, fn, thisArg) {
       var keys = Object.keys(obj);
       var len = keys.length;
-      var i = void 0;
+      var i;
+
       for (i = 0; i < len; i++) {
         if (fn.call(thisArg, obj[keys[i]], keys[i], obj) === false) {
           break;
         }
       }
     },
-
 
     /**
      * Proxy for `JSON.parse`.
@@ -893,7 +924,6 @@
       return utils.isString(json) ? JSON.parse(json) : json;
     },
 
-
     /**
      * Retrieve the specified property from the given object. Supports retrieving
      * nested properties.
@@ -911,16 +941,18 @@
      * @see utils.set
      * @since 3.0.0
      */
-    get: function get$$1(object, prop) {
+    get: function get(object, prop) {
       if (!prop) {
         return;
       }
+
       var parts = prop.split('.');
       var last = parts.pop();
 
       while (prop = parts.shift()) {
         // eslint-disable-line
         object = object[prop];
+
         if (object == null) {
           // eslint-disable-line
           return;
@@ -959,12 +991,13 @@
      */
     getSuper: function getSuper(instance, isCtor) {
       var ctor = isCtor ? instance : instance.constructor;
+
       if (ctor.hasOwnProperty('__super__')) {
         return ctor.__super__;
       }
+
       return Object.getPrototypeOf(ctor) || ctor.__proto__; // eslint-disable-line
     },
-
 
     /**
      * Return the intersection of two arrays.
@@ -987,24 +1020,28 @@
       if (!array1 || !array2) {
         return [];
       }
+
       array1 = Array.isArray(array1) ? array1 : [array1];
       array2 = Array.isArray(array2) ? array2 : [array2];
       var result = [];
-      var item = void 0;
-      var i = void 0;
+      var item;
+      var i;
       var len = array1.length;
+
       for (i = 0; i < len; i++) {
         item = array1[i];
+
         if (result.indexOf(item) !== -1) {
           continue;
         }
+
         if (array2.indexOf(item) !== -1) {
           result.push(item);
         }
       }
+
       return result;
     },
-
 
     /**
      * Proxy for `Array.isArray`.
@@ -1045,16 +1082,18 @@
       if (!blacklist || !blacklist.length) {
         return false;
       }
-      var matches = void 0;
+
+      var matches;
+
       for (var i = 0; i < blacklist.length; i++) {
         if (toStr(blacklist[i]) === REGEXP_TAG && blacklist[i].test(prop) || blacklist[i] === prop) {
           matches = prop;
           return !!matches;
         }
       }
+
       return !!matches;
     },
-
 
     /**
      * Return whether the provided value is a boolean.
@@ -1075,7 +1114,6 @@
       return toStr(value) === BOOL_TAG;
     },
 
-
     /**
      * Return whether the provided value is a date.
      *
@@ -1092,9 +1130,8 @@
      * @since 3.0.0
      */
     isDate: function isDate(value) {
-      return value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && toStr(value) === DATE_TAG;
+      return value && _typeof(value) === 'object' && toStr(value) === DATE_TAG;
     },
-
 
     /**
      * Return whether the provided value is a function.
@@ -1114,7 +1151,6 @@
     isFunction: function isFunction(value) {
       return typeof value === 'function' || value && toStr(value) === FUNC_TAG;
     },
-
 
     /**
      * Return whether the provided value is an integer.
@@ -1137,7 +1173,6 @@
       return toStr(value) === NUMBER_TAG && value == toInteger(value); // eslint-disable-line
     },
 
-
     /**
      * Return whether the provided value is `null`.
      *
@@ -1157,7 +1192,6 @@
       return value === null;
     },
 
-
     /**
      * Return whether the provided value is a number.
      *
@@ -1176,10 +1210,10 @@
      * @since 3.0.0
      */
     isNumber: function isNumber(value) {
-      var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+      var type = _typeof(value);
+
       return type === 'number' || value && type === 'object' && toStr(value) === NUMBER_TAG;
     },
-
 
     /**
      * Return whether the provided value is an object.
@@ -1199,7 +1233,6 @@
     isObject: function isObject(value) {
       return toStr(value) === OBJECT_TAG;
     },
-
 
     /**
      * Return whether the provided value is a regular expression.
@@ -1222,7 +1255,6 @@
       return toStr(value) === REGEXP_TAG;
     },
 
-
     /**
      * Return whether the provided value is a string or a number.
      *
@@ -1243,7 +1275,6 @@
       return utils.isString(value) || utils.isNumber(value);
     },
 
-
     /**
      * Return whether the provided value is a string.
      *
@@ -1260,9 +1291,8 @@
      * @since 3.0.0
      */
     isString: function isString(value) {
-      return typeof value === 'string' || value && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && toStr(value) === STRING_TAG;
+      return typeof value === 'string' || value && _typeof(value) === 'object' && toStr(value) === STRING_TAG;
     },
-
 
     /**
      * Return whether the provided value is a `undefined`.
@@ -1284,7 +1314,6 @@
     isUndefined: function isUndefined(value) {
       return value === undefined;
     },
-
 
     /**
      * Mix in logging capabilities to the target.
@@ -1310,15 +1339,15 @@
       utils.addHiddenPropsToTarget(target, {
         dbg: function dbg() {
           if (utils.isFunction(this.log)) {
-            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+            for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
               args[_key3] = arguments[_key3];
             }
 
-            this.log.apply(this, ['debug'].concat(toConsumableArray(args)));
+            this.log.apply(this, ['debug'].concat(args));
           }
         },
         log: function log(level) {
-          for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+          for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
             args[_key4 - 1] = arguments[_key4];
           }
 
@@ -1326,23 +1355,25 @@
             args.push(level);
             level = 'debug';
           }
+
           if (level === 'debug' && !this.debug) {
             return;
           }
-          var prefix = level.toUpperCase() + ': (' + (this.name || this.constructor.name) + ')';
+
+          var prefix = "".concat(level.toUpperCase(), ": (").concat(this.name || this.constructor.name, ")");
+
           if (utils.isFunction(console[level])) {
             var _console;
 
-            (_console = console)[level].apply(_console, [prefix].concat(toConsumableArray(args)));
+            (_console = console)[level].apply(_console, [prefix].concat(args));
           } else {
             var _console2;
 
-            (_console2 = console).log.apply(_console2, [prefix].concat(toConsumableArray(args)));
+            (_console2 = console).log.apply(_console2, [prefix].concat(args));
           }
         }
       });
     },
-
 
     /**
      * Adds the given record to the provided array only if it's not already in the
@@ -1369,12 +1400,13 @@
       if (!array) {
         return;
       }
+
       var index = this.findIndex(array, fn);
+
       if (index < 0) {
         array.push(record);
       }
     },
-
 
     /**
      * Return a shallow copy of the provided object, minus the properties
@@ -1403,7 +1435,6 @@
       return _props;
     },
 
-
     /**
      * Return a shallow copy of the provided object, but only include the
      * properties specified in `keys`.
@@ -1428,7 +1459,6 @@
       }, {});
     },
 
-
     /**
      * Return a plain copy of the given value.
      *
@@ -1447,7 +1477,6 @@
     plainCopy: function plainCopy(value) {
       return utils.copy(value, undefined, undefined, undefined, undefined, true);
     },
-
 
     /**
      * Shortcut for `utils.Promise.reject(value)`.
@@ -1471,7 +1500,6 @@
       return utils.Promise.reject(value);
     },
 
-
     /**
      * Remove the last item found in array according to the given checker function.
      *
@@ -1490,12 +1518,13 @@
       if (!array || !array.length) {
         return;
       }
+
       var index = this.findIndex(array, fn);
+
       if (index >= 0) {
         array.splice(index, 1); // todo should this be recursive?
       }
     },
-
 
     /**
      * Shortcut for `utils.Promise.resolve(value)`.
@@ -1517,7 +1546,6 @@
     resolve: function resolve(value) {
       return utils.Promise.resolve(value);
     },
-
 
     /**
      * Set the value at the provided key or path.
@@ -1558,13 +1586,14 @@
      * object.
      * @param {*} [value] The value to set.
      */
-    set: function set$$1(object, path, value) {
+    set: function set(object, path, value) {
       if (utils.isObject(path)) {
         utils.forOwn(path, function (value, _path) {
           utils.set(object, _path, value);
         });
       } else {
         var parts = PATH.exec(path);
+
         if (parts) {
           mkdirP(object, parts[1])[parts[2]] = value;
         } else {
@@ -1612,11 +1641,14 @@
       if (a === b) {
         return true;
       }
+
       var _equal = true;
+
       if (utils.isArray(a) && utils.isArray(b)) {
         if (a.length !== b.length) {
           return false;
         }
+
         for (var i = a.length; i--;) {
           if (!utils.deepEqual(a[i], b[i])) {
             // Exit loop early
@@ -1630,6 +1662,7 @@
             return false;
           }
         });
+
         if (_equal) {
           utils.forOwn(b, function (value, key) {
             if (!(_equal = utils.deepEqual(value, a[key]))) {
@@ -1641,9 +1674,9 @@
       } else {
         return false;
       }
+
       return _equal;
     },
-
 
     /**
      * Proxy for `JSON.stringify`.
@@ -1697,6 +1730,7 @@
       while (path = parts.shift()) {
         // eslint-disable-line
         object = object[path];
+
         if (object == null) {
           // eslint-disable-line
           return;
@@ -1706,18 +1740,16 @@
       object[last] = undefined;
     }
   };
-
   var safeSetProp = function safeSetProp(record, field, value) {
     if (record && record._set) {
-      record._set('props.' + field, value);
+      record._set("props.".concat(field), value);
     } else {
       utils.set(record, field, value);
     }
   };
-
   var safeSetLink = function safeSetLink(record, field, value) {
     if (record && record._set) {
-      record._set('links.' + field, value);
+      record._set("links.".concat(field), value);
     } else {
       utils.set(record, field, value);
     }
@@ -1740,6 +1772,7 @@
    * @returns {Settable} A new {@link Settable} instance.
    * @since 3.0.0
    */
+
   function Settable() {
     var _props = {};
     Object.defineProperties(this, {
@@ -1792,7 +1825,6 @@
       }
     });
   }
-
   /**
    * Create a subclass of this Settable:
    *
@@ -1845,6 +1877,7 @@
    * @returns {Constructor} Subclass of this Settable class.
    * @since 3.0.0
    */
+
   Settable.extend = utils.extend;
 
   /**
@@ -1867,10 +1900,10 @@
    * @returns {Component} A new {@link Component} instance.
    * @since 3.0.0
    */
+
   function Component(opts) {
     Settable.call(this);
     opts || (opts = {});
-
     /**
      * Whether to enable debug-level logs for this component. Anything that
      * extends `Component` inherits this option and the corresponding logging
@@ -1892,8 +1925,8 @@
      * @since 3.0.0
      * @type {boolean}
      */
-    this.debug = opts.hasOwnProperty('debug') ? !!opts.debug : false;
 
+    this.debug = opts.hasOwnProperty('debug') ? !!opts.debug : false;
     /**
      * Event listeners attached to this Component. __Do not modify.__ Use
      * {@link Component#on} and {@link Component#off} instead.
@@ -1904,13 +1937,16 @@
      * @since 3.0.0
      * @type {Object}
      */
-    Object.defineProperty(this, '_listeners', { value: {}, writable: true });
+
+    Object.defineProperty(this, '_listeners', {
+      value: {},
+      writable: true
+    });
   }
 
   var Component$1 = Settable.extend({
     constructor: Component
   });
-
   /**
    * Create a subclass of this Component:
    *
@@ -1963,8 +1999,8 @@
    * @returns {Constructor} Subclass of this Component class.
    * @since 3.0.0
    */
-  Component.extend = utils.extend;
 
+  Component.extend = utils.extend;
   /**
    * Log the provided values at the "debug" level. Debug-level logs are only
    * logged if {@link Component#debug} is `true`.
@@ -1975,6 +2011,7 @@
    * @param {...*} [args] Values to log.
    * @since 3.0.0
    */
+
   /**
    * Log the provided values. By default sends values to `console[level]`.
    * Debug-level logs are only logged if {@link Component#debug} is `true`.
@@ -1986,8 +2023,8 @@
    * @param {...*} [args] Values to log.
    * @since 3.0.0
    */
-  utils.logify(Component.prototype);
 
+  utils.logify(Component.prototype);
   /**
    * Register a new event listener on this Component.
    *
@@ -2021,6 +2058,7 @@
    * @param {*} [ctx] Optional content in which to invoke the listener.
    * @since 3.0.0
    */
+
   /**
    * Remove an event listener from this Component. If no listener is provided,
    * then all listeners for the specified event will be removed. If no event is
@@ -2043,6 +2081,7 @@
    * @param {Function} [listener] Listener to remove.
    * @since 3.0.0
    */
+
   /**
    * Trigger an event on this Component.
    *
@@ -2068,6 +2107,7 @@
    * @param {...*} [args] Arguments to pass to any listeners.
    * @since 3.0.0
    */
+
   utils.eventify(Component.prototype, function () {
     return this._listeners;
   }, function (value) {
@@ -2075,9 +2115,8 @@
   });
 
   var DOMAIN$1 = 'Query';
-  var INDEX_ERR = 'Index inaccessible after first operation';
+  var INDEX_ERR = 'Index inaccessible after first operation'; // Reserved words used by JSData's Query Syntax
 
-  // Reserved words used by JSData's Query Syntax
   var reserved = {
     limit: '',
     offset: '',
@@ -2085,15 +2124,15 @@
     skip: '',
     sort: '',
     where: ''
+  }; // Used by our JavaScript implementation of the LIKE operator
 
-    // Used by our JavaScript implementation of the LIKE operator
-  };var escapeRegExp = /([.*+?^=!:${}()|[\]/\\])/g;
+  var escapeRegExp = /([.*+?^=!:${}()|[\]/\\])/g;
   var percentRegExp = /%/g;
   var underscoreRegExp = /_/g;
+
   var escape = function escape(pattern) {
     return pattern.replace(escapeRegExp, '\\$1');
   };
-
   /**
    * A class used by the {@link Collection} class to build queries to be executed
    * against the collection's data. An instance of `Query` is returned by
@@ -2127,9 +2166,10 @@
    * @param {Collection} collection The collection on which this query operates.
    * @since 3.0.0
    */
+
+
   function Query(collection) {
     utils.classCallCheck(this, Query);
-
     /**
      * The {@link Collection} on which this query operates.
      *
@@ -2137,8 +2177,8 @@
      * @since 3.0.0
      * @type {Collection}
      */
-    this.collection = collection;
 
+    this.collection = collection;
     /**
      * The current data result of this query.
      *
@@ -2146,12 +2186,12 @@
      * @since 3.0.0
      * @type {Array}
      */
+
     this.data = null;
   }
 
   var Query$1 = Component$1.extend({
     constructor: Query,
-
     _applyWhereFromObject: function _applyWhereFromObject(where) {
       var fields = [];
       var ops = [];
@@ -2162,6 +2202,7 @@
             '==': clause
           };
         }
+
         utils.forOwn(clause, function (expr, op) {
           fields.push(field);
           ops.push(op);
@@ -2182,42 +2223,54 @@
         if (utils.isString(_where)) {
           return;
         }
+
         var prev = where[i - 1];
         var parser = utils.isArray(_where) ? _this._applyWhereFromArray : _this._applyWhereFromObject;
         var group = parser.call(_this, _where);
+
         if (prev === 'or') {
           group.isOr = true;
         }
+
         groups.push(group);
       });
       groups.isArray = true;
       return groups;
     },
     _testObjectGroup: function _testObjectGroup(keep, first, group, item) {
-      var i = void 0;
+      var i;
       var fields = group.fields;
       var ops = group.ops;
       var predicates = group.predicates;
       var len = ops.length;
+
       for (i = 0; i < len; i++) {
         var op = ops[i];
         var isOr = op.charAt(0) === '|';
         op = isOr ? op.substr(1) : op;
         var expr = this.evaluate(utils.get(item, fields[i]), op, predicates[i]);
+
         if (expr !== undefined) {
           keep = first ? expr : isOr ? keep || expr : keep && expr;
         }
+
         first = false;
       }
-      return { keep: keep, first: first };
+
+      return {
+        keep: keep,
+        first: first
+      };
     },
     _testArrayGroup: function _testArrayGroup(keep, first, groups, item) {
-      var i = void 0;
+      var i;
       var len = groups.length;
+
       for (i = 0; i < len; i++) {
         var group = groups[i];
         var parser = group.isArray ? this._testArrayGroup : this._testObjectGroup;
         var result = parser.call(this, true, true, group, item);
+
         if (groups[i - 1]) {
           if (group.isOr) {
             keep = keep || result.keep;
@@ -2227,11 +2280,15 @@
         } else {
           keep = result.keep;
         }
+
         first = result.first;
       }
-      return { keep: keep, first: first };
-    },
 
+      return {
+        keep: keep,
+        first: first
+      };
+    },
 
     /**
      * Find all entities between two boundaries.
@@ -2295,13 +2352,14 @@
      */
     between: function between(leftKeys, rightKeys, opts) {
       opts || (opts = {});
+
       if (this.data) {
-        throw utils.err(DOMAIN$1 + '#between')(500, 'Cannot access index');
+        throw utils.err("".concat(DOMAIN$1, "#between"))(500, 'Cannot access index');
       }
+
       this.data = this.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts);
       return this;
     },
-
 
     /**
      * The comparison function used by the {@link Query} class.
@@ -2319,23 +2377,29 @@
       var def = orderBy[index];
       var cA = utils.get(a, def[0]);
       var cB = utils.get(b, def[0]);
+
       if (cA && utils.isString(cA)) {
         cA = cA.toUpperCase();
       }
+
       if (cB && utils.isString(cB)) {
         cB = cB.toUpperCase();
       }
+
       if (a === undefined) {
         a = null;
       }
+
       if (b === undefined) {
         b = null;
       }
+
       if (def[1].toUpperCase() === 'DESC') {
         var temp = cB;
         cB = cA;
         cA = temp;
       }
+
       if (cA < cB) {
         return -1;
       } else if (cA > cB) {
@@ -2349,7 +2413,6 @@
       }
     },
 
-
     /**
      * Predicate evaluation function used by the {@link Query} class.
      *
@@ -2362,16 +2425,17 @@
      */
     evaluate: function evaluate(value, op, predicate) {
       var ops = this.constructor.ops;
+
       if (ops[op]) {
         return ops[op](value, predicate);
       }
+
       if (op.indexOf('like') === 0) {
         return this.like(predicate, op.substr(4)).exec(value) !== null;
       } else if (op.indexOf('notLike') === 0) {
         return this.like(predicate, op.substr(7)).exec(value) === null;
       }
     },
-
 
     /**
      * Find the record or records that match the provided query or are accepted by
@@ -2519,9 +2583,9 @@
        */
       query || (query = {});
       this.getData();
+
       if (utils.isObject(query)) {
         var where = {};
-
         /**
          * Filtering criteria. Records that do not meet this criteria will be exluded
          * from the result.
@@ -2555,9 +2619,11 @@
          * @see http://www.js-data.io/v3.0/docs/query-syntax
          * @since 3.0.0
          */
+
         if (utils.isObject(query.where) || utils.isArray(query.where)) {
           where = query.where;
         }
+
         utils.forOwn(query, function (value, key) {
           if (!(key in reserved) && !(key in where)) {
             where[key] = {
@@ -2565,9 +2631,8 @@
             };
           }
         });
-        var groups = void 0;
+        var groups; // Apply filter for each field
 
-        // Apply filter for each field
         if (utils.isObject(where) && Object.keys(where).length !== 0) {
           groups = this._applyWhereFromArray([where]);
         } else if (utils.isArray(where)) {
@@ -2578,18 +2643,18 @@
           this.data = this.data.filter(function (item, i) {
             return _this2._testArrayGroup(true, true, groups, item).keep;
           });
-        }
+        } // Sort
 
-        // Sort
+
         var orderBy = query.orderBy || query.sort;
 
         if (utils.isString(orderBy)) {
           orderBy = [[orderBy, 'ASC']];
         }
+
         if (!utils.isArray(orderBy)) {
           orderBy = null;
         }
-
         /**
          * Determines how records should be ordered in the result.
          *
@@ -2618,6 +2683,8 @@
          * @see http://www.js-data.io/v3.0/docs/query-syntax
          * @since 3.0.0
          */
+
+
         if (orderBy) {
           var index = 0;
           orderBy.forEach(function (def, i) {
@@ -2629,7 +2696,6 @@
             return _this2.compare(orderBy, index, a, b);
           });
         }
-
         /**
          * Number of records to skip.
          *
@@ -2681,12 +2747,13 @@
          * @see http://www.js-data.io/v3.0/docs/query-syntax
          * @since 3.0.0
          */
+
+
         if (utils.isNumber(query.skip)) {
           this.skip(query.skip);
         } else if (utils.isNumber(query.offset)) {
           this.skip(query.offset);
         }
-
         /**
          * Maximum number of records to retrieve.
          *
@@ -2739,15 +2806,17 @@
          * @see http://www.js-data.io/v3.0/docs/query-syntax
          * @since 3.0.0
          */
+
+
         if (utils.isNumber(query.limit)) {
           this.limit(query.limit);
         }
       } else if (utils.isFunction(query)) {
         this.data = this.data.filter(query, thisArg);
       }
+
       return this;
     },
-
 
     /**
      * Iterate over all entities.
@@ -2762,7 +2831,6 @@
       this.getData().forEach(forEachFn, thisArg);
       return this;
     },
-
 
     /**
      * Find the entity or entities that match the provided key.
@@ -2793,23 +2861,26 @@
      * @returns {Query} A reference to itself for chaining.
      * @since 3.0.0
      */
-    get: function get$$1(keyList, opts) {
+    get: function get(keyList, opts) {
       keyList || (keyList = []);
       opts || (opts = {});
+
       if (this.data) {
-        throw utils.err(DOMAIN$1 + '#get')(500, INDEX_ERR);
+        throw utils.err("".concat(DOMAIN$1, "#get"))(500, INDEX_ERR);
       }
+
       if (keyList && !utils.isArray(keyList)) {
         keyList = [keyList];
       }
+
       if (!keyList.length) {
         this.getData();
         return this;
       }
+
       this.data = this.collection.getIndex(opts.index).get(keyList);
       return this;
     },
-
 
     /**
      * Find the entity or entities that match the provided keyLists.
@@ -2834,11 +2905,12 @@
       var _this3 = this;
 
       var opts = {};
+
       if (this.data) {
-        throw utils.err(DOMAIN$1 + '#getAll')(500, INDEX_ERR);
+        throw utils.err("".concat(DOMAIN$1, "#getAll"))(500, INDEX_ERR);
       }
 
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
 
@@ -2849,6 +2921,7 @@
         opts = args[args.length - 1];
         args.pop();
       }
+
       var collection = this.collection;
       var index = collection.getIndex(opts.index);
       this.data = [];
@@ -2857,7 +2930,6 @@
       });
       return this;
     },
-
 
     /**
      * Return the current data result of this query.
@@ -2870,9 +2942,9 @@
       if (!this.data) {
         this.data = this.collection.index.getAll();
       }
+
       return this.data;
     },
-
 
     /**
      * Implementation used by the `like` operator. Takes a pattern and flags and
@@ -2885,9 +2957,8 @@
      * @since 3.0.0
      */
     like: function like(pattern, flags) {
-      return new RegExp('^' + escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.') + '$', flags);
+      return new RegExp("^".concat(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'), "$"), flags);
     },
-
 
     /**
      * Limit the result.
@@ -2913,13 +2984,13 @@
      */
     limit: function limit(num) {
       if (!utils.isNumber(num)) {
-        throw utils.err(DOMAIN$1 + '#limit', 'num')(400, 'number', num);
+        throw utils.err("".concat(DOMAIN$1, "#limit"), 'num')(400, 'number', num);
       }
+
       var data = this.getData();
       this.data = data.slice(0, Math.min(data.length, num));
       return this;
     },
-
 
     /**
      * Apply a mapping function to the result data.
@@ -2958,7 +3029,6 @@
       return this;
     },
 
-
     /**
      * Return the result of calling the specified function on each item in this
      * collection's main index.
@@ -2973,16 +3043,15 @@
      * @since 3.0.0
      */
     mapCall: function mapCall(funcName) {
-      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+      for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
         args[_key2 - 1] = arguments[_key2];
       }
 
       this.data = this.getData().map(function (item) {
-        return item[funcName].apply(item, toConsumableArray(args));
+        return item[funcName].apply(item, args);
       });
       return this;
     },
-
 
     /**
      * Complete the execution of the query and return the resulting data.
@@ -2996,7 +3065,6 @@
       this.data = null;
       return data;
     },
-
 
     /**
      * Skip a number of results.
@@ -3026,14 +3094,17 @@
      */
     skip: function skip(num) {
       if (!utils.isNumber(num)) {
-        throw utils.err(DOMAIN$1 + '#skip', 'num')(400, 'number', num);
+        throw utils.err("".concat(DOMAIN$1, "#skip"), 'num')(400, 'number', num);
       }
+
       var data = this.getData();
+
       if (num < data.length) {
         this.data = data.slice(num);
       } else {
         this.data = [];
       }
+
       return this;
     }
   }, {
@@ -3237,32 +3308,80 @@
       }
     }
   });
+  /**
+   * Create a subclass of this Query:
+   * @example <caption>Query.extend</caption>
+   * const JSData = require('js-data');
+   * const { Query } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * // Extend the class using ES2015 class syntax.
+   * class CustomQueryClass extends Query {
+   *   foo () { return 'bar'; }
+   *   static beep () { return 'boop'; }
+   * }
+   * const customQuery = new CustomQueryClass();
+   * console.log(customQuery.foo());
+   * console.log(CustomQueryClass.beep());
+   *
+   * // Extend the class using alternate method.
+   * const OtherQueryClass = Query.extend({
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const otherQuery = new OtherQueryClass();
+   * console.log(otherQuery.foo());
+   * console.log(OtherQueryClass.beep());
+   *
+   * // Extend the class, providing a custom constructor.
+   * function AnotherQueryClass (collection) {
+   *   Query.call(this, collection);
+   *   this.created_at = new Date().getTime();
+   * }
+   * Query.extend({
+   *   constructor: AnotherQueryClass,
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const anotherQuery = new AnotherQueryClass();
+   * console.log(anotherQuery.created_at);
+   * console.log(anotherQuery.foo());
+   * console.log(AnotherQueryClass.beep());
+   *
+   * @method Query.extend
+   * @param {object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
+   * to be used as the subclass itself.
+   * @param {object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Query class.
+   * @since 3.0.0
+   */
 
-  // TODO: remove this when the rest of the project is cleaned
   var belongsToType = 'belongsTo';
   var hasManyType = 'hasMany';
   var hasOneType = 'hasOne';
-
   var DOMAIN$2 = 'Relation';
-
   function Relation(relatedMapper) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
     utils.classCallCheck(this, Relation);
-
     options.type = this.constructor.TYPE_NAME;
     this.validateOptions(relatedMapper, options);
 
-    if ((typeof relatedMapper === 'undefined' ? 'undefined' : _typeof(relatedMapper)) === 'object') {
-      Object.defineProperty(this, 'relatedMapper', { value: relatedMapper });
+    if (_typeof(relatedMapper) === 'object') {
+      Object.defineProperty(this, 'relatedMapper', {
+        value: relatedMapper
+      });
     }
 
-    Object.defineProperty(this, 'inverse', { writable: true });
+    Object.defineProperty(this, 'inverse', {
+      writable: true
+    });
     utils.fillIn(this, options);
   }
-
   Relation.extend = utils.extend;
-
   utils.addHiddenPropsToTarget(Relation.prototype, {
     get canAutoAddLinks() {
       return this.add === undefined || !!this.add;
@@ -3273,20 +3392,22 @@
     },
 
     validateOptions: function validateOptions(related, opts) {
-      var DOMAIN_ERR = 'new ' + DOMAIN$2;
-
+      var DOMAIN_ERR = "new ".concat(DOMAIN$2);
       var localField = opts.localField;
+
       if (!localField) {
         throw utils.err(DOMAIN_ERR, 'opts.localField')(400, 'string', localField);
       }
 
       var foreignKey = opts.foreignKey = opts.foreignKey || opts.localKey;
+
       if (!foreignKey && (opts.type === belongsToType || opts.type === hasOneType)) {
         throw utils.err(DOMAIN_ERR, 'opts.foreignKey')(400, 'string', foreignKey);
       }
 
       if (utils.isString(related)) {
         opts.relation = related;
+
         if (!utils.isFunction(opts.getRelation)) {
           throw utils.err(DOMAIN_ERR, 'opts.getRelation')(400, 'function', opts.getRelation);
         }
@@ -3298,10 +3419,15 @@
     },
     assignTo: function assignTo(mapper) {
       this.name = mapper.name;
-      Object.defineProperty(this, 'mapper', { value: mapper });
-
-      mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
-      mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] });
+      Object.defineProperty(this, 'mapper', {
+        value: mapper
+      });
+      mapper.relationList || Object.defineProperty(mapper, 'relationList', {
+        value: []
+      });
+      mapper.relationFields || Object.defineProperty(mapper, 'relationFields', {
+        value: []
+      });
       mapper.relationList.push(this);
       mapper.relationFields.push(this.localField);
     },
@@ -3364,7 +3490,6 @@
       var _this3 = this;
 
       var datastore = this.mapper.datastore;
-
       records.forEach(function (record) {
         var relatedData = _this3.getLocalField(record);
 
@@ -3396,6 +3521,7 @@
 
       if (relatedId === undefined) {
         var unsaved = this.relatedCollection.unsaved();
+
         if (unsaved.indexOf(relatedRecord) === -1) {
           if (this.canAutoAddLinks) {
             relatedRecord = this.relatedCollection.add(relatedRecord);
@@ -3413,14 +3539,13 @@
 
       return relatedRecord;
     },
-
-
     // e.g. user hasMany post via "foreignKey", so find all posts of user
     findExistingLinksByForeignKey: function findExistingLinksByForeignKey(id) {
       if (id === undefined || id === null) {
         return;
       }
-      return this.relatedCollection.filter(defineProperty({}, this.foreignKey, id));
+
+      return this.relatedCollection.filter(_defineProperty({}, this.foreignKey, id));
     },
     ensureLinkedDataHasProperType: function ensureLinkedDataHasProperType(props, opts) {
       var relatedMapper = this.getRelation();
@@ -3444,14 +3569,12 @@
       var _this4 = this;
 
       this.setForeignKey(props, relationData);
-
       return this.createLinked(relationData, opts).then(function (result) {
         _this4.setLocalField(props, result);
       });
     },
     createLinked: function createLinked(props, opts) {
       var create = utils.isArray(props) ? 'createMany' : 'create';
-
       return this.getRelation()[create](props, opts);
     }
   });
@@ -3468,7 +3591,9 @@
       if (!record) {
         return;
       }
+
       var relatedId = utils.get(record, this.foreignKey);
+
       if (relatedId !== undefined && relatedId !== null) {
         return this.relatedCollection.get(relatedId);
       }
@@ -3480,7 +3605,6 @@
       var _this = this;
 
       var relationData = this.getLocalField(props);
-
       return this.createLinked(relationData, opts).then(function (record) {
         _this.setForeignKey(props, record);
       });
@@ -3495,11 +3619,9 @@
   var HasManyRelation = Relation.extend({
     validateOptions: function validateOptions(related, opts) {
       Relation.prototype.validateOptions.call(this, related, opts);
-
       var localKeys = opts.localKeys,
           foreignKeys = opts.foreignKeys,
           foreignKey = opts.foreignKey;
-
 
       if (!foreignKey && !localKeys && !foreignKeys) {
         throw utils.err('new Relation', 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey);
@@ -3516,7 +3638,6 @@
       var canAutoAddLinks = this.canAutoAddLinks;
       var foreignKey = this.foreignKey;
       var unsaved = this.relatedCollection.unsaved();
-
       return relatedRecords.map(function (relatedRecord) {
         var relatedId = relatedCollection.recordId(relatedRecord);
 
@@ -3525,6 +3646,7 @@
             // TODO: slow, could be optimized? But user loses hook
             _this.setForeignKey(record, relatedRecord);
           }
+
           if (canAutoAddLinks) {
             relatedRecord = relatedCollection.add(relatedRecord);
           }
@@ -3536,7 +3658,7 @@
     findExistingLinksFor: function findExistingLinksFor(record) {
       var id = utils.get(record, this.mapper.idAttribute);
       var ids = this.localKeys ? utils.get(record, this.localKeys) : null;
-      var records = void 0;
+      var records;
 
       if (id !== undefined && this.foreignKey) {
         records = this.findExistingLinksByForeignKey(id);
@@ -3550,22 +3672,18 @@
         return records;
       }
     },
-
-
     // e.g. user hasMany group via "foreignKeys", so find all users of a group
     findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(ids) {
       return this.relatedCollection.filter({
-        where: defineProperty({}, this.relatedCollection.mapper.idAttribute, {
+        where: _defineProperty({}, this.relatedCollection.mapper.idAttribute, {
           'in': ids
         })
       });
     },
-
-
     // e.g. group hasMany user via "localKeys", so find all groups that own a user
     findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(id) {
       return this.relatedCollection.filter({
-        where: defineProperty({}, this.foreignKeys, {
+        where: _defineProperty({}, this.foreignKeys, {
           'contains': id
         })
       });
@@ -3581,7 +3699,6 @@
 
       var relationData = this.getLocalField(props);
       var foreignIdField = this.getRelation().idAttribute;
-
       return this.createLinked(relationData, opts).then(function (records) {
         utils.set(props, _this2.localKeys, records.map(function (record) {
           return utils.get(record, foreignIdField);
@@ -3631,12 +3748,12 @@
    * @returns {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
+
   var belongsTo = function belongsTo(related, opts) {
     return function (mapper) {
       Relation.belongsTo(related, opts).assignTo(mapper);
     };
   };
-
   /**
    * HasMany relation decorator. You probably won't use this directly.
    *
@@ -3651,12 +3768,12 @@
    * @returns {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
+
   var hasMany = function hasMany(related, opts) {
     return function (mapper) {
       Relation.hasMany(related, opts).assignTo(mapper);
     };
   };
-
   /**
    * HasOne relation decorator. You probably won't use this directly.
    *
@@ -3671,6 +3788,7 @@
    * @returns {Function} Invocation function, which accepts the target as the only
    * parameter.
    */
+
   var hasOne = function hasOne(related, opts) {
     return function (mapper) {
       Relation.hasOne(related, opts).assignTo(mapper);
@@ -3681,24 +3799,25 @@
 
   var superMethod = function superMethod(mapper, name) {
     var store = mapper.datastore;
+
     if (store && store[name]) {
       return function () {
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
           args[_key] = arguments[_key];
         }
 
         return store[name].apply(store, [mapper.name].concat(args));
       };
     }
-    return mapper[name].bind(mapper);
-  };
 
-  // Cache these strings
+    return mapper[name].bind(mapper);
+  }; // Cache these strings
+
+
   var creatingPath = 'creating';
   var noValidatePath = 'noValidate';
   var keepChangeHistoryPath = 'keepChangeHistory';
   var previousPath = 'previous';
-
   /**
    * js-data's Record class. An instance of `Record` corresponds to an in-memory
    * representation of a single row or document in a database, Firebase,
@@ -3794,6 +3913,7 @@
    * validation on properties after the Record has been initialized.
    * @since 3.0.0
    */
+
   function Record(props, opts) {
     utils.classCallCheck(this, Record);
     Settable.call(this);
@@ -3803,17 +3923,22 @@
     var mapper = this.constructor.mapper;
 
     _set(creatingPath, true);
-    _set(noValidatePath, !!opts.noValidate);
-    _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? mapper ? mapper.keepChangeHistory : true : opts.keepChangeHistory);
 
-    // Set the idAttribute value first, if it exists.
+    _set(noValidatePath, !!opts.noValidate);
+
+    _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? mapper ? mapper.keepChangeHistory : true : opts.keepChangeHistory); // Set the idAttribute value first, if it exists.
+
+
     var id = mapper ? utils.get(props, mapper.idAttribute) : undefined;
+
     if (id !== undefined) {
       utils.set(this, mapper.idAttribute, id);
     }
 
     utils.fillIn(this, props);
+
     _set(creatingPath, false);
+
     if (opts.validateOnSet !== undefined) {
       _set(noValidatePath, !opts.validateOnSet);
     } else if (mapper && mapper.validateOnSet !== undefined) {
@@ -3821,6 +3946,7 @@
     } else {
       _set(noValidatePath, false);
     }
+
     _set(previousPath, mapper ? mapper.toJSON(props) : utils.plainCopy(props));
   }
 
@@ -3836,12 +3962,13 @@
      */
     _mapper: function _mapper() {
       var mapper = this.constructor.mapper;
+
       if (!mapper) {
-        throw utils.err(DOMAIN$3 + '#_mapper', '')(404, 'mapper');
+        throw utils.err("".concat(DOMAIN$3, "#_mapper"), '')(404, 'mapper');
       }
+
       return mapper;
     },
-
 
     /**
      * Lifecycle hook.
@@ -3853,7 +3980,6 @@
      */
     afterLoadRelations: function afterLoadRelations() {},
 
-
     /**
      * Lifecycle hook.
      *
@@ -3863,7 +3989,6 @@
      * @since 3.0.0
      */
     beforeLoadRelations: function beforeLoadRelations() {},
-
 
     /**
      * Return the change history of this record since it was instantiated or
@@ -3875,7 +4000,6 @@
     changeHistory: function changeHistory() {
       return (this._get('history') || []).slice();
     },
-
 
     /**
      * Return changes to this record since it was instantiated or
@@ -3906,7 +4030,6 @@
       return utils.diffObjects(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts);
     },
 
-
     /**
      * Make the record's current in-memory state it's only state, with any
      * previous property values being set to current values.
@@ -3931,11 +4054,15 @@
      */
     commit: function commit(opts) {
       this._set('changed'); // unset
+
+
       this._set('changing', false);
+
       this._set('history', []); // clear history
+
+
       this._set('previous', this.toJSON(opts));
     },
-
 
     /**
      * Call {@link Mapper#destroy} using this record's primary key.
@@ -3962,10 +4089,11 @@
      */
     destroy: function destroy(opts) {
       opts || (opts = {});
+
       var mapper = this._mapper();
+
       return superMethod(mapper, 'destroy')(utils.get(this, mapper.idAttribute), opts);
     },
-
 
     /**
      * Return the value at the given path for this instance.
@@ -3985,10 +4113,9 @@
      * @returns {*} Value at path.
      * @since 3.0.0
      */
-    'get': function get$$1(key) {
+    'get': function get(key) {
       return utils.get(this, key);
     },
-
 
     /**
      * Return whether this record has changed since it was instantiated or
@@ -4020,7 +4147,6 @@
       return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts);
     },
 
-
     /**
      * Return whether the record is unsaved. Records that have primary keys are
      * considered "saved". Records without primary keys are considered "unsaved".
@@ -4045,7 +4171,6 @@
     isNew: function isNew(opts) {
       return utils.get(this, this._mapper().idAttribute) === undefined;
     },
-
 
     /**
      * Return whether the record in its current state passes validation.
@@ -4088,6 +4213,7 @@
       } else if (inverseDef.type === hasManyType) {
         // e.g. remove comment from otherPost.comments
         var children = utils.get(currentParent, inverseDef.localField);
+
         if (id === undefined) {
           utils.remove(children, function (child) {
             return child === _this;
@@ -4109,6 +4235,7 @@
       } else if (inverseDef.type === hasManyType) {
         // e.g. add comment to somePost.comments
         var children = utils.get(record, inverseDef.localField);
+
         if (id === undefined) {
           utils.noDupeAdd(children, this, function (child) {
             return child === _this2;
@@ -4120,7 +4247,6 @@
         }
       }
     },
-
 
     /**
      * Lazy load relations of this record, to be attached to the record once their
@@ -4172,61 +4298,67 @@
     loadRelations: function loadRelations(relations, opts) {
       var _this3 = this;
 
-      var op = void 0;
-      var mapper = this._mapper();
+      var op;
 
-      // Default values for arguments
+      var mapper = this._mapper(); // Default values for arguments
+
+
       relations || (relations = []);
+
       if (utils.isString(relations)) {
         relations = [relations];
       }
+
       opts || (opts = {});
-      opts.with = relations;
+      opts.with = relations; // Fill in "opts" with the Model's configuration
 
-      // Fill in "opts" with the Model's configuration
       utils._(opts, mapper);
-      opts.adapter = mapper.getAdapterName(opts);
 
-      // beforeLoadRelations lifecycle hook
+      opts.adapter = mapper.getAdapterName(opts); // beforeLoadRelations lifecycle hook
+
       op = opts.op = 'beforeLoadRelations';
       return utils.resolve(this[op](relations, opts)).then(function () {
         // Now delegate to the adapter
         op = opts.op = 'loadRelations';
         mapper.dbg(op, _this3, relations, opts);
         var tasks = [];
-        var task = void 0;
+        var task;
         utils.forEachRelation(mapper, opts, function (def, optsCopy) {
           var relatedMapper = def.getRelation();
           optsCopy.raw = false;
+
           if (utils.isFunction(def.load)) {
             task = def.load(mapper, def, _this3, opts);
           } else if (def.type === 'hasMany' || def.type === 'hasOne') {
             if (def.foreignKey) {
-              task = superMethod(relatedMapper, 'findAll')(defineProperty({}, def.foreignKey, utils.get(_this3, mapper.idAttribute)), optsCopy).then(function (relatedData) {
+              task = superMethod(relatedMapper, 'findAll')(_defineProperty({}, def.foreignKey, utils.get(_this3, mapper.idAttribute)), optsCopy).then(function (relatedData) {
                 if (def.type === 'hasOne') {
                   return relatedData.length ? relatedData[0] : undefined;
                 }
+
                 return relatedData;
               });
             } else if (def.localKeys) {
               task = superMethod(relatedMapper, 'findAll')({
-                where: defineProperty({}, relatedMapper.idAttribute, {
+                where: _defineProperty({}, relatedMapper.idAttribute, {
                   'in': utils.get(_this3, def.localKeys)
                 })
               });
             } else if (def.foreignKeys) {
               task = superMethod(relatedMapper, 'findAll')({
-                where: defineProperty({}, def.foreignKeys, {
+                where: _defineProperty({}, def.foreignKeys, {
                   'contains': utils.get(_this3, mapper.idAttribute)
                 })
               }, opts);
             }
           } else if (def.type === 'belongsTo') {
             var key = utils.get(_this3, def.foreignKey);
+
             if (utils.isSorN(key)) {
               task = superMethod(relatedMapper, 'find')(key, optsCopy);
             }
           }
+
           if (task) {
             task = task.then(function (relatedData) {
               def.setLocalField(_this3, relatedData);
@@ -4243,7 +4375,6 @@
         });
       });
     },
-
 
     /**
      * Return the properties with which this record was instantiated.
@@ -4271,11 +4402,11 @@
      */
     previous: function previous(key) {
       if (key) {
-        return this._get('previous.' + key);
+        return this._get("previous.".concat(key));
       }
+
       return this._get('previous');
     },
-
 
     /**
      * Revert changes to this record back to the properties it had when it was
@@ -4306,6 +4437,7 @@
       var _this4 = this;
 
       var previous = this._get('previous');
+
       opts || (opts = {});
       opts.preserve || (opts.preserve = []);
       utils.forOwn(this, function (value, key) {
@@ -4320,7 +4452,6 @@
       });
       this.commit();
     },
-
 
     /**
      * Delegates to {@link Mapper#create} or {@link Mapper#update}.
@@ -4360,31 +4491,37 @@
       var _this5 = this;
 
       opts || (opts = {});
+
       var mapper = this._mapper();
+
       var id = utils.get(this, mapper.idAttribute);
       var props = this;
 
       var postProcess = function postProcess(result) {
         var record = opts.raw ? result.data : result;
+
         if (record) {
           utils.deepMixIn(_this5, record);
+
           _this5.commit();
         }
+
         return result;
       };
 
       if (id === undefined) {
         return superMethod(mapper, 'create')(props, opts).then(postProcess);
       }
+
       if (opts.changesOnly) {
         var changes = this.changes(opts);
         props = {};
         utils.fillIn(props, changes.added);
         utils.fillIn(props, changes.changed);
       }
+
       return superMethod(mapper, 'update')(id, props, opts).then(postProcess);
     },
-
 
     /**
      * Set the value for a given key, or the values for the given keys if "key" is
@@ -4415,20 +4552,24 @@
      * @param {boolean} [opts.silent=false] Whether to trigger change events.
      * @since 3.0.0
      */
-    'set': function set$$1(key, value, opts) {
+    'set': function set(key, value, opts) {
       if (utils.isObject(key)) {
         opts = value;
       }
+
       opts || (opts = {});
+
       if (opts.silent) {
         this._set('silent', true);
       }
+
       utils.set(this, key, value);
+
       if (!this._get('eventId')) {
         this._set('silent'); // unset
+
       }
     },
-
 
     /**
      * Return a plain object representation of this record. If the class from
@@ -4465,6 +4606,7 @@
      */
     toJSON: function toJSON(opts) {
       var mapper = this.constructor.mapper;
+
       if (mapper) {
         return mapper.toJSON(this, opts);
       } else {
@@ -4475,7 +4617,6 @@
         return json;
       }
     },
-
 
     /**
      * Unset the value for a given key. Triggers change events on those properties
@@ -4505,7 +4646,6 @@
     unset: function unset(key, opts) {
       this.set(key, undefined, opts);
     },
-
 
     /**
      * Validate this record based on its current properties.
@@ -4545,17 +4685,92 @@
     keepChangeHistoryPath: keepChangeHistoryPath,
     previousPath: previousPath
   });
-
   /**
    * Allow records to emit events.
    *
    * An record's registered listeners are stored in the record's private data.
    */
+
   utils.eventify(Record.prototype, function () {
     return this._get('events');
   }, function (value) {
     this._set('events', value);
   });
+  /**
+   * Fired when a record changes. Only works for records that have tracked fields.
+   * See {@link Record~changeListener} on how to listen for this event.
+   *
+   * @event Record#change
+   * @see Record~changeListener
+   */
+
+  /**
+   * Callback signature for the {@link Record#event:change} event.
+   *
+   * @example
+   * function onChange (record, changes) {
+   *   // do something
+   * }
+   * record.on('change', onChange);
+   *
+   * @callback Record~changeListener
+   * @param {Record} The Record that changed.
+   * @param {object} The changes.
+   * @see Record#event:change
+   * @since 3.0.0
+   */
+
+  /**
+   * Create a subclass of this Record:
+   * @example <caption>Record.extend</caption>
+   * const JSData = require('js-data');
+   * const { Record } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * // Extend the class using ES2015 class syntax.
+   * class CustomRecordClass extends Record {
+   *   foo () { return 'bar'; }
+   *   static beep () { return 'boop'; }
+   * }
+   * const customRecord = new CustomRecordClass();
+   * console.log(customRecord.foo());
+   * console.log(CustomRecordClass.beep());
+   *
+   * // Extend the class using alternate method.
+   * const OtherRecordClass = Record.extend({
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const otherRecord = new OtherRecordClass();
+   * console.log(otherRecord.foo());
+   * console.log(OtherRecordClass.beep());
+   *
+   * // Extend the class, providing a custom constructor.
+   * function AnotherRecordClass () {
+   *   Record.call(this);
+   *   this.created_at = new Date().getTime();
+   * }
+   * Record.extend({
+   *   constructor: AnotherRecordClass,
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const anotherRecord = new AnotherRecordClass();
+   * console.log(anotherRecord.created_at);
+   * console.log(anotherRecord.foo());
+   * console.log(AnotherRecordClass.beep());
+   *
+   * @method Record.extend
+   * @param {object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
+   * to be used as the subclass itself.
+   * @param {object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Record class.
+   * @since 3.0.0
+   */
 
   function sort(a, b, hashCode) {
     // Short-circuit comparison if a and b are strictly equal
@@ -4564,10 +4779,12 @@
     if (a === b) {
       return 0;
     }
+
     if (hashCode) {
       a = hashCode(a);
       b = hashCode(b);
     }
+
     if (a === null && b === null || a === undefined && b === undefined) {
       return -1;
     }
@@ -4590,26 +4807,24 @@
 
     return 0;
   }
-
   function insertAt(array, index, value) {
     array.splice(index, 0, value);
     return array;
   }
-
   function removeAt(array, index) {
     array.splice(index, 1);
     return array;
   }
-
   function binarySearch(array, value, field) {
     var lo = 0;
     var hi = array.length;
-    var compared = void 0;
-    var mid = void 0;
+    var compared;
+    var mid;
 
     while (lo < hi) {
       mid = (lo + hi) / 2 | 0;
       compared = sort(value, array[mid], field);
+
       if (compared === 0) {
         return {
           found: true,
@@ -4629,7 +4844,6 @@
   }
 
   // Copyright (c) 2015, InternalFX.
-
   function Index(fieldList, opts) {
     utils.classCallCheck(this, Index);
     fieldList || (fieldList = []);
@@ -4646,7 +4860,6 @@
     this.keys = [];
     this.values = [];
   }
-
   utils.addHiddenPropsToTarget(Index.prototype, {
     'set': function set(keyList, value) {
       if (!utils.isArray(keyList)) {
@@ -4659,6 +4872,7 @@
       if (keyList.length === 0) {
         if (pos.found) {
           var dataLocation = binarySearch(this.values[pos.index], value, this.hashCode);
+
           if (!dataLocation.found) {
             insertAt(this.values[pos.index], dataLocation.index, value);
           }
@@ -4671,7 +4885,9 @@
           this.values[pos.index].set(keyList, value);
         } else {
           insertAt(this.keys, pos.index, key);
-          var newIndex = new Index([], { hashCode: this.hashCode });
+          var newIndex = new Index([], {
+            hashCode: this.hashCode
+          });
           newIndex.set(keyList, value);
           insertAt(this.values, pos.index, newIndex);
         }
@@ -4707,9 +4923,11 @@
       opts || (opts = {});
       var results = [];
       var values = this.values;
+
       if (opts.order === 'desc') {
         for (var i = values.length - 1; i >= 0; i--) {
           var value = values[i];
+
           if (value.isIndex) {
             results = results.concat(value.getAll(opts));
           } else {
@@ -4719,6 +4937,7 @@
       } else {
         for (var _i = 0; _i < values.length; _i++) {
           var _value = values[_i];
+
           if (_value.isIndex) {
             results = results.concat(_value.getAll(opts));
           } else {
@@ -4726,6 +4945,7 @@
           }
         }
       }
+
       return results;
     },
     visitAll: function visitAll(cb, thisArg) {
@@ -4739,12 +4959,15 @@
     },
     between: function between(leftKeys, rightKeys, opts) {
       opts || (opts = {});
+
       if (!utils.isArray(leftKeys)) {
         leftKeys = [leftKeys];
       }
+
       if (!utils.isArray(rightKeys)) {
         rightKeys = [rightKeys];
       }
+
       utils.fillIn(opts, {
         leftInclusive: true,
         rightInclusive: false,
@@ -4762,11 +4985,9 @@
     },
     _between: function _between(leftKeys, rightKeys, opts) {
       var results = [];
-
       var leftKey = leftKeys.shift();
       var rightKey = rightKeys.shift();
-
-      var pos = void 0;
+      var pos;
 
       if (leftKey !== undefined) {
         pos = binarySearch(this.keys, leftKey);
@@ -4810,6 +5031,7 @@
       } else {
         for (var _i2 = pos.index; _i2 < this.keys.length; _i2 += 1) {
           var currKey = this.keys[_i2];
+
           if (currKey > rightKey) {
             break;
           }
@@ -4852,6 +5074,7 @@
           return this.values[0];
         }
       }
+
       return [];
     },
     clear: function clear() {
@@ -4871,7 +5094,7 @@
     removeRecord: function removeRecord(data) {
       var _this = this;
 
-      var removed = void 0;
+      var removed;
       var isUnique = this.hashCode(data) !== undefined;
       this.values.forEach(function (value, i) {
         if (value.isIndex) {
@@ -4880,11 +5103,13 @@
               removeAt(_this.keys, i);
               removeAt(_this.values, i);
             }
+
             removed = true;
             return false;
           }
         } else {
           var dataLocation = {};
+
           if (_this.keys[i] === undefined || !isUnique) {
             for (var j = value.length - 1; j >= 0; j--) {
               if (value[j] === data) {
@@ -4898,12 +5123,15 @@
           } else if (isUnique) {
             dataLocation = binarySearch(value, data, _this.hashCode);
           }
+
           if (dataLocation.found) {
             removeAt(value, dataLocation.index);
+
             if (value.length === 0) {
               removeAt(_this.keys, i);
               removeAt(_this.values, i);
             }
+
             removed = true;
             return false;
           }
@@ -4913,6 +5141,7 @@
     },
     updateRecord: function updateRecord(data) {
       var removed = this.removeRecord(data);
+
       if (removed !== undefined) {
         this.insertRecord(data);
       }
@@ -4920,10 +5149,7 @@
   });
 
   var noValidatePath$1 = Record$1.noValidatePath;
-
-
   var DOMAIN$4 = 'Collection';
-
   var COLLECTION_DEFAULTS = {
     /**
      * Whether to call {@link Record#commit} on records that are added to the
@@ -4984,33 +5210,34 @@
      * @default "merge"
      */
     onConflict: 'merge'
+  };
+  /**
+   * An ordered set of {@link Record} instances.
+   *
+   * @example <caption>Collection#constructor</caption>
+   * // import { Collection, Record } from 'js-data';
+   * const JSData = require('js-data');
+   * const {Collection, Record} = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const user1 = new Record({ id: 1 });
+   * const user2 = new Record({ id: 2 });
+   * const UserCollection = new Collection([user1, user2]);
+   * console.log(UserCollection.get(1) === user1);
+   *
+   * @class Collection
+   * @extends Component
+   * @param {array} [records] Initial set of records to insert into the
+   * collection.
+   * @param {object} [opts] Configuration options.
+   * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
+   * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
+   * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
+   * @param {string} [opts.mapper] See {@link Collection#mapper}.
+   * @since 3.0.0
+   */
 
-    /**
-     * An ordered set of {@link Record} instances.
-     *
-     * @example <caption>Collection#constructor</caption>
-     * // import { Collection, Record } from 'js-data';
-     * const JSData = require('js-data');
-     * const {Collection, Record} = JSData;
-     * console.log('Using JSData v' + JSData.version.full);
-     *
-     * const user1 = new Record({ id: 1 });
-     * const user2 = new Record({ id: 2 });
-     * const UserCollection = new Collection([user1, user2]);
-     * console.log(UserCollection.get(1) === user1);
-     *
-     * @class Collection
-     * @extends Component
-     * @param {array} [records] Initial set of records to insert into the
-     * collection.
-     * @param {object} [opts] Configuration options.
-     * @param {string} [opts.commitOnMerge] See {@link Collection#commitOnMerge}.
-     * @param {string} [opts.idAttribute] See {@link Collection#idAttribute}.
-     * @param {string} [opts.onConflict="merge"] See {@link Collection#onConflict}.
-     * @param {string} [opts.mapper] See {@link Collection#mapper}.
-     * @since 3.0.0
-     */
-  };function Collection(records, opts) {
+  function Collection(records, opts) {
     utils.classCallCheck(this, Collection);
     Component$1.call(this, opts);
 
@@ -5018,14 +5245,16 @@
       opts = records;
       records = [];
     }
-    if (utils.isString(opts)) {
-      opts = { idAttribute: opts };
-    }
 
-    // Default values for arguments
+    if (utils.isString(opts)) {
+      opts = {
+        idAttribute: opts
+      };
+    } // Default values for arguments
+
+
     records || (records = []);
     opts || (opts = {});
-
     Object.defineProperties(this, {
       /**
        * Default Mapper for this collection. Optional. If a Mapper is provided, then
@@ -5057,11 +5286,10 @@
         value: undefined,
         writable: true
       }
-    });
+    }); // Apply user-provided configuration
 
-    // Apply user-provided configuration
-    utils.fillIn(this, opts);
-    // Fill in any missing options with the defaults
+    utils.fillIn(this, opts); // Fill in any missing options with the defaults
+
     utils.fillIn(this, utils.copy(COLLECTION_DEFAULTS));
 
     if (!this.queryClass) {
@@ -5069,7 +5297,6 @@
     }
 
     var idAttribute = this.recordId();
-
     Object.defineProperties(this, {
       /**
        * The main index, which uses @{link Collection#recordId} as the key.
@@ -5094,9 +5321,8 @@
       indexes: {
         value: {}
       }
-    });
+    }); // Insert initial data into the collection
 
-    // Insert initial data into the collection
     if (utils.isObject(records) || utils.isArray(records) && records.length) {
       this.add(records);
     }
@@ -5118,7 +5344,6 @@
         this.emit.apply(this, arguments);
       }
     },
-
 
     /**
      * Insert the provided record or records.
@@ -5143,34 +5368,35 @@
       var _this = this;
 
       // Default values for arguments
-      opts || (opts = {});
+      opts || (opts = {}); // Fill in "opts" with the Collection's configuration
 
-      // Fill in "opts" with the Collection's configuration
       utils._(opts, this);
-      records = this.beforeAdd(records, opts) || records;
 
-      // Track whether just one record or an array of records is being inserted
+      records = this.beforeAdd(records, opts) || records; // Track whether just one record or an array of records is being inserted
+
       var singular = false;
       var idAttribute = this.recordId();
+
       if (!utils.isArray(records)) {
         if (utils.isObject(records)) {
           records = [records];
           singular = true;
         } else {
-          throw utils.err(DOMAIN$4 + '#add', 'records')(400, 'object or array', records);
+          throw utils.err("".concat(DOMAIN$4, "#add"), 'records')(400, 'object or array', records);
         }
-      }
-
-      // Map the provided records to existing records.
+      } // Map the provided records to existing records.
       // New records will be inserted. If any records map to existing records,
       // they will be merged into the existing records according to the onConflict
       // option.
+
+
       records = records.map(function (record) {
-        var id = _this.recordId(record);
-        // Grab existing record if there is one
-        var existing = id === undefined ? id : _this.get(id);
-        // If the currently visited record is just a reference to an existing
+        var id = _this.recordId(record); // Grab existing record if there is one
+
+
+        var existing = id === undefined ? id : _this.get(id); // If the currently visited record is just a reference to an existing
         // record, then there is nothing to be done. Exit early.
+
         if (record === existing) {
           return existing;
         }
@@ -5179,14 +5405,18 @@
           // Here, the currently visited record corresponds to a record already
           // in the collection, so we need to merge them
           var onConflict = opts.onConflict || _this.onConflict;
+
           if (onConflict !== 'merge' && onConflict !== 'replace' && onConflict !== 'skip') {
-            throw utils.err(DOMAIN$4 + '#add', 'opts.onConflict')(400, 'one of (merge, replace, skip)', onConflict, true);
+            throw utils.err("".concat(DOMAIN$4, "#add"), 'opts.onConflict')(400, 'one of (merge, replace, skip)', onConflict, true);
           }
+
           var existingNoValidate = existing._get(noValidatePath$1);
+
           if (opts.noValidate) {
             // Disable validation
             existing._set(noValidatePath$1, true);
           }
+
           if (onConflict === 'merge') {
             utils.deepMixIn(existing, record);
           } else if (onConflict === 'replace') {
@@ -5198,39 +5428,48 @@
             existing.set(record);
           } // else if(onConflict === 'skip'){ do nothing }
 
+
           if (opts.noValidate) {
             // Restore previous `noValidate` value
             existing._set(noValidatePath$1, existingNoValidate);
           }
+
           record = existing;
+
           if (opts.commitOnMerge && utils.isFunction(record.commit)) {
             record.commit();
-          }
-          // Update all indexes in the collection
+          } // Update all indexes in the collection
+
+
           _this.updateIndexes(record);
         } else {
           // Here, the currently visted record does not correspond to any record
           // in the collection, so (optionally) instantiate this record and insert
           // it into the collection
           record = _this.mapper ? _this.mapper.createRecord(record, opts) : record;
+
           _this.index.insertRecord(record);
+
           utils.forOwn(_this.indexes, function (index, name) {
             index.insertRecord(record);
           });
+
           if (record && utils.isFunction(record.on)) {
             record.on('all', _this._onRecordEvent, _this);
           }
         }
+
         return record;
-      });
-      // Finally, return the inserted data
+      }); // Finally, return the inserted data
+
       var result = singular ? records[0] : records;
+
       if (!opts.silent) {
         this.emit('add', result);
       }
+
       return this.afterAdd(records, opts, result) || result;
     },
-
 
     /**
      * Lifecycle hook called by {@link Collection#add}. If this method returns a
@@ -5244,7 +5483,6 @@
      */
     afterAdd: function afterAdd() {},
 
-
     /**
      * Lifecycle hook called by {@link Collection#remove}. If this method returns
      * a value then {@link Collection#remove} will return that same value.
@@ -5256,7 +5494,6 @@
      * @param {object} record The result that will be returned by {@link Collection#remove}.
      */
     afterRemove: function afterRemove() {},
-
 
     /**
      * Lifecycle hook called by {@link Collection#removeAll}. If this method
@@ -5271,7 +5508,6 @@
      */
     afterRemoveAll: function afterRemoveAll() {},
 
-
     /**
      * Lifecycle hook called by {@link Collection#add}. If this method returns a
      * value then the `records` argument in {@link Collection#add} will be
@@ -5284,7 +5520,6 @@
      */
     beforeAdd: function beforeAdd() {},
 
-
     /**
      * Lifecycle hook called by {@link Collection#remove}.
      *
@@ -5295,7 +5530,6 @@
      */
     beforeRemove: function beforeRemove() {},
 
-
     /**
      * Lifecycle hook called by {@link Collection#removeAll}.
      *
@@ -5305,7 +5539,6 @@
      * @param {object} opts The `opts` argument passed to {@link Collection#removeAll}.
      */
     beforeRemoveAll: function beforeRemoveAll() {},
-
 
     /**
      * Find all records between two boundaries.
@@ -5339,7 +5572,6 @@
       return this.query().between(leftKeys, rightKeys, opts).run();
     },
 
-
     /**
      * Create a new secondary index on the contents of the collection.
      *
@@ -5364,6 +5596,7 @@
       if (utils.isString(name) && fieldList === undefined) {
         fieldList = [name];
       }
+
       opts || (opts = {});
       opts.hashCode || (opts.hashCode = function (obj) {
         return _this2.recordId(obj);
@@ -5371,7 +5604,6 @@
       var index = this.indexes[name] = new Index(fieldList, opts);
       this.index.visitAll(index.insertRecord, index);
     },
-
 
     /**
      * Find the record or records that match the provided query or pass the
@@ -5417,7 +5649,6 @@
       return this.query().filter(query, thisArg).run();
     },
 
-
     /**
      * Iterate over all records.
      *
@@ -5436,7 +5667,6 @@
       this.index.visitAll(cb, thisArg);
     },
 
-
     /**
      * Get the record with the given id.
      *
@@ -5445,11 +5675,10 @@
      * @param {(string|number)} id The primary key of the record to get.
      * @returns {(Object|Record)} The record with the given id.
      */
-    get: function get$$1(id) {
+    get: function get(id) {
       var instances = id === undefined ? [] : this.query().get(id).run();
       return instances.length ? instances[0] : undefined;
     },
-
 
     /**
      * Find the record or records that match the provided keyLists.
@@ -5475,11 +5704,10 @@
      * @returns {Array} The result.
      */
     getAll: function getAll() {
-      var _query;
+      var _this$query;
 
-      return (_query = this.query()).getAll.apply(_query, arguments).run();
+      return (_this$query = this.query()).getAll.apply(_this$query, arguments).run();
     },
-
 
     /**
      * Return the index with the given name. If no name is provided, return the
@@ -5491,12 +5719,13 @@
      */
     getIndex: function getIndex(name) {
       var index = name ? this.indexes[name] : this.index;
+
       if (!index) {
-        throw utils.err(DOMAIN$4 + '#getIndex', name)(404, 'index');
+        throw utils.err("".concat(DOMAIN$4, "#getIndex"), name)(404, 'index');
       }
+
       return index;
     },
-
 
     /**
      * Limit the result.
@@ -5514,7 +5743,6 @@
     limit: function limit(num) {
       return this.query().limit(num).run();
     },
-
 
     /**
      * Apply a mapping function to all records.
@@ -5536,7 +5764,6 @@
       return data;
     },
 
-
     /**
      * Return the result of calling the specified function on each record in this
      * collection's main index.
@@ -5548,17 +5775,16 @@
      * @returns {Array} The result.
      */
     mapCall: function mapCall(funcName) {
-      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         args[_key - 1] = arguments[_key];
       }
 
       var data = [];
       this.index.visitAll(function (record) {
-        data.push(record[funcName].apply(record, toConsumableArray(args)));
+        data.push(record[funcName].apply(record, args));
       });
       return data;
     },
-
 
     /**
      * Return all "unsaved" (not uniquely identifiable) records in this colleciton.
@@ -5571,7 +5797,6 @@
     prune: function prune(opts) {
       return this.removeAll(this.unsaved(), opts);
     },
-
 
     /**
      * Create a new query to be executed against the contents of the collection.
@@ -5594,7 +5819,6 @@
       return new Ctor(this);
     },
 
-
     /**
      * Return the primary key of the given, or if no record is provided, return the
      * name of the field that holds the primary key of records in this Collection.
@@ -5610,9 +5834,9 @@
       if (record) {
         return utils.get(record, this.recordId());
       }
+
       return this.mapper ? this.mapper.idAttribute : this.idAttribute;
     },
-
 
     /**
      * Reduce the data in the collection to a single value and return the result.
@@ -5633,7 +5857,6 @@
       return data.reduce(cb, initialValue);
     },
 
-
     /**
      * Remove the record with the given id from this Collection.
      *
@@ -5648,26 +5871,28 @@
       // Default values for arguments
       opts || (opts = {});
       this.beforeRemove(idOrRecord, opts);
-      var record = utils.isSorN(idOrRecord) ? this.get(idOrRecord) : idOrRecord;
+      var record = utils.isSorN(idOrRecord) ? this.get(idOrRecord) : idOrRecord; // The record is in the collection, remove it
 
-      // The record is in the collection, remove it
       if (utils.isObject(record)) {
         record = this.index.removeRecord(record);
+
         if (record) {
           utils.forOwn(this.indexes, function (index, name) {
             index.removeRecord(record);
           });
+
           if (utils.isFunction(record.off)) {
             record.off('all', this._onRecordEvent, this);
           }
+
           if (!opts.silent) {
             this.emit('remove', record);
           }
         }
       }
+
       return this.afterRemove(idOrRecord, opts, record) || record;
     },
-
 
     /**
      * Remove from this collection the given records or the records selected by
@@ -5689,9 +5914,8 @@
       // Default values for arguments
       opts || (opts = {});
       this.beforeRemoveAll(queryOrRecords, opts);
-      var records = utils.isArray(queryOrRecords) ? queryOrRecords.slice() : this.filter(queryOrRecords);
+      var records = utils.isArray(queryOrRecords) ? queryOrRecords.slice() : this.filter(queryOrRecords); // Remove each selected record from the collection
 
-      // Remove each selected record from the collection
       var optsCopy = utils.plainCopy(opts);
       optsCopy.silent = true;
       records = records.map(function (record) {
@@ -5699,12 +5923,13 @@
       }).filter(function (record) {
         return record;
       });
+
       if (!opts.silent) {
         this.emit('remove', records);
       }
+
       return this.afterRemoveAll(queryOrRecords, opts, records) || records;
     },
-
 
     /**
      * Skip a number of results.
@@ -5723,7 +5948,6 @@
       return this.query().skip(num).run();
     },
 
-
     /**
      * Return the plain JSON representation of all items in this collection.
      * Assumes records in this collection have a toJSON method.
@@ -5739,7 +5963,6 @@
       return this.mapCall('toJSON', opts);
     },
 
-
     /**
      * Return all "unsaved" (not uniquely identifiable) records in this colleciton.
      *
@@ -5750,7 +5973,6 @@
     unsaved: function unsaved(opts) {
       return this.index.get();
     },
-
 
     /**
      * Update a record's position in a single index of this collection. See
@@ -5770,7 +5992,6 @@
       this.getIndex(opts.index).updateRecord(record);
     },
 
-
     /**
      * Updates all indexes in this collection for the provided record. Has no
      * effect if the record is not in the collection.
@@ -5786,9 +6007,137 @@
       });
     }
   });
+  /**
+   * Fired when a record changes. Only works for records that have tracked changes.
+   * See {@link Collection~changeListener} on how to listen for this event.
+   *
+   * @event Collection#change
+   * @see Collection~changeListener
+   */
+
+  /**
+   * Callback signature for the {@link Collection#event:change} event.
+   *
+   * @example
+   * function onChange (record, changes) {
+   *   // do something
+   * }
+   * collection.on('change', onChange);
+   *
+   * @callback Collection~changeListener
+   * @param {Record} The Record that changed.
+   * @param {object} The changes.
+   * @see Collection#event:change
+   * @since 3.0.0
+   */
+
+  /**
+   * Fired when one or more records are added to the Collection. See
+   * {@link Collection~addListener} on how to listen for this event.
+   *
+   * @event Collection#add
+   * @see Collection~addListener
+   * @see Collection#event:add
+   * @see Collection#add
+   */
+
+  /**
+   * Callback signature for the {@link Collection#event:add} event.
+   *
+   * @example
+   * function onAdd (recordOrRecords) {
+   *   // do something
+   * }
+   * collection.on('add', onAdd);
+   *
+   * @callback Collection~addListener
+   * @param {Record|Record[]} The Record or Records that were added.
+   * @see Collection#event:add
+   * @see Collection#add
+   * @since 3.0.0
+   */
+
+  /**
+   * Fired when one or more records are removed from the Collection. See
+   * {@link Collection~removeListener} for how to listen for this event.
+   *
+   * @event Collection#remove
+   * @see Collection~removeListener
+   * @see Collection#event:remove
+   * @see Collection#remove
+   * @see Collection#removeAll
+   */
+
+  /**
+   * Callback signature for the {@link Collection#event:remove} event.
+   *
+   * @example
+   * function onRemove (recordsOrRecords) {
+   *   // do something
+   * }
+   * collection.on('remove', onRemove);
+   *
+   * @callback Collection~removeListener
+   * @param {Record|Record[]} Record or Records that were removed.
+   * @see Collection#event:remove
+   * @see Collection#remove
+   * @see Collection#removeAll
+   * @since 3.0.0
+   */
+
+  /**
+   * Create a subclass of this Collection:
+   * @example <caption>Collection.extend</caption>
+   * const JSData = require('js-data');
+   * const { Collection } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * // Extend the class using ES2015 class syntax.
+   * class CustomCollectionClass extends Collection {
+   *   foo () { return 'bar'; }
+   *   static beep () { return 'boop'; }
+   * }
+   * const customCollection = new CustomCollectionClass();
+   * console.log(customCollection.foo());
+   * console.log(CustomCollectionClass.beep());
+   *
+   * // Extend the class using alternate method.
+   * const OtherCollectionClass = Collection.extend({
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const otherCollection = new OtherCollectionClass();
+   * console.log(otherCollection.foo());
+   * console.log(OtherCollectionClass.beep());
+   *
+   * // Extend the class, providing a custom constructor.
+   * function AnotherCollectionClass () {
+   *   Collection.call(this);
+   *   this.created_at = new Date().getTime();
+   * }
+   * Collection.extend({
+   *   constructor: AnotherCollectionClass,
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const anotherCollection = new AnotherCollectionClass();
+   * console.log(anotherCollection.created_at);
+   * console.log(anotherCollection.foo());
+   * console.log(AnotherCollectionClass.beep());
+   *
+   * @method Collection.extend
+   * @param {object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
+   * to be used as the subclass itself.
+   * @param {object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Collection class.
+   * @since 3.0.0
+   */
 
   var DOMAIN$5 = 'Schema';
-
   /**
    * A function map for each of the seven primitive JSON types defined by the core specification.
    * Each function will check a given value and return true or false if the value is an instance of that type.
@@ -5800,6 +6149,7 @@
    * @name Schema.types
    * @type {object}
    */
+
   var types = {
     array: utils.isArray,
     boolean: utils.isBoolean,
@@ -5808,27 +6158,31 @@
     number: utils.isNumber,
     object: utils.isObject,
     string: utils.isString
-
-    /**
-     * @ignore
-     */
-  };var segmentToString = function segmentToString(segment, prev) {
-    var str = '';
-    if (segment) {
-      if (utils.isNumber(segment)) {
-        str += '[' + segment + ']';
-      } else if (prev) {
-        str += '.' + segment;
-      } else {
-        str += '' + segment;
-      }
-    }
-    return str;
   };
-
   /**
    * @ignore
    */
+
+  var segmentToString = function segmentToString(segment, prev) {
+    var str = '';
+
+    if (segment) {
+      if (utils.isNumber(segment)) {
+        str += "[".concat(segment, "]");
+      } else if (prev) {
+        str += ".".concat(segment);
+      } else {
+        str += "".concat(segment);
+      }
+    }
+
+    return str;
+  };
+  /**
+   * @ignore
+   */
+
+
   var makePath = function makePath(opts) {
     opts || (opts = {});
     var path = '';
@@ -5839,10 +6193,11 @@
     path += segmentToString(opts.prop, path);
     return path;
   };
-
   /**
    * @ignore
    */
+
+
   var makeError = function makeError(actual, expected, opts) {
     return {
       expected: expected,
@@ -5850,39 +6205,45 @@
       path: makePath(opts)
     };
   };
-
   /**
    * @ignore
    */
+
+
   var addError = function addError(actual, expected, opts, errors) {
     errors.push(makeError(actual, expected, opts));
   };
-
   /**
    * @ignore
    */
+
+
   var maxLengthCommon = function maxLengthCommon(keyword, value, schema, opts) {
     var max = schema[keyword];
+
     if (value.length > max) {
-      return makeError(value.length, 'length no more than ' + max, opts);
+      return makeError(value.length, "length no more than ".concat(max), opts);
     }
   };
-
   /**
    * @ignore
    */
+
+
   var minLengthCommon = function minLengthCommon(keyword, value, schema, opts) {
     var min = schema[keyword];
+
     if (value.length < min) {
-      return makeError(value.length, 'length no less than ' + min, opts);
+      return makeError(value.length, "length no less than ".concat(min), opts);
     }
   };
-
   /**
    * A map of all object member validation functions for each keyword defined in the JSON Schema.
    * @name Schema.validationKeywords
    * @type {object}
    */
+
+
   var validationKeywords = {
     /**
      * Validates the provided value against all schemas defined in the Schemas `allOf` keyword.
@@ -5908,7 +6269,6 @@
       return allErrors.length ? allErrors : undefined;
     },
 
-
     /**
      * Validates the provided value against all schemas defined in the Schemas `anyOf` keyword.
      * The instance is valid against this keyword if and only if it is valid against
@@ -5930,6 +6290,7 @@
       var allErrors = [];
       schema.anyOf.forEach(function (_schema) {
         var errors = _validate(value, _schema, opts);
+
         if (errors) {
           allErrors = allErrors.concat(errors);
         } else {
@@ -5938,7 +6299,6 @@
       });
       return validated ? undefined : allErrors;
     },
-
 
     /**
      * http://json-schema.org/latest/json-schema-validation.html#anchor70
@@ -5949,10 +6309,8 @@
      * @param {object} schema TODO
      * @param {object} opts TODO
      */
-    dependencies: function dependencies(value, schema, opts) {
-      // TODO
+    dependencies: function dependencies(value, schema, opts) {// TODO
     },
-
 
     /**
      * Validates the provided value against an array of possible values defined by the Schema's `enum` keyword
@@ -5968,13 +6326,13 @@
      */
     enum: function _enum(value, schema, opts) {
       var possibleValues = schema['enum'];
+
       if (utils.findIndex(possibleValues, function (item) {
         return utils.deepEqual(item, value);
       }) === -1) {
-        return makeError(value, 'one of (' + possibleValues.join(', ') + ')', opts);
+        return makeError(value, "one of (".concat(possibleValues.join(', '), ")"), opts);
       }
     },
-
 
     /**
      * Validates each of the provided array values against a schema or an array of schemas defined by the Schema's `items` keyword
@@ -5988,24 +6346,26 @@
      * @returns {(array|undefined)} Array of errors or `undefined` if valid.
      */
     items: function items(value, schema, opts) {
-      opts || (opts = {});
-      // TODO: additionalItems
+      opts || (opts = {}); // TODO: additionalItems
+
       var items = schema.items;
       var errors = [];
       var checkingTuple = utils.isArray(items);
       var length = value.length;
+
       for (var prop = 0; prop < length; prop++) {
         if (checkingTuple) {
           // Validating a tuple, instead of just checking each item against the
           // same schema
           items = schema.items[prop];
         }
+
         opts.prop = prop;
         errors = errors.concat(_validate(value[prop], items, opts) || []);
       }
+
       return errors.length ? errors : undefined;
     },
-
 
     /**
      * Validates the provided number against a maximum value defined by the Schema's `maximum` keyword
@@ -6021,16 +6381,16 @@
      */
     maximum: function maximum(value, schema, opts) {
       // Must be a number
-      var maximum = schema.maximum;
-      // Must be a boolean
+      var maximum = schema.maximum; // Must be a boolean
       // Depends on maximum
       // default: false
+
       var exclusiveMaximum = schema.exclusiveMaximum;
-      if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === (typeof maximum === 'undefined' ? 'undefined' : _typeof(maximum)) && !(exclusiveMaximum ? maximum > value : maximum >= value)) {
-        return exclusiveMaximum ? makeError(value, 'no more than nor equal to ' + maximum, opts) : makeError(value, 'no more than ' + maximum, opts);
+
+      if (_typeof(value) === _typeof(maximum) && !(exclusiveMaximum ? maximum > value : maximum >= value)) {
+        return exclusiveMaximum ? makeError(value, "no more than nor equal to ".concat(maximum), opts) : makeError(value, "no more than ".concat(maximum), opts);
       }
     },
-
 
     /**
      * Validates the length of the provided array against a maximum value defined by the Schema's `maxItems` keyword.
@@ -6050,7 +6410,6 @@
       }
     },
 
-
     /**
      * Validates the length of the provided string against a maximum value defined in the Schema's `maxLength` keyword.
      * Validation succeeds if the length of the string is less than, or equal to the value of this keyword.
@@ -6066,7 +6425,6 @@
     maxLength: function maxLength(value, schema, opts) {
       return maxLengthCommon('maxLength', value, schema, opts);
     },
-
 
     /**
      * Validates the count of the provided object's properties against a maximum value defined in the Schema's `maxProperties` keyword.
@@ -6085,11 +6443,11 @@
       if (!utils.isObject(value)) return;
       var maxProperties = schema.maxProperties;
       var length = Object.keys(value).length;
+
       if (length > maxProperties) {
-        return makeError(length, 'no more than ' + maxProperties + ' properties', opts);
+        return makeError(length, "no more than ".concat(maxProperties, " properties"), opts);
       }
     },
-
 
     /**
      * Validates the provided value against a minimum value defined by the Schema's `minimum` keyword
@@ -6105,16 +6463,16 @@
      */
     minimum: function minimum(value, schema, opts) {
       // Must be a number
-      var minimum = schema.minimum;
-      // Must be a boolean
+      var minimum = schema.minimum; // Must be a boolean
       // Depends on minimum
       // default: false
+
       var exclusiveMinimum = schema.exclusiveMinimum;
-      if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === (typeof minimum === 'undefined' ? 'undefined' : _typeof(minimum)) && !(exclusiveMinimum ? value > minimum : value >= minimum)) {
-        return exclusiveMinimum ? makeError(value, 'no less than nor equal to ' + minimum, opts) : makeError(value, 'no less than ' + minimum, opts);
+
+      if (_typeof(value) === _typeof(minimum) && !(exclusiveMinimum ? value > minimum : value >= minimum)) {
+        return exclusiveMinimum ? makeError(value, "no less than nor equal to ".concat(minimum), opts) : makeError(value, "no less than ".concat(minimum), opts);
       }
     },
-
 
     /**
      * Validates the length of the provided array against a minimum value defined by the Schema's `minItems` keyword.
@@ -6134,7 +6492,6 @@
       }
     },
 
-
     /**
      * Validates the length of the provided string against a minimum value defined in the Schema's `minLength` keyword.
      * Validation succeeds if the length of the string is greater than, or equal to the value of this keyword.
@@ -6150,7 +6507,6 @@
     minLength: function minLength(value, schema, opts) {
       return minLengthCommon('minLength', value, schema, opts);
     },
-
 
     /**
      * Validates the count of the provided object's properties against a minimum value defined in the Schema's `minProperties` keyword.
@@ -6169,11 +6525,11 @@
       if (!utils.isObject(value)) return;
       var minProperties = schema.minProperties;
       var length = Object.keys(value).length;
+
       if (length < minProperties) {
-        return makeError(length, 'no more than ' + minProperties + ' properties', opts);
+        return makeError(length, "no more than ".concat(minProperties, " properties"), opts);
       }
     },
-
 
     /**
      * Validates the provided number is a multiple of the number defined in the Schema's `multipleOf` keyword.
@@ -6189,13 +6545,13 @@
      */
     multipleOf: function multipleOf(value, schema, opts) {
       var multipleOf = schema.multipleOf;
+
       if (utils.isNumber(value)) {
         if (value / multipleOf % 1 !== 0) {
-          return makeError(value, 'multipleOf ' + multipleOf, opts);
+          return makeError(value, "multipleOf ".concat(multipleOf), opts);
         }
       }
     },
-
 
     /**
      * Validates the provided value is not valid with any of the schemas defined in the Schema's `not` keyword.
@@ -6216,7 +6572,6 @@
       }
     },
 
-
     /**
      * Validates the provided value is valid with one and only one of the schemas defined in the Schema's `oneOf` keyword.
      * An instance is valid against this keyword if and only if it is valid against a single schemas in this keyword's value.
@@ -6234,6 +6589,7 @@
       var allErrors = [];
       schema.oneOf.forEach(function (_schema) {
         var errors = _validate(value, _schema, opts);
+
         if (errors) {
           allErrors = allErrors.concat(errors);
         } else if (validated) {
@@ -6246,7 +6602,6 @@
       });
       return validated ? undefined : allErrors;
     },
-
 
     /**
      * Validates the provided string matches a pattern defined in the Schema's `pattern` keyword.
@@ -6262,11 +6617,11 @@
      */
     pattern: function pattern(value, schema, opts) {
       var pattern = schema.pattern;
+
       if (utils.isString(value) && !value.match(pattern)) {
         return makeError(value, pattern, opts);
       }
     },
-
 
     /**
      * Validates the provided object's properties against a map of values defined in the Schema's `properties` keyword.
@@ -6287,27 +6642,25 @@
 
       if (utils.isArray(value)) {
         return;
-      }
-
-      // Can be a boolean or an object
+      } // Can be a boolean or an object
       // Technically the default is an "empty schema", but here "true" is
       // functionally the same
+
+
       var additionalProperties = schema.additionalProperties === undefined ? true : schema.additionalProperties;
-      var validated = [];
-      // "p": The property set from "properties".
+      var validated = []; // "p": The property set from "properties".
       // Default is an object
-      var properties = schema.properties || {};
-      // "pp": The property set from "patternProperties".
+
+      var properties = schema.properties || {}; // "pp": The property set from "patternProperties".
       // Default is an object
+
       var patternProperties = schema.patternProperties || {};
       var errors = [];
-
       utils.forOwn(properties, function (_schema, prop) {
         opts.prop = prop;
         errors = errors.concat(_validate(value[prop], _schema, opts) || []);
         validated.push(prop);
       });
-
       var toValidate = utils.omit(value, validated);
       utils.forOwn(patternProperties, function (_schema, pattern) {
         utils.forOwn(toValidate, function (undef, prop) {
@@ -6318,13 +6671,13 @@
           }
         });
       });
-      var keys = Object.keys(utils.omit(value, validated));
-      // If "s" is not empty, validation fails
+      var keys = Object.keys(utils.omit(value, validated)); // If "s" is not empty, validation fails
+
       if (additionalProperties === false) {
         if (keys.length) {
           var origProp = opts.prop;
           opts.prop = '';
-          addError('extra fields: ' + keys.join(', '), 'no extra fields', opts, errors);
+          addError("extra fields: ".concat(keys.join(', ')), 'no extra fields', opts, errors);
           opts.prop = origProp;
         }
       } else if (utils.isObject(additionalProperties)) {
@@ -6334,9 +6687,9 @@
           errors = errors.concat(_validate(value[prop], additionalProperties, opts) || []);
         });
       }
+
       return errors.length ? errors : undefined;
     },
-
 
     /**
      * Validates the provided object's has all properties listed in the Schema's `properties` keyword array.
@@ -6354,6 +6707,7 @@
       opts || (opts = {});
       var required = schema.required;
       var errors = [];
+
       if (!opts.existingOnly) {
         required.forEach(function (prop) {
           if (utils.get(value, prop) === undefined) {
@@ -6364,9 +6718,9 @@
           }
         });
       }
+
       return errors.length ? errors : undefined;
     },
-
 
     /**
      * Validates the provided value's type is equal to the type, or array of types, defined in the Schema's `type` keyword.
@@ -6381,12 +6735,13 @@
      */
     type: function type(value, schema, opts) {
       var type = schema.type;
-      var validType = void 0;
-      // Can be one of several types
+      var validType; // Can be one of several types
+
       if (utils.isString(type)) {
         type = [type];
-      }
-      // Try to match the value against an expected type
+      } // Try to match the value against an expected type
+
+
       type.forEach(function (_type) {
         // TODO: throw an error if type is not defined
         if (types[_type](value, schema, opts)) {
@@ -6394,19 +6749,20 @@
           validType = _type;
           return false;
         }
-      });
-      // Value did not match any expected type
+      }); // Value did not match any expected type
+
       if (!validType) {
-        return makeError(value !== undefined && value !== null ? typeof value === 'undefined' ? 'undefined' : _typeof(value) : '' + value, 'one of (' + type.join(', ') + ')', opts);
-      }
-      // Run keyword validators for matched type
+        return makeError(value !== undefined && value !== null ? _typeof(value) : '' + value, "one of (".concat(type.join(', '), ")"), opts);
+      } // Run keyword validators for matched type
       // http://json-schema.org/latest/json-schema-validation.html#anchor12
+
+
       var validator = typeGroupValidators[validType];
+
       if (validator) {
         return validator(value, schema, opts);
       }
     },
-
 
     /**
      * Validates the provided array values are unique.
@@ -6423,13 +6779,11 @@
     uniqueItems: function uniqueItems(value, schema, opts) {
       if (value && value.length && schema.uniqueItems) {
         var length = value.length;
-        var item = void 0,
-            i = void 0,
-            j = void 0;
-        // Check n - 1 items
+        var item, i, j; // Check n - 1 items
+
         for (i = length - 1; i > 0; i--) {
-          item = value[i];
-          // Only compare against unchecked items
+          item = value[i]; // Only compare against unchecked items
+
           for (j = i - 1; j >= 0; j--) {
             // Found a duplicate
             if (utils.deepEqual(item, value[j])) {
@@ -6440,10 +6794,10 @@
       }
     }
   };
-
   /**
    * @ignore
    */
+
   var runOps = function runOps(ops, value, schema, opts) {
     var errors = [];
     ops.forEach(function (op) {
@@ -6453,7 +6807,6 @@
     });
     return errors.length ? errors : undefined;
   };
-
   /**
    * Validation keywords validated for any type:
    *
@@ -6467,8 +6820,9 @@
    * @name Schema.ANY_OPS
    * @type {string[]}
    */
-  var ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not'];
 
+
+  var ANY_OPS = ['enum', 'type', 'allOf', 'anyOf', 'oneOf', 'not'];
   /**
    * Validation keywords validated for array types:
    *
@@ -6480,8 +6834,8 @@
    * @name Schema.ARRAY_OPS
    * @type {string[]}
    */
-  var ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems'];
 
+  var ARRAY_OPS = ['items', 'maxItems', 'minItems', 'uniqueItems'];
   /**
    * Validation keywords validated for numeric (number and integer) types:
    *
@@ -6492,8 +6846,8 @@
    * @name Schema.NUMERIC_OPS
    * @type {string[]}
    */
-  var NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum'];
 
+  var NUMERIC_OPS = ['multipleOf', 'maximum', 'minimum'];
   /**
    * Validation keywords validated for object types:
    *
@@ -6506,8 +6860,8 @@
    * @name Schema.OBJECT_OPS
    * @type {string[]}
    */
-  var OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies'];
 
+  var OBJECT_OPS = ['maxProperties', 'minProperties', 'required', 'properties', 'dependencies'];
   /**
    * Validation keywords validated for string types:
    *
@@ -6518,16 +6872,16 @@
    * @name Schema.STRING_OPS
    * @type {string[]}
    */
-  var STRING_OPS = ['maxLength', 'minLength', 'pattern'];
 
+  var STRING_OPS = ['maxLength', 'minLength', 'pattern'];
   /**
    * http://json-schema.org/latest/json-schema-validation.html#anchor75
    * @ignore
    */
+
   var validateAny = function validateAny(value, schema, opts) {
     return runOps(ANY_OPS, value, schema, opts);
   };
-
   /**
    * Validates the provided value against a given Schema according to the http://json-schema.org/ v4 specification.
    *
@@ -6538,28 +6892,38 @@
    * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
-  var _validate = function _validate(value, schema, opts) {
+
+
+  var _validate = function validate(value, schema, opts) {
     var errors = [];
     opts || (opts = {});
-    opts.ctx || (opts.ctx = { value: value, schema: schema });
-    var shouldPop = void 0;
+    opts.ctx || (opts.ctx = {
+      value: value,
+      schema: schema
+    });
+    var shouldPop;
     var prevProp = opts.prop;
+
     if (schema === undefined) {
       return;
     }
+
     if (!utils.isObject(schema)) {
-      throw utils.err(DOMAIN$5 + '#validate')(500, 'Invalid schema at path: "' + opts.path + '"');
+      throw utils.err("".concat(DOMAIN$5, "#validate"))(500, "Invalid schema at path: \"".concat(opts.path, "\""));
     }
+
     if (opts.path === undefined) {
       opts.path = [];
-    }
-    // Track our location as we recurse
+    } // Track our location as we recurse
+
+
     if (opts.prop !== undefined) {
       shouldPop = true;
       opts.path.push(opts.prop);
       opts.prop = undefined;
-    }
-    // Validate against parent schema
+    } // Validate against parent schema
+
+
     if (schema['extends']) {
       // opts.path = path
       // opts.prop = prop
@@ -6569,52 +6933,57 @@
         errors = errors.concat(_validate(value, schema['extends'], opts) || []);
       }
     }
+
     if (value === undefined) {
       // Check if property is required
       if (schema.required === true && !opts.existingOnly) {
         addError(value, 'a value', opts, errors);
       }
+
       if (shouldPop) {
         opts.path.pop();
         opts.prop = prevProp;
       }
+
       return errors.length ? errors : undefined;
     }
 
     errors = errors.concat(validateAny(value, schema, opts) || []);
+
     if (shouldPop) {
       opts.path.pop();
       opts.prop = prevProp;
     }
-    return errors.length ? errors : undefined;
-  };
 
-  // These strings are cached for optimal performance of the change detection
+    return errors.length ? errors : undefined;
+  }; // These strings are cached for optimal performance of the change detection
   // boolean - Whether a Record is changing in the current execution frame
-  var changingPath = 'changing';
-  // string[] - Properties that have changed in the current execution frame
-  var changedPath = 'changed';
-  // Object[] - History of change records
-  var changeHistoryPath = 'history';
-  // boolean - Whether a Record is currently being instantiated
-  var creatingPath$1 = 'creating';
-  // number - The setTimeout change event id of a Record, if any
-  var eventIdPath = 'eventId';
-  // boolean - Whether to skip validation for a Record's currently changing property
-  var noValidatePath$2 = 'noValidate';
-  // boolean - Whether to preserve Change History for a Record
-  var keepChangeHistoryPath$1 = 'keepChangeHistory';
-  // boolean - Whether to skip change notification for a Record's currently
+
+
+  var changingPath = 'changing'; // string[] - Properties that have changed in the current execution frame
+
+  var changedPath = 'changed'; // Object[] - History of change records
+
+  var changeHistoryPath = 'history'; // boolean - Whether a Record is currently being instantiated
+
+  var creatingPath$1 = 'creating'; // number - The setTimeout change event id of a Record, if any
+
+  var eventIdPath = 'eventId'; // boolean - Whether to skip validation for a Record's currently changing property
+
+  var noValidatePath$2 = 'noValidate'; // boolean - Whether to preserve Change History for a Record
+
+  var keepChangeHistoryPath$1 = 'keepChangeHistory'; // boolean - Whether to skip change notification for a Record's currently
   // changing property
+
   var silentPath = 'silent';
   var validationFailureMsg = 'validation failed';
-
   /**
    * A map of validation functions grouped by type.
    *
    * @name Schema.typeGroupValidators
    * @type {object}
    */
+
   var typeGroupValidators = {
     /**
      * Validates the provided value against the schema using all of the validation keywords specific to instances of an array.
@@ -6727,32 +7096,33 @@
     string: function string(value, schema, opts) {
       return runOps(STRING_OPS, value, schema, opts);
     }
+  };
+  /**
+   * js-data's Schema class.
+   *
+   * @example <caption>Schema#constructor</caption>
+   * const JSData = require('js-data');
+   * const { Schema } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const PostSchema = new Schema({
+   *   type: 'object',
+   *   properties: {
+   *     title: { type: 'string' }
+   *   }
+   * });
+   * PostSchema.validate({ title: 1234 });
+   *
+   * @class Schema
+   * @extends Component
+   * @param {object} definition Schema definition according to json-schema.org
+   */
 
-    /**
-     * js-data's Schema class.
-     *
-     * @example <caption>Schema#constructor</caption>
-     * const JSData = require('js-data');
-     * const { Schema } = JSData;
-     * console.log('Using JSData v' + JSData.version.full);
-     *
-     * const PostSchema = new Schema({
-     *   type: 'object',
-     *   properties: {
-     *     title: { type: 'string' }
-     *   }
-     * });
-     * PostSchema.validate({ title: 1234 });
-     *
-     * @class Schema
-     * @extends Component
-     * @param {object} definition Schema definition according to json-schema.org
-     */
-  };function Schema(definition) {
+  function Schema(definition) {
     var _this = this;
 
-    definition || (definition = {});
-    // TODO: schema validation
+    definition || (definition = {}); // TODO: schema validation
+
     utils.fillIn(this, definition);
 
     if (this.type === 'object') {
@@ -6765,9 +7135,11 @@
     } else if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
       this.items = new Schema(this.items);
     }
+
     if (this.extends && !(this.extends instanceof Schema)) {
       this.extends = new Schema(this.extends);
     }
+
     ['allOf', 'anyOf', 'oneOf'].forEach(function (validationKeyword) {
       if (_this[validationKeyword]) {
         _this[validationKeyword].forEach(function (_definition, i) {
@@ -6805,7 +7177,6 @@
       });
     },
 
-
     /**
      * Apply default values to the target object for missing values.
      *
@@ -6817,30 +7188,39 @@
       if (!target) {
         return;
       }
+
       var properties = this.properties || {};
       var hasSet = utils.isFunction(target.set) || utils.isFunction(target._set);
       utils.forOwn(properties, function (schema, prop) {
         if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
           if (hasSet) {
-            target.set(prop, utils.plainCopy(schema['default']), { silent: true });
+            target.set(prop, utils.plainCopy(schema['default']), {
+              silent: true
+            });
           } else {
             utils.set(target, prop, utils.plainCopy(schema['default']));
           }
         }
+
         if (schema.type === 'object' && schema.properties) {
           if (hasSet) {
             var orig = target._get('noValidate');
+
             target._set('noValidate', true);
-            utils.set(target, prop, utils.get(target, prop) || {}, { silent: true });
+
+            utils.set(target, prop, utils.get(target, prop) || {}, {
+              silent: true
+            });
+
             target._set('noValidate', orig);
           } else {
             utils.set(target, prop, utils.get(target, prop) || {});
           }
+
           schema.applyDefaults(utils.get(target, prop));
         }
       });
     },
-
 
     /**
      * Assemble a property descriptor for tracking and validating changes to
@@ -6864,9 +7244,10 @@
         // These properties are enumerable by default, but regardless of their
         // enumerability, they won't be "own" properties of individual records
         enumerable: schema.enumerable === undefined ? true : !!schema.enumerable
-        // Cache a few strings for optimal performance
-      };var keyPath = 'props.' + prop;
-      var previousPath = 'previous.' + prop;
+      }; // Cache a few strings for optimal performance
+
+      var keyPath = "props.".concat(prop);
+      var previousPath = "previous.".concat(prop);
       var getter = opts.getter;
       var setter = opts.setter;
       var unsetter = opts.unsetter;
@@ -6878,6 +7259,7 @@
 
       if (utils.isFunction(schema.get)) {
         var originalGet = descriptor.get;
+
         descriptor.get = function () {
           return schema.get.call(this, originalGet);
         };
@@ -6889,10 +7271,13 @@
         // These are accessed a lot
         var _get = this[getter];
         var _set = this[setter];
-        var _unset = this[unsetter];
-        // Optionally check that the new value passes validation
+        var _unset = this[unsetter]; // Optionally check that the new value passes validation
+
         if (!_get(noValidatePath$2)) {
-          var errors = schema.validate(value, { path: [prop] });
+          var errors = schema.validate(value, {
+            path: [prop]
+          });
+
           if (errors) {
             // Immediately throw an error, preventing the record from getting into
             // an invalid state
@@ -6900,85 +7285,110 @@
             error.errors = errors;
             throw error;
           }
-        }
-        // TODO: Make it so tracking can be turned on for all properties instead of
+        } // TODO: Make it so tracking can be turned on for all properties instead of
         // only per-property
+
+
         if (track && !_get(creatingPath$1)) {
           // previous is versioned on database commit
           // props are versioned on set()
           var previous = _get(previousPath);
+
           var current = _get(keyPath);
+
           var changing = _get(changingPath);
+
           var changed = _get(changedPath);
 
           if (!changing) {
             // Track properties that are changing in the current event loop
             changed = [];
-          }
+          } // Add changing properties to this array once at most
 
-          // Add changing properties to this array once at most
+
           var index = changed.indexOf(prop);
+
           if (current !== value && index === -1) {
             changed.push(prop);
           }
+
           if (previous === value) {
             if (index >= 0) {
               changed.splice(index, 1);
             }
-          }
-          // No changes in current event loop
+          } // No changes in current event loop
+
+
           if (!changed.length) {
             changing = false;
+
             _unset(changingPath);
-            _unset(changedPath);
-            // Cancel pending change event
+
+            _unset(changedPath); // Cancel pending change event
+
+
             if (_get(eventIdPath)) {
               clearTimeout(_get(eventIdPath));
+
               _unset(eventIdPath);
             }
-          }
-          // Changes detected in current event loop
+          } // Changes detected in current event loop
+
+
           if (!changing && changed.length) {
             _set(changedPath, changed);
-            _set(changingPath, true);
-            // Saving the timeout id allows us to batch all changes in the same
+
+            _set(changingPath, true); // Saving the timeout id allows us to batch all changes in the same
             // event loop into a single "change"
             // TODO: Optimize
+
+
             _set(eventIdPath, setTimeout(function () {
               // Previous event loop where changes were gathered has ended, so
               // notify any listeners of those changes and prepare for any new
               // changes
               _unset(changedPath);
+
               _unset(eventIdPath);
-              _unset(changingPath);
-              // TODO: Optimize
+
+              _unset(changingPath); // TODO: Optimize
+
+
               if (!_get(silentPath)) {
-                var i = void 0;
+                var i;
+
                 for (i = 0; i < changed.length; i++) {
                   _this3.emit('change:' + changed[i], _this3, utils.get(_this3, changed[i]));
                 }
 
-                var changes = utils.diffObjects(defineProperty({}, prop, value), defineProperty({}, prop, current));
+                var changes = utils.diffObjects(_defineProperty({}, prop, value), _defineProperty({}, prop, current));
 
                 if (_get(keepChangeHistoryPath$1)) {
                   var changeRecord = utils.plainCopy(changes);
                   changeRecord.timestamp = new Date().getTime();
+
                   var changeHistory = _get(changeHistoryPath);
+
                   !changeHistory && _set(changeHistoryPath, changeHistory = []);
                   changeHistory.push(changeRecord);
                 }
+
                 _this3.emit('change', _this3, changes);
               }
+
               _unset(silentPath);
             }, 0));
           }
         }
+
         _set(keyPath, value);
+
         return value;
       };
 
       if (utils.isFunction(schema.set)) {
         var originalSet = descriptor.set;
+
         descriptor.set = function (value) {
           return schema.set.call(this, value, originalSet);
         };
@@ -6986,7 +7396,6 @@
 
       return descriptor;
     },
-
 
     /**
      * Create a copy of the given value that contains only the properties defined
@@ -7003,18 +7412,22 @@
       if (value === undefined) {
         return;
       }
+
       if (this.type === 'object') {
         var copy = {};
         var properties = this.properties;
+
         if (properties) {
           utils.forOwn(properties, function (_definition, prop) {
             copy[prop] = _definition.pick(value[prop]);
           });
         }
+
         if (this.extends) {
           utils.fillIn(copy, this.extends.pick(value));
-        }
-        // Conditionally copy properties not defined in "properties"
+        } // Conditionally copy properties not defined in "properties"
+
+
         if (this.additionalProperties) {
           for (var key in value) {
             if (!properties[key]) {
@@ -7022,19 +7435,22 @@
             }
           }
         }
+
         return copy;
       } else if (this.type === 'array') {
         return value.map(function (item) {
           var _copy = _this4.items ? _this4.items.pick(item) : {};
+
           if (_this4.extends) {
             utils.fillIn(_copy, _this4.extends.pick(item));
           }
+
           return _copy;
         });
       }
+
       return utils.plainCopy(value);
     },
-
 
     /**
      * Validate the provided value against this schema.
@@ -7059,15 +7475,67 @@
     validate: _validate,
     validationKeywords: validationKeywords
   });
+  /**
+   * Create a subclass of this Schema:
+   * @example <caption>Schema.extend</caption>
+   * const JSData = require('js-data');
+   * const { Schema } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * // Extend the class using ES2015 class syntax.
+   * class CustomSchemaClass extends Schema {
+   *   foo () { return 'bar'; }
+   *   static beep () { return 'boop'; }
+   * }
+   * const customSchema = new CustomSchemaClass();
+   * console.log(customSchema.foo());
+   * console.log(CustomSchemaClass.beep());
+   *
+   * // Extend the class using alternate method.
+   * const OtherSchemaClass = Schema.extend({
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const otherSchema = new OtherSchemaClass();
+   * console.log(otherSchema.foo());
+   * console.log(OtherSchemaClass.beep());
+   *
+   * // Extend the class, providing a custom constructor.
+   * function AnotherSchemaClass () {
+   *   Schema.call(this);
+   *   this.created_at = new Date().getTime();
+   * }
+   * Schema.extend({
+   *   constructor: AnotherSchemaClass,
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const anotherSchema = new AnotherSchemaClass();
+   * console.log(anotherSchema.created_at);
+   * console.log(anotherSchema.foo());
+   * console.log(AnotherSchemaClass.beep());
+   *
+   * @method Schema.extend
+   * @param {object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
+   * to be used as the subclass itself.
+   * @param {object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Schema class.
+   * @since 3.0.0
+   */
 
   var DOMAIN$6 = 'Mapper';
   var applyDefaultsHooks = ['beforeCreate', 'beforeCreateMany'];
   var validatingHooks = ['beforeCreate', 'beforeCreateMany', 'beforeUpdate', 'beforeUpdateAll', 'beforeUpdateMany'];
+
   var makeNotify = function makeNotify(num) {
     return function () {
       var _this = this;
 
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
 
@@ -7077,54 +7545,54 @@
 
       if (applyDefaultsHooks.indexOf(op) !== -1 && opts.applyDefaults !== false) {
         var schema = this.getSchema();
+
         if (schema && schema.applyDefaults) {
           var toProcess = args[0];
+
           if (!utils.isArray(toProcess)) {
             toProcess = [toProcess];
           }
+
           toProcess.forEach(function (record) {
             schema.applyDefaults(record);
           });
         }
-      }
+      } // Automatic validation
 
-      // Automatic validation
+
       if (validatingHooks.indexOf(op) !== -1 && !opts.noValidate) {
         // Save current value of option
-        var originalExistingOnly = opts.existingOnly;
+        var originalExistingOnly = opts.existingOnly; // For updates, ignore required fields if they aren't present
 
-        // For updates, ignore required fields if they aren't present
         if (op.indexOf('beforeUpdate') === 0 && opts.existingOnly === undefined) {
           opts.existingOnly = true;
         }
-        var errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly']));
 
-        // Restore option
-        opts.existingOnly = originalExistingOnly;
+        var errors = this.validate(args[op === 'beforeUpdate' ? 1 : 0], utils.pick(opts, ['existingOnly'])); // Restore option
 
-        // Abort lifecycle due to validation errors
+        opts.existingOnly = originalExistingOnly; // Abort lifecycle due to validation errors
+
         if (errors) {
           var err = new Error('validation failed');
           err.errors = errors;
           return utils.reject(err);
         }
-      }
+      } // Emit lifecycle event
 
-      // Emit lifecycle event
+
       if (opts.notify || opts.notify === undefined && this.notify) {
         setTimeout(function () {
           _this.emit.apply(_this, [op].concat(args));
         });
       }
     };
-  };
+  }; // These are the default implementations of all of the lifecycle hooks
 
-  // These are the default implementations of all of the lifecycle hooks
+
   var notify = makeNotify(1);
-  var notify2 = makeNotify(2);
-
-  // This object provides meta information used by Mapper#crud to actually
+  var notify2 = makeNotify(2); // This object provides meta information used by Mapper#crud to actually
   // execute each lifecycle method
+
   var LIFECYCLE_METHODS = {
     count: {
       defaults: [{}, {}],
@@ -7158,7 +7626,6 @@
       adapterArgs: function adapterArgs(mapper, id, props, opts) {
         return [id, mapper.toJSON(props, opts), opts];
       },
-
       beforeAssign: 1,
       defaults: [undefined, {}, {}],
       types: []
@@ -7167,7 +7634,6 @@
       adapterArgs: function adapterArgs(mapper, props, query, opts) {
         return [mapper.toJSON(props, opts), query, opts];
       },
-
       beforeAssign: 0,
       defaults: [{}, {}, {}],
       types: []
@@ -7178,13 +7644,11 @@
           return mapper.toJSON(record, opts);
         }), opts];
       },
-
       beforeAssign: 0,
       defaults: [[], {}],
       types: []
     }
   };
-
   var MAPPER_DEFAULTS = {
     /**
      * Hash of registered adapters. Don't modify directly. Use
@@ -7301,64 +7765,64 @@
      * @type {boolean}
      */
     validateOnSet: true
+  };
+  /**
+   * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
+   * meta information about a resource, a Mapper can perform generic CRUD
+   * operations against that resource. Apart from its configuration, a Mapper is
+   * stateless. The particulars of various persistence layers have been abstracted
+   * into adapters, which a Mapper uses to perform its operations.
+   *
+   * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
+   * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
+   * Data Mapper moves data between [in-memory object instances][record] and a
+   * relational or document-based database. JSData's Mapper can work with any
+   * persistence layer you can write an adapter for.
+   *
+   * _("Model" is a heavily overloaded term and is avoided in this documentation
+   * to prevent confusion.)_
+   *
+   * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
+   *
+   * @example
+   * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
+   * [book]: http://martinfowler.com/books/eaa.html
+   * [record]: Record.html
+   * // Import and instantiate
+   * import { Mapper } from 'js-data';
+   * const UserMapper = new Mapper({ name: 'user' });
+   *
+   * @example
+   * // Define a Mapper using the Container component
+   * import { Container } from 'js-data';
+   * const store = new Container();
+   * store.defineMapper('user');
+   *
+   * @class Mapper
+   * @extends Component
+   * @param {object} opts Configuration options.
+   * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
+   * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+   * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
+   * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
+   * @param {object} [opts.methods] See {@link Mapper#methods}.
+   * @param {string} opts.name See {@link Mapper#name}.
+   * @param {boolean} [opts.notify] See {@link Mapper#notify}.
+   * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
+   * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
+   * @param {Object|Schema} [opts.schema] See {@link Mapper#schema}.
+   * @returns {Mapper} A new {@link Mapper} instance.
+   * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
+   */
 
-    /**
-     * The core of JSData's [ORM/ODM][orm] implementation. Given a minimum amout of
-     * meta information about a resource, a Mapper can perform generic CRUD
-     * operations against that resource. Apart from its configuration, a Mapper is
-     * stateless. The particulars of various persistence layers have been abstracted
-     * into adapters, which a Mapper uses to perform its operations.
-     *
-     * The term "Mapper" comes from the [Data Mapper Pattern][pattern] described in
-     * Martin Fowler's [Patterns of Enterprise Application Architecture][book]. A
-     * Data Mapper moves data between [in-memory object instances][record] and a
-     * relational or document-based database. JSData's Mapper can work with any
-     * persistence layer you can write an adapter for.
-     *
-     * _("Model" is a heavily overloaded term and is avoided in this documentation
-     * to prevent confusion.)_
-     *
-     * [orm]: https://en.wikipedia.org/wiki/Object-relational_mapping
-     *
-     * @example
-     * [pattern]: https://en.wikipedia.org/wiki/Data_mapper_pattern
-     * [book]: http://martinfowler.com/books/eaa.html
-     * [record]: Record.html
-     * // Import and instantiate
-     * import { Mapper } from 'js-data';
-     * const UserMapper = new Mapper({ name: 'user' });
-     *
-     * @example
-     * // Define a Mapper using the Container component
-     * import { Container } from 'js-data';
-     * const store = new Container();
-     * store.defineMapper('user');
-     *
-     * @class Mapper
-     * @extends Component
-     * @param {object} opts Configuration options.
-     * @param {boolean} [opts.applySchema=true] See {@link Mapper#applySchema}.
-     * @param {boolean} [opts.debug=false] See {@link Component#debug}.
-     * @param {string} [opts.defaultAdapter=http] See {@link Mapper#defaultAdapter}.
-     * @param {string} [opts.idAttribute=id] See {@link Mapper#idAttribute}.
-     * @param {object} [opts.methods] See {@link Mapper#methods}.
-     * @param {string} opts.name See {@link Mapper#name}.
-     * @param {boolean} [opts.notify] See {@link Mapper#notify}.
-     * @param {boolean} [opts.raw=false] See {@link Mapper#raw}.
-     * @param {Function|boolean} [opts.recordClass] See {@link Mapper#recordClass}.
-     * @param {Object|Schema} [opts.schema] See {@link Mapper#schema}.
-     * @returns {Mapper} A new {@link Mapper} instance.
-     * @see http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper
-     * @since 3.0.0
-     * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
-     * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
-     */
-  };function Mapper(opts) {
+  function Mapper(opts) {
     utils.classCallCheck(this, Mapper);
     Component$1.call(this);
-    opts || (opts = {});
+    opts || (opts = {}); // Prepare certain properties to be non-enumerable
 
-    // Prepare certain properties to be non-enumerable
     Object.defineProperties(this, {
       _adapters: {
         value: undefined,
@@ -7488,13 +7952,11 @@
         value: undefined,
         writable: true
       }
-    });
+    }); // Apply user-provided configuration
 
-    // Apply user-provided configuration
-    utils.fillIn(this, opts);
-    // Fill in any missing options with the defaults
+    utils.fillIn(this, opts); // Fill in any missing options with the defaults
+
     utils.fillIn(this, utils.copy(MAPPER_DEFAULTS));
-
     /**
      * The name for this Mapper. This is the minimum amount of meta information
      * required for a Mapper to be able to execute CRUD operations for a
@@ -7504,19 +7966,23 @@
      * @since 3.0.0
      * @type {string}
      */
-    if (!this.name) {
-      throw utils.err('new ' + DOMAIN$6, 'opts.name')(400, 'string', this.name);
-    }
 
-    // Setup schema, with an empty default schema if necessary
+    if (!this.name) {
+      throw utils.err("new ".concat(DOMAIN$6), 'opts.name')(400, 'string', this.name);
+    } // Setup schema, with an empty default schema if necessary
+
+
     if (this.schema) {
       this.schema.type || (this.schema.type = 'object');
-      if (!(this.schema instanceof Schema$1)) {
-        this.schema = new Schema$1(this.schema || { type: 'object' });
-      }
-    }
 
-    // Create a subclass of Record that's tied to this Mapper
+      if (!(this.schema instanceof Schema$1)) {
+        this.schema = new Schema$1(this.schema || {
+          type: 'object'
+        });
+      }
+    } // Create a subclass of Record that's tied to this Mapper
+
+
     if (this.recordClass === undefined) {
       var superClass = Record$1;
       this.recordClass = superClass.extend({
@@ -7525,6 +7991,7 @@
             utils.classCallCheck(this, subClass);
             superClass.call(this, props, opts);
           };
+
           return subClass;
         }()
       });
@@ -7532,7 +7999,6 @@
 
     if (this.recordClass) {
       this.recordClass.mapper = this;
-
       /**
        * Functions that should be added to the prototype of {@link Mapper#recordClass}.
        *
@@ -7540,12 +8006,13 @@
        * @since 3.0.0
        * @type {Object}
        */
+
       if (utils.isObject(this.methods)) {
         utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods);
-      }
-
-      // We can only apply the schema to the prototype of this.recordClass if the
+      } // We can only apply the schema to the prototype of this.recordClass if the
       // class extends Record
+
+
       if (Record$1.prototype.isPrototypeOf(Object.create(this.recordClass.prototype)) && this.schema && this.schema.apply && this.applySchema) {
         this.schema.apply(this.recordClass.prototype);
       }
@@ -7853,21 +8320,25 @@
       if (opts.raw) {
         utils._(result, opts);
       }
+
       if (skip) {
         return result;
       }
+
       var _data = opts.raw ? result.data : result;
+
       if (_data && utils.isFunction(this.wrap)) {
         _data = this.wrap(_data, opts);
+
         if (opts.raw) {
           result.data = _data;
         } else {
           result = _data;
         }
       }
+
       return result;
     },
-
 
     /**
      * Define a belongsTo relationship. Only useful if you're managing your
@@ -7898,10 +8369,9 @@
      * @see http://www.js-data.io/v3.0/docs/relations
      * @since 3.0.0
      */
-    belongsTo: function belongsTo$$1(relatedMapper, opts) {
+    belongsTo: function belongsTo$1(relatedMapper, opts) {
       return belongsTo(relatedMapper, opts)(this);
     },
-
 
     /**
      * Select records according to the `query` argument and return the count.
@@ -7934,7 +8404,6 @@
       return this.crud('count', query, opts);
     },
 
-
     /**
      * Fired during {@link Mapper#create}. See
      * {@link Mapper~beforeCreateListener} for how to listen for this event.
@@ -7943,6 +8412,7 @@
      * @see Mapper~beforeCreateListener
      * @see Mapper#create
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeCreate} event.
      *
@@ -7959,6 +8429,7 @@
      * @see Mapper#create
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#create}. See
      * {@link Mapper~afterCreateListener} for how to listen for this event.
@@ -7967,6 +8438,7 @@
      * @see Mapper~afterCreateListener
      * @see Mapper#create
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterCreate} event.
      *
@@ -7984,6 +8456,7 @@
      * @see Mapper#create
      * @since 3.0.0
      */
+
     /**
      * Create and save a new the record using the provided `props`.
      *
@@ -8027,12 +8500,11 @@
       opts || (opts = {});
       var originalRecord = props;
       var parentRelationMap = {};
-      var adapterResponse = {};
+      var adapterResponse = {}; // Fill in "opts" with the Mapper's configuration
 
-      // Fill in "opts" with the Mapper's configuration
       utils._(opts, this);
-      opts.adapter = this.getAdapterName(opts);
 
+      opts.adapter = this.getAdapterName(opts);
       opts.op = 'beforeCreate';
       return this._runHook(opts.op, props, opts).then(function (props) {
         opts.with || (opts.with = []);
@@ -8046,7 +8518,6 @@
         adapterResponse = result;
       }).then(function () {
         var createdProps = opts.raw ? adapterResponse.data : adapterResponse;
-
         return _this2._createOrAssignChildRecordIfRequired(createdProps, {
           opts: opts,
           parentRelationMap: parentRelationMap,
@@ -8060,7 +8531,9 @@
         } else {
           adapterResponse = record;
         }
+
         var result = _this2._end(adapterResponse, opts);
+
         opts.op = 'afterCreate';
         return _this2._runHook(opts.op, props, opts, result);
       });
@@ -8074,7 +8547,9 @@
         });
       }
 
-      utils.set(recordOrRecords, newValues, { silent: true });
+      utils.set(recordOrRecords, newValues, {
+        silent: true
+      });
 
       if (utils.isFunction(recordOrRecords.commit)) {
         recordOrRecords.commit();
@@ -8082,7 +8557,6 @@
 
       return recordOrRecords;
     },
-
 
     /**
      * Use {@link Mapper#createRecord} instead.
@@ -8098,7 +8572,6 @@
       return this.createRecord(props, opts);
     },
 
-
     /**
      * Creates parent record for relation types like BelongsTo or HasMany with localKeys
      * in order to satisfy foreignKey dependency (so called child records).
@@ -8111,7 +8584,6 @@
     _createParentRecordIfRequired: function _createParentRecordIfRequired(props, opts) {
       var tasks = [];
       var relations = [];
-
       utils.forEachRelation(this, opts, function (def, optsCopy) {
         if (!def.isRequiresParentId() || !def.getLocalField(props)) {
           return;
@@ -8121,7 +8593,6 @@
         relations.push(def);
         tasks.push(def.createParentRecord(props, optsCopy));
       });
-
       return utils.Promise.all(tasks).then(function (records) {
         return relations.reduce(function (map, relation, index) {
           relation.setLocalField(map, records[index]);
@@ -8129,7 +8600,6 @@
         }, {});
       });
     },
-
 
     /**
      * Creates child record for relation types like HasOne or HasMany with foreignKey
@@ -8145,7 +8615,6 @@
      */
     _createOrAssignChildRecordIfRequired: function _createOrAssignChildRecordIfRequired(props, context) {
       var tasks = [];
-
       utils.forEachRelation(this, context.opts, function (def, optsCopy) {
         var relationData = def.getLocalField(context.originalProps);
 
@@ -8153,9 +8622,9 @@
           return;
         }
 
-        optsCopy.raw = false;
-        // Create hasMany and hasOne after the main create because we needed
+        optsCopy.raw = false; // Create hasMany and hasOne after the main create because we needed
         // a generated id to attach to these items
+
         if (def.isRequiresChildId()) {
           tasks.push(def.createChildRecord(props, relationData, optsCopy));
         } else if (def.isRequiresParentId()) {
@@ -8166,12 +8635,10 @@
           }
         }
       });
-
       return utils.Promise.all(tasks).then(function () {
         return props;
       });
     },
-
 
     /**
      * Fired during {@link Mapper#createMany}. See
@@ -8181,6 +8648,7 @@
      * @see Mapper~beforeCreateManyListener
      * @see Mapper#createMany
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeCreateMany} event.
      *
@@ -8197,6 +8665,7 @@
      * @see Mapper#createMany
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#createMany}. See
      * {@link Mapper~afterCreateManyListener} for how to listen for this event.
@@ -8205,6 +8674,7 @@
      * @see Mapper~afterCreateManyListener
      * @see Mapper#createMany
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterCreateMany} event.
      *
@@ -8222,6 +8692,7 @@
      * @see Mapper#createMany
      * @since 3.0.0
      */
+
     /**
      * Given an array of records, batch create them via an adapter.
      *
@@ -8269,13 +8740,12 @@
       records || (records = []);
       opts || (opts = {});
       var originalRecords = records;
-      var adapterResponse = void 0;
+      var adapterResponse; // Fill in "opts" with the Mapper's configuration
 
-      // Fill in "opts" with the Mapper's configuration
       utils._(opts, this);
-      opts.adapter = this.getAdapterName(opts);
 
-      // beforeCreateMany lifecycle hook
+      opts.adapter = this.getAdapterName(opts); // beforeCreateMany lifecycle hook
+
       opts.op = 'beforeCreateMany';
       return this._runHook(opts.op, records, opts).then(function (records) {
         // Deep pre-create belongsTo relations
@@ -8286,6 +8756,7 @@
           var relationData = records.map(function (record) {
             return def.getLocalField(record);
           }).filter(Boolean);
+
           if (def.type === belongsToType && relationData.length === records.length) {
             // Create belongsTo relation first because we need a generated id to
             // attach to the child
@@ -8305,23 +8776,23 @@
         }).then(function (result) {
           adapterResponse = result;
         }).then(function () {
-          var createdRecordsData = opts.raw ? adapterResponse.data : adapterResponse;
+          var createdRecordsData = opts.raw ? adapterResponse.data : adapterResponse; // Deep post-create hasOne relations
 
-          // Deep post-create hasOne relations
           tasks = [];
           utils.forEachRelation(_this4, opts, function (def, optsCopy) {
             var relationData = records.map(function (record) {
               return def.getLocalField(record);
             }).filter(Boolean);
+
             if (relationData.length !== records.length) {
               return;
             }
 
             optsCopy.raw = false;
             var belongsToData = def.getLocalField(belongsToRelationData);
-            var task = void 0;
-            // Create hasMany and hasOne after the main create because we needed
+            var task; // Create hasMany and hasOne after the main create because we needed
             // a generated id to attach to these items
+
             if (def.type === hasManyType) {
               // Not supported
               _this4.log('warn', 'deep createMany of hasMany type not supported!');
@@ -8339,6 +8810,7 @@
                 def.setLocalField(createdRecordData, belongsToData[i]);
               });
             }
+
             if (task) {
               tasks.push(task);
             }
@@ -8353,12 +8825,13 @@
         } else {
           adapterResponse = records;
         }
+
         var result = _this4._end(adapterResponse, opts);
+
         opts.op = 'afterCreateMany';
         return _this4._runHook(opts.op, records, opts, result);
       });
     },
-
 
     /**
      * Create an unsaved, uncached instance of this Mapper's
@@ -8439,13 +8912,15 @@
       var _this5 = this;
 
       props || (props = {});
+
       if (utils.isArray(props)) {
         return props.map(function (_props) {
           return _this5.createRecord(_props, opts);
         });
       }
+
       if (!utils.isObject(props)) {
-        throw utils.err(DOMAIN$6 + '#createRecord', 'props')(400, 'array or object', props);
+        throw utils.err("".concat(DOMAIN$6, "#createRecord"), 'props')(400, 'array or object', props);
       }
 
       if (this.relationList) {
@@ -8453,11 +8928,10 @@
           def.ensureLinkedDataHasProperType(props, opts);
         });
       }
-      var RecordCtor = this.recordClass;
 
+      var RecordCtor = this.recordClass;
       return !RecordCtor || props instanceof RecordCtor ? props : new RecordCtor(props, opts);
     },
-
 
     /**
      * Lifecycle invocation method. You probably won't call this method directly.
@@ -8471,65 +8945,66 @@
     crud: function crud(method) {
       var _this6 = this;
 
-      for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+      for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
         args[_key2 - 1] = arguments[_key2];
       }
 
       var config = this.lifecycleMethods[method];
+
       if (!config) {
-        throw utils.err(DOMAIN$6 + '#crud', method)(404, 'method');
+        throw utils.err("".concat(DOMAIN$6, "#crud"), method)(404, 'method');
       }
 
-      var upper = '' + method.charAt(0).toUpperCase() + method.substr(1);
-      var before = 'before' + upper;
-      var after = 'after' + upper;
+      var upper = "".concat(method.charAt(0).toUpperCase()).concat(method.substr(1));
+      var before = "before".concat(upper);
+      var after = "after".concat(upper);
+      var op, adapter; // Default values for arguments
 
-      var op = void 0,
-          adapter = void 0;
-
-      // Default values for arguments
       config.defaults.forEach(function (value, i) {
         if (args[i] === undefined) {
           args[i] = utils.copy(value);
         }
       });
+      var opts = args[args.length - 1]; // Fill in "opts" with the Mapper's configuration
 
-      var opts = args[args.length - 1];
-
-      // Fill in "opts" with the Mapper's configuration
       utils._(opts, this);
-      adapter = opts.adapter = this.getAdapterName(opts);
 
-      // before lifecycle hook
+      adapter = opts.adapter = this.getAdapterName(opts); // before lifecycle hook
+
       op = opts.op = before;
-      return utils.resolve(this[op].apply(this, toConsumableArray(args))).then(function (_value) {
-        var _getAdapter;
+      return utils.resolve(this[op].apply(this, _toConsumableArray(args))).then(function (_value) {
+        var _this6$getAdapter;
 
         if (args[config.beforeAssign] !== undefined) {
           // Allow for re-assignment from lifecycle hook
           args[config.beforeAssign] = _value === undefined ? args[config.beforeAssign] : _value;
-        }
-        // Now delegate to the adapter
+        } // Now delegate to the adapter
+
+
         op = opts.op = method;
-        args = config.adapterArgs ? config.adapterArgs.apply(config, [_this6].concat(toConsumableArray(args))) : args;
-        _this6.dbg.apply(_this6, [op].concat(toConsumableArray(args)));
-        return utils.resolve((_getAdapter = _this6.getAdapter(adapter))[op].apply(_getAdapter, [_this6].concat(toConsumableArray(args))));
+        args = config.adapterArgs ? config.adapterArgs.apply(config, [_this6].concat(_toConsumableArray(args))) : args;
+
+        _this6.dbg.apply(_this6, [op].concat(_toConsumableArray(args)));
+
+        return utils.resolve((_this6$getAdapter = _this6.getAdapter(adapter))[op].apply(_this6$getAdapter, [_this6].concat(_toConsumableArray(args))));
       }).then(function (result) {
         // force noValidate on find/findAll
         var noValidate = /find/.test(op) || opts.noValidate;
-        var _opts = Object.assign({}, opts, { noValidate: noValidate });
+
+        var _opts = Object.assign({}, opts, {
+          noValidate: noValidate
+        });
 
         result = _this6._end(result, _opts, !!config.skip);
-        args.push(result);
-        // after lifecycle hook
+        args.push(result); // after lifecycle hook
+
         op = opts.op = after;
-        return utils.resolve(_this6[op].apply(_this6, toConsumableArray(args))).then(function (_result) {
+        return utils.resolve(_this6[op].apply(_this6, _toConsumableArray(args))).then(function (_result) {
           // Allow for re-assignment from lifecycle hook
           return _result === undefined ? result : _result;
         });
       });
     },
-
 
     /**
      * Fired during {@link Mapper#destroy}. See
@@ -8539,6 +9014,7 @@
      * @see Mapper~beforeDestroyListener
      * @see Mapper#destroy
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeDestroy} event.
      *
@@ -8555,6 +9031,7 @@
      * @see Mapper#destroy
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#destroy}. See
      * {@link Mapper~afterDestroyListener} for how to listen for this event.
@@ -8563,6 +9040,7 @@
      * @see Mapper~afterDestroyListener
      * @see Mapper#destroy
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterDestroy} event.
      *
@@ -8580,6 +9058,7 @@
      * @see Mapper#destroy
      * @since 3.0.0
      */
+
     /**
      * Using an adapter, destroy the record with the given primary key.
      *
@@ -8618,7 +9097,6 @@
       return this.crud('destroy', id, opts);
     },
 
-
     /**
      * Fired during {@link Mapper#destroyAll}. See
      * {@link Mapper~beforeDestroyAllListener} for how to listen for this event.
@@ -8627,6 +9105,7 @@
      * @see Mapper~beforeDestroyAllListener
      * @see Mapper#destroyAll
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeDestroyAll} event.
      *
@@ -8643,6 +9122,7 @@
      * @see Mapper#destroyAll
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#destroyAll}. See
      * {@link Mapper~afterDestroyAllListener} for how to listen for this event.
@@ -8651,6 +9131,7 @@
      * @see Mapper~afterDestroyAllListener
      * @see Mapper#destroyAll
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterDestroyAll} event.
      *
@@ -8668,6 +9149,7 @@
      * @see Mapper#destroyAll
      * @since 3.0.0
      */
+
     /**
      * Destroy the records selected by `query` via an adapter. If no `query` is
      * provided then all records will be destroyed.
@@ -8720,7 +9202,6 @@
       return this.crud('destroyAll', query, opts);
     },
 
-
     /**
      * Fired during {@link Mapper#find}. See
      * {@link Mapper~beforeFindListener} for how to listen for this event.
@@ -8729,6 +9210,7 @@
      * @see Mapper~beforeFindListener
      * @see Mapper#find
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeFind} event.
      *
@@ -8745,6 +9227,7 @@
      * @see Mapper#find
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#find}. See
      * {@link Mapper~afterFindListener} for how to listen for this event.
@@ -8753,6 +9236,7 @@
      * @see Mapper~afterFindListener
      * @see Mapper#find
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterFind} event.
      *
@@ -8770,6 +9254,7 @@
      * @see Mapper#find
      * @since 3.0.0
      */
+
     /**
      * Retrieve via an adapter the record with the given primary key.
      *
@@ -8810,7 +9295,6 @@
       return this.crud('find', id, opts);
     },
 
-
     /**
      * Fired during {@link Mapper#findAll}. See
      * {@link Mapper~beforeFindAllListener} for how to listen for this event.
@@ -8819,6 +9303,7 @@
      * @see Mapper~beforeFindAllListener
      * @see Mapper#findAll
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeFindAll} event.
      *
@@ -8835,6 +9320,7 @@
      * @see Mapper#findAll
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#findAll}. See
      * {@link Mapper~afterFindAllListener} for how to listen for this event.
@@ -8843,6 +9329,7 @@
      * @see Mapper~afterFindAllListener
      * @see Mapper#findAll
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterFindAll} event.
      *
@@ -8860,6 +9347,7 @@
      * @see Mapper#findAll
      * @since 3.0.0
      */
+
     /**
      * Using the `query` argument, select records to retrieve via an adapter.
      *
@@ -8904,7 +9392,6 @@
       return this.crud('findAll', query, opts);
     },
 
-
     /**
      * Return the registered adapter with the given name or the default adapter if
      * no name is provided.
@@ -8918,12 +9405,13 @@
     getAdapter: function getAdapter(name) {
       this.dbg('getAdapter', 'name:', name);
       var adapter = this.getAdapterName(name);
+
       if (!adapter) {
-        throw utils.err(DOMAIN$6 + '#getAdapter', 'name')(400, 'string', name);
+        throw utils.err("".concat(DOMAIN$6, "#getAdapter"), 'name')(400, 'string', name);
       }
+
       return this.getAdapters()[adapter];
     },
-
 
     /**
      * Return the name of a registered adapter based on the given name or options,
@@ -8937,12 +9425,15 @@
      */
     getAdapterName: function getAdapterName(opts) {
       opts || (opts = {});
+
       if (utils.isString(opts)) {
-        opts = { adapter: opts };
+        opts = {
+          adapter: opts
+        };
       }
+
       return opts.adapter || opts.defaultAdapter;
     },
-
 
     /**
      * Get the object of registered adapters for this Mapper.
@@ -8956,7 +9447,6 @@
       return this._adapters;
     },
 
-
     /**
      * Returns this Mapper's {@link Schema}.
      *
@@ -8968,7 +9458,6 @@
     getSchema: function getSchema() {
       return this.schema;
     },
-
 
     /**
      * Defines a hasMany relationship. Only useful if you're managing your
@@ -8986,10 +9475,9 @@
      * @see http://www.js-data.io/v3.0/docs/relations
      * @since 3.0.0
      */
-    hasMany: function hasMany$$1(relatedMapper, opts) {
+    hasMany: function hasMany$1(relatedMapper, opts) {
       return hasMany(relatedMapper, opts)(this);
     },
-
 
     /**
      * Defines a hasOne relationship. Only useful if you're managing your Mappers
@@ -9007,10 +9495,9 @@
      * @see http://www.js-data.io/v3.0/docs/relations
      * @since 3.0.0
      */
-    hasOne: function hasOne$$1(relatedMapper, opts) {
+    hasOne: function hasOne$1(relatedMapper, opts) {
       return hasOne(relatedMapper, opts)(this);
     },
-
 
     /**
      * Return whether `record` is an instance of this Mapper's recordClass.
@@ -9033,7 +9520,6 @@
       return recordClass ? record instanceof recordClass : false;
     },
 
-
     /**
      * Register an adapter on this Mapper under the given name.
      *
@@ -9048,29 +9534,29 @@
      */
     registerAdapter: function registerAdapter(name, adapter, opts) {
       opts || (opts = {});
-      this.getAdapters()[name] = adapter;
-      // Optionally make it the default adapter for the target.
+      this.getAdapters()[name] = adapter; // Optionally make it the default adapter for the target.
+
       if (opts === true || opts.default) {
         this.defaultAdapter = name;
       }
     },
     _runHook: function _runHook(hookName) {
-      for (var _len3 = arguments.length, hookArgs = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+      for (var _len3 = arguments.length, hookArgs = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
         hookArgs[_key3 - 1] = arguments[_key3];
       }
 
       var defaultValueIndex = hookName.indexOf('after') === 0 ? hookArgs.length - 1 : 0;
-
-      return utils.resolve(this[hookName].apply(this, toConsumableArray(hookArgs))).then(function (overridenResult) {
+      return utils.resolve(this[hookName].apply(this, hookArgs)).then(function (overridenResult) {
         return overridenResult === undefined ? hookArgs[defaultValueIndex] : overridenResult;
       });
     },
     _invokeAdapterMethod: function _invokeAdapterMethod(method, propsOrRecords, opts) {
       var _this7 = this;
 
-      var conversionOptions = { with: opts.pass || [] };
-      var object = void 0;
-
+      var conversionOptions = {
+        with: opts.pass || []
+      };
+      var object;
       this.dbg(opts.op, propsOrRecords, opts);
 
       if (utils.isArray(propsOrRecords)) {
@@ -9083,7 +9569,6 @@
 
       return this.getAdapter(opts.adapter)[method](this, object, opts);
     },
-
 
     /**
      * Select records according to the `query` argument, and aggregate the sum
@@ -9116,7 +9601,6 @@
     sum: function sum(field, query, opts) {
       return this.crud('sum', field, query, opts);
     },
-
 
     /**
      * Return a plain object representation of the given record. Relations can
@@ -9165,8 +9649,9 @@
     toJSON: function toJSON(records, opts) {
       var _this8 = this;
 
-      var record = void 0;
+      var record;
       opts || (opts = {});
+
       if (utils.isArray(records)) {
         return records.map(function (record) {
           return _this8.toJSON(record, opts);
@@ -9174,10 +9659,10 @@
       } else {
         record = records;
       }
-      var relationFields = (this ? this.relationFields : []) || [];
-      var json = {};
 
-      // Copy properties defined in the schema
+      var relationFields = (this ? this.relationFields : []) || [];
+      var json = {}; // Copy properties defined in the schema
+
       if (this && this.schema) {
         json = this.schema.pick(record);
       } else {
@@ -9186,18 +9671,21 @@
             json[key] = utils.plainCopy(record[key]);
           }
         }
-      }
+      } // The user wants to include relations in the resulting plain object representation
 
-      // The user wants to include relations in the resulting plain object representation
+
       if (this && opts.withAll) {
         opts.with = relationFields.slice();
       }
+
       if (this && opts.with) {
         if (utils.isString(opts.with)) {
           opts.with = [opts.with];
         }
+
         utils.forEachRelation(this, opts, function (def, optsCopy) {
           var relationData = def.getLocalField(record);
+
           if (relationData) {
             // The actual recursion
             if (utils.isArray(relationData)) {
@@ -9210,9 +9698,9 @@
           }
         });
       }
+
       return json;
     },
-
 
     /**
      * Fired during {@link Mapper#update}. See
@@ -9222,6 +9710,7 @@
      * @see Mapper~beforeUpdateListener
      * @see Mapper#update
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeUpdate} event.
      *
@@ -9239,6 +9728,7 @@
      * @see Mapper#update
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#update}. See
      * {@link Mapper~afterUpdateListener} for how to listen for this event.
@@ -9247,6 +9737,7 @@
      * @see Mapper~afterUpdateListener
      * @see Mapper#update
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterUpdate} event.
      *
@@ -9265,6 +9756,7 @@
      * @see Mapper#update
      * @since 3.0.0
      */
+
     /**
      * Using an adapter, update the record with the primary key specified by the
      * `id` argument.
@@ -9303,7 +9795,6 @@
       return this.crud('update', id, props, opts);
     },
 
-
     /**
      * Fired during {@link Mapper#updateAll}. See
      * {@link Mapper~beforeUpdateAllListener} for how to listen for this event.
@@ -9312,6 +9803,7 @@
      * @see Mapper~beforeUpdateAllListener
      * @see Mapper#updateAll
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeUpdateAll} event.
      *
@@ -9329,6 +9821,7 @@
      * @see Mapper#updateAll
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#updateAll}. See
      * {@link Mapper~afterUpdateAllListener} for how to listen for this event.
@@ -9337,6 +9830,7 @@
      * @see Mapper~afterUpdateAllListener
      * @see Mapper#updateAll
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterUpdateAll} event.
      *
@@ -9355,6 +9849,7 @@
      * @see Mapper#updateAll
      * @since 3.0.0
      */
+
     /**
      * Using the `query` argument, perform the a single updated to the selected
      * records.
@@ -9395,7 +9890,6 @@
       return this.crud('updateAll', props, query, opts);
     },
 
-
     /**
      * Fired during {@link Mapper#updateMany}. See
      * {@link Mapper~beforeUpdateManyListener} for how to listen for this event.
@@ -9404,6 +9898,7 @@
      * @see Mapper~beforeUpdateManyListener
      * @see Mapper#updateMany
      */
+
     /**
      * Callback signature for the {@link Mapper#event:beforeUpdateMany} event.
      *
@@ -9420,6 +9915,7 @@
      * @see Mapper#updateMany
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link Mapper#updateMany}. See
      * {@link Mapper~afterUpdateManyListener} for how to listen for this event.
@@ -9428,6 +9924,7 @@
      * @see Mapper~afterUpdateManyListener
      * @see Mapper#updateMany
      */
+
     /**
      * Callback signature for the {@link Mapper#event:afterUpdateMany} event.
      *
@@ -9445,6 +9942,7 @@
      * @see Mapper#updateMany
      * @since 3.0.0
      */
+
     /**
      * Given an array of updates, perform each of the updates via an adapter. Each
      * "update" is a hash of properties with which to update an record. Each
@@ -9481,7 +9979,6 @@
       return this.crud('updateMany', records, opts);
     },
 
-
     /**
      * Validate the given record or records according to this Mapper's
      * {@link Schema}. If there are no validation errors then the return value
@@ -9514,20 +10011,22 @@
     validate: function validate(record, opts) {
       opts || (opts = {});
       var schema = this.getSchema();
+
       if (!schema) {
         return;
       }
+
       var _opts = utils.pick(opts, ['existingOnly']);
+
       if (utils.isArray(record)) {
         var errors = record.map(function (_record) {
           return schema.validate(_record, utils.pick(_opts, ['existingOnly']));
         });
-
         return errors.some(Boolean) ? errors : undefined;
       }
+
       return schema.validate(record, _opts);
     },
-
 
     /**
      * Method used to wrap data returned by an adapter with this Mapper's
@@ -9571,7 +10070,6 @@
       return this.createRecord(data, opts);
     },
 
-
     /**
      * @ignore
      */
@@ -9585,8 +10083,10 @@
           if (utils.isObject(relations)) {
             relations = [relations];
           }
+
           relations.forEach(function (def) {
             var relatedMapper = _this9.datastore.getMapperByName(_name) || _name;
+
             def.getRelation = function () {
               return _this9.datastore.getMapper(_name);
             };
@@ -9601,9 +10101,60 @@
       });
     }
   });
+  /**
+   * Create a subclass of this Mapper:
+   *
+   * @example <caption>Mapper.extend</caption>
+   * const JSData = require('js-data');
+   * const { Mapper } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * // Extend the class using ES2015 class syntax.
+   * class CustomMapperClass extends Mapper {
+   *   foo () { return 'bar'; }
+   *   static beep () { return 'boop'; }
+   * };
+   * const customMapper = new CustomMapperClass();
+   * console.log(customMapper.foo());
+   * console.log(CustomMapperClass.beep());
+   *
+   * // Extend the class using alternate method.
+   * const OtherMapperClass = Mapper.extend({
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const otherMapper = new OtherMapperClass();
+   * console.log(otherMapper.foo());
+   * console.log(OtherMapperClass.beep());
+   *
+   * // Extend the class, providing a custom constructor.
+   * function AnotherMapperClass () {
+   *   Mapper.call(this);
+   *   this.created_at = new Date().getTime();
+   * }
+   * Mapper.extend({
+   *   constructor: AnotherMapperClass,
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * })
+   * const anotherMapper = new AnotherMapperClass();
+   * console.log(anotherMapper.created_at);
+   * console.log(anotherMapper.foo());
+   * console.log(AnotherMapperClass.beep());
+   *
+   * @method Mapper.extend
+   * @param {object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
+   * to be used as the subclass itself.
+   * @param {object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Mapper class.
+   * @since 3.0.0
+   */
 
   var DOMAIN$7 = 'Container';
-
   var proxiedMapperMethods = [
   /**
    * Wrapper for {@link Mapper#count}.
@@ -9629,7 +10180,6 @@
    * @since 3.0.0
    */
   'count',
-
   /**
    * Fired during {@link Container#create}. See
    * {@link Container~beforeCreateListener} for how to listen for this event.
@@ -9638,6 +10188,7 @@
    * @see Container~beforeCreateListener
    * @see Container#create
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeCreate} event.
    *
@@ -9655,6 +10206,7 @@
    * @see Container#create
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#create}. See
    * {@link Container~afterCreateListener} for how to listen for this event.
@@ -9663,6 +10215,7 @@
    * @see Container~afterCreateListener
    * @see Container#create
    */
+
   /**
    * Callback signature for the {@link Container#event:afterCreate} event.
    *
@@ -9681,6 +10234,7 @@
    * @see Container#create
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#create}.
    *
@@ -9710,7 +10264,6 @@
    * @since 3.0.0
    */
   'create',
-
   /**
    * Fired during {@link Container#createMany}. See
    * {@link Container~beforeCreateManyListener} for how to listen for this event.
@@ -9719,6 +10272,7 @@
    * @see Container~beforeCreateManyListener
    * @see Container#createMany
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeCreateMany} event.
    *
@@ -9736,6 +10290,7 @@
    * @see Container#createMany
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#createMany}. See
    * {@link Container~afterCreateManyListener} for how to listen for this event.
@@ -9744,6 +10299,7 @@
    * @see Container~afterCreateManyListener
    * @see Container#createMany
    */
+
   /**
    * Callback signature for the {@link Container#event:afterCreateMany} event.
    *
@@ -9762,6 +10318,7 @@
    * @see Container#createMany
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#createMany}.
    *
@@ -9795,7 +10352,6 @@
    * @since 3.0.0
    */
   'createMany',
-
   /**
    * Wrapper for {@link Mapper#createRecord}.
    *
@@ -9818,7 +10374,6 @@
    * @since 3.0.0
    */
   'createRecord',
-
   /**
    * Fired during {@link Container#destroy}. See
    * {@link Container~beforeDestroyListener} for how to listen for this event.
@@ -9827,6 +10382,7 @@
    * @see Container~beforeDestroyListener
    * @see Container#destroy
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeDestroy} event.
    *
@@ -9844,6 +10400,7 @@
    * @see Container#destroy
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#destroy}. See
    * {@link Container~afterDestroyListener} for how to listen for this event.
@@ -9852,6 +10409,7 @@
    * @see Container~afterDestroyListener
    * @see Container#destroy
    */
+
   /**
    * Callback signature for the {@link Container#event:afterDestroy} event.
    *
@@ -9870,6 +10428,7 @@
    * @see Container#destroy
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#destroy}.
    *
@@ -9896,7 +10455,6 @@
    * @since 3.0.0
    */
   'destroy',
-
   /**
    * Fired during {@link Container#destroyAll}. See
    * {@link Container~beforeDestroyAllListener} for how to listen for this event.
@@ -9905,6 +10463,7 @@
    * @see Container~beforeDestroyAllListener
    * @see Container#destroyAll
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeDestroyAll} event.
    *
@@ -9922,6 +10481,7 @@
    * @see Container#destroyAll
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#destroyAll}. See
    * {@link Container~afterDestroyAllListener} for how to listen for this event.
@@ -9930,6 +10490,7 @@
    * @see Container~afterDestroyAllListener
    * @see Container#destroyAll
    */
+
   /**
    * Callback signature for the {@link Container#event:afterDestroyAll} event.
    *
@@ -9948,6 +10509,7 @@
    * @see Container#destroyAll
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#destroyAll}.
    *
@@ -9974,7 +10536,6 @@
    * @since 3.0.0
    */
   'destroyAll',
-
   /**
    * Fired during {@link Container#find}. See
    * {@link Container~beforeFindListener} for how to listen for this event.
@@ -9983,6 +10544,7 @@
    * @see Container~beforeFindListener
    * @see Container#find
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeFind} event.
    *
@@ -10000,6 +10562,7 @@
    * @see Container#find
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#find}. See
    * {@link Container~afterFindListener} for how to listen for this event.
@@ -10008,6 +10571,7 @@
    * @see Container~afterFindListener
    * @see Container#find
    */
+
   /**
    * Callback signature for the {@link Container#event:afterFind} event.
    *
@@ -10026,6 +10590,7 @@
    * @see Container#find
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#find}.
    *
@@ -10051,7 +10616,6 @@
    * @since 3.0.0
    */
   'find',
-
   /**
    * Fired during {@link Container#findAll}. See
    * {@link Container~beforeFindAllListener} for how to listen for this event.
@@ -10060,6 +10624,7 @@
    * @see Container~beforeFindAllListener
    * @see Container#findAll
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeFindAll} event.
    *
@@ -10077,6 +10642,7 @@
    * @see Container#findAll
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#findAll}. See
    * {@link Container~afterFindAllListener} for how to listen for this event.
@@ -10085,6 +10651,7 @@
    * @see Container~afterFindAllListener
    * @see Container#findAll
    */
+
   /**
    * Callback signature for the {@link Container#event:afterFindAll} event.
    *
@@ -10103,6 +10670,7 @@
    * @see Container#findAll
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#createRecord}.
    *
@@ -10129,7 +10697,6 @@
    * @since 3.0.0
    */
   'findAll',
-
   /**
    * Wrapper for {@link Mapper#getSchema}.
    *
@@ -10140,7 +10707,6 @@
    * @since 3.0.0
    */
   'getSchema',
-
   /**
    * Wrapper for {@link Mapper#is}.
    *
@@ -10162,7 +10728,6 @@
    * @since 3.0.0
    */
   'is',
-
   /**
    * Wrapper for {@link Mapper#sum}.
    *
@@ -10187,7 +10752,6 @@
    * @since 3.0.0
    */
   'sum',
-
   /**
    * Wrapper for {@link Mapper#toJSON}.
    *
@@ -10230,7 +10794,6 @@
    * @since 3.0.0
    */
   'toJSON',
-
   /**
    * Fired during {@link Container#update}. See
    * {@link Container~beforeUpdateListener} for how to listen for this event.
@@ -10239,6 +10802,7 @@
    * @see Container~beforeUpdateListener
    * @see Container#update
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeUpdate} event.
    *
@@ -10257,6 +10821,7 @@
    * @see Container#update
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#update}. See
    * {@link Container~afterUpdateListener} for how to listen for this event.
@@ -10265,6 +10830,7 @@
    * @see Container~afterUpdateListener
    * @see Container#update
    */
+
   /**
    * Callback signature for the {@link Container#event:afterUpdate} event.
    *
@@ -10284,6 +10850,7 @@
    * @see Container#update
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#update}.
    *
@@ -10314,7 +10881,6 @@
    * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
   'update',
-
   /**
    * Fired during {@link Container#updateAll}. See
    * {@link Container~beforeUpdateAllListener} for how to listen for this event.
@@ -10323,6 +10889,7 @@
    * @see Container~beforeUpdateAllListener
    * @see Container#updateAll
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeUpdateAll} event.
    *
@@ -10341,6 +10908,7 @@
    * @see Container#updateAll
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#updateAll}. See
    * {@link Container~afterUpdateAllListener} for how to listen for this event.
@@ -10349,6 +10917,7 @@
    * @see Container~afterUpdateAllListener
    * @see Container#updateAll
    */
+
   /**
    * Callback signature for the {@link Container#event:afterUpdateAll} event.
    *
@@ -10368,6 +10937,7 @@
    * @see Container#updateAll
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#updateAll}.
    *
@@ -10397,7 +10967,6 @@
    * @since 3.0.0
    */
   'updateAll',
-
   /**
    * Fired during {@link Container#updateMany}. See
    * {@link Container~beforeUpdateManyListener} for how to listen for this event.
@@ -10406,6 +10975,7 @@
    * @see Container~beforeUpdateManyListener
    * @see Container#updateMany
    */
+
   /**
    * Callback signature for the {@link Container#event:beforeUpdateMany} event.
    *
@@ -10423,6 +10993,7 @@
    * @see Container#updateMany
    * @since 3.0.0
    */
+
   /**
    * Fired during {@link Container#updateMany}. See
    * {@link Container~afterUpdateManyListener} for how to listen for this event.
@@ -10431,6 +11002,7 @@
    * @see Container~afterUpdateManyListener
    * @see Container#updateMany
    */
+
   /**
    * Callback signature for the {@link Container#event:afterUpdateMany} event.
    *
@@ -10449,6 +11021,7 @@
    * @see Container#updateMany
    * @since 3.0.0
    */
+
   /**
    * Wrapper for {@link Mapper#updateMany}.
    *
@@ -10477,7 +11050,6 @@
    * @since 3.0.0
    */
   'updateMany',
-
   /**
    * Wrapper for {@link Mapper#validate}.
    *
@@ -10506,7 +11078,6 @@
    * @since 3.0.0
    */
   'validate'];
-
   /**
    * The `Container` class is a place to define and store {@link Mapper} instances.
    *
@@ -10531,11 +11102,11 @@
    * @param {object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
    * @since 3.0.0
    */
+
   function Container(opts) {
     utils.classCallCheck(this, Container);
     Component$1.call(this);
     opts || (opts = {});
-
     Object.defineProperties(this, {
       /**
        * The adapters registered with this Container, which are also shared by all
@@ -10591,11 +11162,9 @@
         value: undefined,
         writable: true
       }
-    });
+    }); // Apply options provided by the user
 
-    // Apply options provided by the user
     utils.fillIn(this, opts);
-
     /**
      * Defaults options to pass to {@link Container#mapperClass} when creating a
      * new {@link Mapper}.
@@ -10619,12 +11188,11 @@
      * @since 3.0.0
      * @type {Object}
      */
-    this.mapperDefaults = this.mapperDefaults || {};
 
-    // Use the Mapper class if the user didn't provide a mapperClass
+    this.mapperDefaults = this.mapperDefaults || {}; // Use the Mapper class if the user didn't provide a mapperClass
+
     this.mapperClass || (this.mapperClass = Mapper$1);
   }
-
   var props = {
     constructor: Container,
 
@@ -10664,14 +11232,13 @@
      * @since 3.0.0
      */
     _onMapperEvent: function _onMapperEvent(name) {
-      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         args[_key - 1] = arguments[_key];
       }
 
       var type = args.shift();
-      this.emit.apply(this, [type, name].concat(toConsumableArray(args)));
+      this.emit.apply(this, [type, name].concat(args));
     },
-
 
     /**
      * Return a container scoped to a particular mapper.
@@ -10705,11 +11272,11 @@
         props[method] = {
           writable: true,
           value: function value() {
-            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
               args[_key2] = arguments[_key2];
             }
 
-            return original[method].apply(original, [name].concat(toConsumableArray(args)));
+            return original[method].apply(original, [name].concat(args));
           }
         };
       });
@@ -10721,7 +11288,6 @@
       };
       return Object.create(this, props);
     },
-
 
     /**
      * Create a new mapper and register it in this container.
@@ -10759,49 +11325,44 @@
         opts = name;
         name = opts.name;
       }
+
       if (!utils.isString(name)) {
-        throw utils.err(DOMAIN$7 + '#defineMapper', 'name')(400, 'string', name);
-      }
+        throw utils.err("".concat(DOMAIN$7, "#defineMapper"), 'name')(400, 'string', name);
+      } // Default values for arguments
 
-      // Default values for arguments
-      opts || (opts = {});
-      // Set Mapper#name
+
+      opts || (opts = {}); // Set Mapper#name
+
       opts.name = name;
-      opts.relations || (opts.relations = {});
+      opts.relations || (opts.relations = {}); // Check if the user is overriding the datastore's default mapperClass
 
-      // Check if the user is overriding the datastore's default mapperClass
       var mapperClass = opts.mapperClass || this.mapperClass;
-      delete opts.mapperClass;
+      delete opts.mapperClass; // Apply the datastore's defaults to the options going into the mapper
 
-      // Apply the datastore's defaults to the options going into the mapper
-      utils.fillIn(opts, this.mapperDefaults);
+      utils.fillIn(opts, this.mapperDefaults); // Instantiate a mapper
 
-      // Instantiate a mapper
       var mapper = this._mappers[name] = new mapperClass(opts); // eslint-disable-line
-      mapper.relations || (mapper.relations = {});
-      // Make sure the mapper's name is set
-      mapper.name = name;
-      // All mappers in this datastore will share adapters
+
+      mapper.relations || (mapper.relations = {}); // Make sure the mapper's name is set
+
+      mapper.name = name; // All mappers in this datastore will share adapters
+
       mapper._adapters = this.getAdapters();
-
       mapper.datastore = this;
-
       mapper.on('all', function () {
-        for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
           args[_key3] = arguments[_key3];
         }
 
         return _this._onMapperEvent.apply(_this, [name].concat(args));
       });
       mapper.defineRelations();
-
       return mapper;
     },
     defineResource: function defineResource(name, opts) {
       console.warn('DEPRECATED: defineResource is deprecated, use defineMapper instead');
       return this.defineMapper(name, opts);
     },
-
 
     /**
      * Return the registered adapter with the given name or the default adapter if
@@ -10814,12 +11375,13 @@
      */
     getAdapter: function getAdapter(name) {
       var adapter = this.getAdapterName(name);
+
       if (!adapter) {
-        throw utils.err(DOMAIN$7 + '#getAdapter', 'name')(400, 'string', name);
+        throw utils.err("".concat(DOMAIN$7, "#getAdapter"), 'name')(400, 'string', name);
       }
+
       return this.getAdapters()[adapter];
     },
-
 
     /**
      * Return the name of a registered adapter based on the given name or options,
@@ -10832,12 +11394,15 @@
      */
     getAdapterName: function getAdapterName(opts) {
       opts || (opts = {});
+
       if (utils.isString(opts)) {
-        opts = { adapter: opts };
+        opts = {
+          adapter: opts
+        };
       }
+
       return opts.adapter || this.mapperDefaults.defaultAdapter;
     },
-
 
     /**
      * Return the registered adapters of this container.
@@ -10849,7 +11414,6 @@
     getAdapters: function getAdapters() {
       return this._adapters;
     },
-
 
     /**
      * Return the mapper registered under the specified name.
@@ -10875,12 +11439,13 @@
      */
     getMapper: function getMapper(name) {
       var mapper = this.getMapperByName(name);
+
       if (!mapper) {
-        throw utils.err(DOMAIN$7 + '#getMapper', name)(404, 'mapper');
+        throw utils.err("".concat(DOMAIN$7, "#getMapper"), name)(404, 'mapper');
       }
+
       return mapper;
     },
-
 
     /**
      * Return the mapper registered under the specified name.
@@ -10909,7 +11474,6 @@
       return this._mappers[name];
     },
 
-
     /**
      * Register an adapter on this container under the given name. Adapters
      * registered on a container are shared by all mappers in the container.
@@ -10931,8 +11495,8 @@
      */
     registerAdapter: function registerAdapter(name, adapter, opts) {
       opts || (opts = {});
-      this.getAdapters()[name] = adapter;
-      // Optionally make it the default adapter for the target.
+      this.getAdapters()[name] = adapter; // Optionally make it the default adapter for the target.
+
       if (opts === true || opts.default) {
         this.mapperDefaults.defaultAdapter = name;
         utils.forOwn(this._mappers, function (mapper) {
@@ -10941,20 +11505,69 @@
       }
     }
   };
-
   proxiedMapperMethods.forEach(function (method) {
     props[method] = function (name) {
-      var _getMapper;
+      var _this$getMapper;
 
-      for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+      for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
         args[_key4 - 1] = arguments[_key4];
       }
 
-      return (_getMapper = this.getMapper(name))[method].apply(_getMapper, args);
+      return (_this$getMapper = this.getMapper(name))[method].apply(_this$getMapper, args);
     };
   });
-
   Component$1.extend(props);
+  /**
+   * Create a subclass of this Container:
+   * @example <caption>Container.extend</caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * // Extend the class using ES2015 class syntax.
+   * class CustomContainerClass extends Container {
+   *   foo () { return 'bar' }
+   *   static beep () { return 'boop' }
+   * }
+   * const customContainer = new CustomContainerClass();
+   * console.log(customContainer.foo());
+   * console.log(CustomContainerClass.beep());
+   *
+   * // Extend the class using alternate method.
+   * const OtherContainerClass = Container.extend({
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * });
+   * const otherContainer = new OtherContainerClass();
+   * console.log(otherContainer.foo());
+   * console.log(OtherContainerClass.beep());
+   *
+   * // Extend the class, providing a custom constructor.
+   * function AnotherContainerClass () {
+   *   Container.call(this);
+   *   this.created_at = new Date().getTime();
+   * }
+   * Container.extend({
+   *   constructor: AnotherContainerClass,
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * })
+   * const anotherContainer = new AnotherContainerClass();
+   * console.log(anotherContainer.created_at);
+   * console.log(anotherContainer.foo());
+   * console.log(AnotherContainerClass.beep());
+   *
+   * @method Container.extend
+   * @param {object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
+   * to be used as the subclass itself.
+   * @param {object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this Container class.
+   * @since 3.0.0
+   */
 
   var DOMAIN$8 = 'SimpleStore';
   var proxiedCollectionMethods = [
@@ -10988,7 +11601,6 @@
    * @since 3.0.0
    */
   'add',
-
   /**
    * Wrapper for {@link Collection#between}.
    *
@@ -11011,7 +11623,6 @@
    * @since 3.0.0
    */
   'between',
-
   /**
    * Wrapper for {@link Collection#createIndex}.
    *
@@ -11032,7 +11643,6 @@
    * @since 3.0.0
    */
   'createIndex',
-
   /**
    * Wrapper for {@link Collection#filter}.
    *
@@ -11073,7 +11683,6 @@
    * @since 3.0.0
    */
   'filter',
-
   /**
    * Wrapper for {@link Collection#get}.
    *
@@ -11100,7 +11709,6 @@
    * @since 3.0.0
    */
   'get',
-
   /**
    * Wrapper for {@link Collection#getAll}.
    *
@@ -11122,7 +11730,6 @@
    * @since 3.0.0
    */
   'getAll',
-
   /**
    * Wrapper for {@link Collection#prune}.
    *
@@ -11134,7 +11741,6 @@
    * @since 3.0.0
    */
   'prune',
-
   /**
    * Wrapper for {@link Collection#query}.
    *
@@ -11154,7 +11760,6 @@
    * @since 3.0.0
    */
   'query',
-
   /**
    * Wrapper for {@link Collection#toJSON}.
    *
@@ -11186,7 +11791,6 @@
    * @since 3.0.0
    */
   'toJSON',
-
   /**
    * Wrapper for {@link Collection#unsaved}.
    *
@@ -11201,9 +11805,11 @@
 
   var cachedFn = function cachedFn(name, hashOrId, opts) {
     var cached = this._completedQueries[name][hashOrId];
+
     if (utils.isFunction(cached)) {
       return cached(name, hashOrId, opts);
     }
+
     return cached;
   };
 
@@ -11231,69 +11837,68 @@
      * @type {boolean|Function}
      */
     usePendingFindAll: true
+  };
+  /**
+   * The `SimpleStore` class is an extension of {@link Container}. Not only does
+   * `SimpleStore` manage mappers, but also collections. `SimpleStore` implements the
+   * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
+   * {@link Mapper#create}. If you use the asynchronous `SimpleStore` methods
+   * instead of calling them directly on the mappers, then the results of the
+   * method calls will be inserted into the store's collections. You can think of
+   * a `SimpleStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
+   * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
+   * (the Mappers).
+   *
+   * ```javascript
+   * import { SimpleStore } from 'js-data';
+   * ```
+   *
+   * @example
+   * import { SimpleStore } from 'js-data';
+   * import { HttpAdapter } from 'js-data-http';
+   * const store = new SimpleStore();
+   *
+   * // SimpleStore#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user');
+   *
+   * // SimpleStore#as returns the store scoped to a particular Mapper.
+   * const UserStore = store.as('user');
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then((user) => {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" targeting "user" (Stateful SimpleStore)
+   *   return store.find('user', 1); // same as "UserStore.find(1)"
+   * }).then((user) => {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1);
+   *   console.log(user === cachedUser); // true
+   * });
+   *
+   * @class SimpleStore
+   * @extends Container
+   * @param {object} [opts] Configuration options. See {@link Container}.
+   * @param {boolean} [opts.collectionClass={@link Collection}] See {@link SimpleStore#collectionClass}.
+   * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+   * @param {boolean|Function} [opts.usePendingFind=true] See {@link SimpleStore#usePendingFind}.
+   * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link SimpleStore#usePendingFindAll}.
+   * @returns {SimpleStore}
+   * @see Container
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#SimpleStore","Components of JSData: SimpleStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-SimpleStore","Working with the SimpleStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+   */
 
-    /**
-     * The `SimpleStore` class is an extension of {@link Container}. Not only does
-     * `SimpleStore` manage mappers, but also collections. `SimpleStore` implements the
-     * asynchronous {@link Mapper} methods, such as {@link Mapper#find} and
-     * {@link Mapper#create}. If you use the asynchronous `SimpleStore` methods
-     * instead of calling them directly on the mappers, then the results of the
-     * method calls will be inserted into the store's collections. You can think of
-     * a `SimpleStore` as an [Identity Map](https://en.wikipedia.org/wiki/Identity_map_pattern)
-     * for the [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
-     * (the Mappers).
-     *
-     * ```javascript
-     * import { SimpleStore } from 'js-data';
-     * ```
-     *
-     * @example
-     * import { SimpleStore } from 'js-data';
-     * import { HttpAdapter } from 'js-data-http';
-     * const store = new SimpleStore();
-     *
-     * // SimpleStore#defineMapper returns a direct reference to the newly created
-     * // Mapper.
-     * const UserMapper = store.defineMapper('user');
-     *
-     * // SimpleStore#as returns the store scoped to a particular Mapper.
-     * const UserStore = store.as('user');
-     *
-     * // Call "find" on "UserMapper" (Stateless ORM)
-     * UserMapper.find(1).then((user) => {
-     *   // retrieved a "user" record via the http adapter, but that's it
-     *
-     *   // Call "find" on "store" targeting "user" (Stateful SimpleStore)
-     *   return store.find('user', 1); // same as "UserStore.find(1)"
-     * }).then((user) => {
-     *   // not only was a "user" record retrieved, but it was added to the
-     *   // store's "user" collection
-     *   const cachedUser = store.getCollection('user').get(1);
-     *   console.log(user === cachedUser); // true
-     * });
-     *
-     * @class SimpleStore
-     * @extends Container
-     * @param {object} [opts] Configuration options. See {@link Container}.
-     * @param {boolean} [opts.collectionClass={@link Collection}] See {@link SimpleStore#collectionClass}.
-     * @param {boolean} [opts.debug=false] See {@link Component#debug}.
-     * @param {boolean|Function} [opts.usePendingFind=true] See {@link SimpleStore#usePendingFind}.
-     * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link SimpleStore#usePendingFindAll}.
-     * @returns {SimpleStore}
-     * @see Container
-     * @since 3.0.0
-     * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#SimpleStore","Components of JSData: SimpleStore"]
-     * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-SimpleStore","Working with the SimpleStore"]
-     * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
-     */
-  };function SimpleStore(opts) {
+  function SimpleStore(opts) {
     utils.classCallCheck(this, SimpleStore);
+    opts || (opts = {}); // Fill in any missing options with the defaults
 
-    opts || (opts = {});
-    // Fill in any missing options with the defaults
     utils.fillIn(opts, SIMPLESTORE_DEFAULTS);
     Container.call(this, opts);
-
     this.collectionClass = this.collectionClass || Collection$1;
     this._collections = {};
     this._pendingQueries = {};
@@ -11316,17 +11921,19 @@
      */
     _end: function _end(name, result, opts) {
       var data = opts.raw ? result.data : result;
+
       if (data && utils.isFunction(this.addToCache)) {
         data = this.addToCache(name, data, opts);
+
         if (opts.raw) {
           result.data = data;
         } else {
           result = data;
         }
       }
+
       return result;
     },
-
 
     /**
      * Register a new event listener on this SimpleStore.
@@ -11374,14 +11981,13 @@
      * @param {...*} [args] Args passed to {@link Collection#emit}.
      */
     _onCollectionEvent: function _onCollectionEvent(name) {
-      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         args[_key - 1] = arguments[_key];
       }
 
       var type = args.shift();
-      this.emit.apply(this, [type, name].concat(toConsumableArray(args)));
+      this.emit.apply(this, [type, name].concat(args));
     },
-
 
     /**
      * This method takes the data received from {@link SimpleStore#find},
@@ -11429,7 +12035,6 @@
       return this.getCollection(name).add(data, opts);
     },
 
-
     /**
      * Return the store scoped to a particular mapper/collection pair.
      *
@@ -11458,16 +12063,15 @@
       var props = {};
       var original = this;
       var methods = ownMethodsForScoping.concat(proxiedMapperMethods).concat(proxiedCollectionMethods);
-
       methods.forEach(function (method) {
         props[method] = {
           writable: true,
           value: function value() {
-            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
               args[_key2] = arguments[_key2];
             }
 
-            return original[method].apply(original, [name].concat(toConsumableArray(args)));
+            return original[method].apply(original, [name].concat(args));
           }
         };
       });
@@ -11485,7 +12089,6 @@
       };
       return Object.create(this, props);
     },
-
 
     /**
      * Retrieve a cached `find` result, if any. This method is called during
@@ -11633,7 +12236,6 @@
       };
     },
 
-
     /**
      * Mark a {@link Mapper#findAll} result as cached by adding an entry to
      * {@link SimpleStore#_completedQueries}. By default, once a `findAll` entry is
@@ -11688,7 +12290,6 @@
       };
     },
 
-
     /**
      * Remove __all__ records from the in-memory store and reset
      * {@link SimpleStore#_completedQueries}.
@@ -11710,7 +12311,6 @@
       return removed;
     },
 
-
     /**
      * Fired during {@link SimpleStore#create}. See
      * {@link SimpleStore~beforeCreateListener} for how to listen for this event.
@@ -11719,6 +12319,7 @@
      * @see SimpleStore~beforeCreateListener
      * @see SimpleStore#create
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeCreate} event.
      *
@@ -11736,6 +12337,7 @@
      * @see SimpleStore#create
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#create}. See
      * {@link SimpleStore~afterCreateListener} for how to listen for this event.
@@ -11744,6 +12346,7 @@
      * @see SimpleStore~afterCreateListener
      * @see SimpleStore#create
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterCreate} event.
      *
@@ -11762,6 +12365,7 @@
      * @see SimpleStore#create
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#create}. Adds the created record to the store.
      *
@@ -11806,7 +12410,6 @@
       });
     },
 
-
     /**
      * Fired during {@link SimpleStore#createMany}. See
      * {@link SimpleStore~beforeCreateManyListener} for how to listen for this event.
@@ -11815,6 +12418,7 @@
      * @see SimpleStore~beforeCreateManyListener
      * @see SimpleStore#createMany
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeCreateMany} event.
      *
@@ -11832,6 +12436,7 @@
      * @see SimpleStore#createMany
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#createMany}. See
      * {@link SimpleStore~afterCreateManyListener} for how to listen for this event.
@@ -11840,6 +12445,7 @@
      * @see SimpleStore~afterCreateManyListener
      * @see SimpleStore#createMany
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterCreateMany} event.
      *
@@ -11858,6 +12464,7 @@
      * @see SimpleStore#createMany
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#createMany}. Adds the created records to the
      * store.
@@ -11911,8 +12518,9 @@
       var mapper = Container.prototype.defineMapper.call(self, name, opts);
       self._pendingQueries[name] = {};
       self._completedQueries[name] = {};
-      mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] });
-
+      mapper.relationList || Object.defineProperty(mapper, 'relationList', {
+        value: []
+      });
       var collectionOpts = {
         // Make sure the collection has somewhere to store "added" timestamps
         _added: {},
@@ -11924,39 +12532,35 @@
 
       if (opts && 'onConflict' in opts) {
         collectionOpts.onConflict = opts.onConflict;
-      }
+      } // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
 
-      // The SimpleStore uses a subclass of Collection that is "SimpleStore-aware"
+
       var collection = self._collections[name] = new self.collectionClass(null, collectionOpts); // eslint-disable-line
 
       var schema = mapper.schema || {};
-      var properties = schema.properties || {};
-      // TODO: Make it possible index nested properties?
+      var properties = schema.properties || {}; // TODO: Make it possible index nested properties?
+
       utils.forOwn(properties, function (opts, prop) {
         if (opts.indexed) {
           collection.createIndex(prop);
         }
-      });
-
-      // Create a secondary index on the "added" timestamps of records in the
+      }); // Create a secondary index on the "added" timestamps of records in the
       // collection
+
       collection.createIndex('addedTimestamps', ['$'], {
         fieldGetter: function fieldGetter(obj) {
           return collection._added[collection.recordId(obj)];
         }
       });
-
       collection.on('all', function () {
-        for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
           args[_key3] = arguments[_key3];
         }
 
         self._onCollectionEvent.apply(self, [name].concat(args));
       });
-
       return mapper;
     },
-
 
     /**
      * Fired during {@link SimpleStore#destroy}. See
@@ -11966,6 +12570,7 @@
      * @see SimpleStore~beforeDestroyListener
      * @see SimpleStore#destroy
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeDestroy} event.
      *
@@ -11983,6 +12588,7 @@
      * @see SimpleStore#destroy
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#destroy}. See
      * {@link SimpleStore~afterDestroyListener} for how to listen for this event.
@@ -11991,6 +12597,7 @@
      * @see SimpleStore~afterDestroyListener
      * @see SimpleStore#destroy
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterDestroy} event.
      *
@@ -12009,6 +12616,7 @@
      * @see SimpleStore#destroy
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#destroy}. Removes any destroyed record from the
      * in-memory store. Clears out any {@link SimpleStore#_completedQueries} entries
@@ -12061,12 +12669,12 @@
         } else {
           result = record;
         }
+
         delete _this6._pendingQueries[name][id];
         delete _this6._completedQueries[name][id];
         return result;
       });
     },
-
 
     /**
      * Fired during {@link SimpleStore#destroyAll}. See
@@ -12076,6 +12684,7 @@
      * @see SimpleStore~beforeDestroyAllListener
      * @see SimpleStore#destroyAll
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeDestroyAll} event.
      *
@@ -12093,6 +12702,7 @@
      * @see SimpleStore#destroyAll
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#destroyAll}. See
      * {@link SimpleStore~afterDestroyAllListener} for how to listen for this event.
@@ -12101,6 +12711,7 @@
      * @see SimpleStore~afterDestroyAllListener
      * @see SimpleStore#destroyAll
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterDestroyAll} event.
      *
@@ -12119,6 +12730,7 @@
      * @see SimpleStore#destroyAll
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#destroyAll}. Removes any destroyed records from
      * the in-memory store.
@@ -12169,7 +12781,9 @@
         } else {
           result = records;
         }
+
         var hash = _this7.hashQuery(name, query, opts);
+
         delete _this7._pendingQueries[name][hash];
         delete _this7._completedQueries[name][hash];
         return result;
@@ -12184,7 +12798,6 @@
       return this.removeAll(name, query, opts);
     },
 
-
     /**
      * Fired during {@link SimpleStore#find}. See
      * {@link SimpleStore~beforeFindListener} for how to listen for this event.
@@ -12193,6 +12806,7 @@
      * @see SimpleStore~beforeFindListener
      * @see SimpleStore#find
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeFind} event.
      *
@@ -12210,6 +12824,7 @@
      * @see SimpleStore#find
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#find}. See
      * {@link SimpleStore~afterFindListener} for how to listen for this event.
@@ -12218,6 +12833,7 @@
      * @see SimpleStore~afterFindListener
      * @see SimpleStore#find
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterFind} event.
      *
@@ -12236,6 +12852,7 @@
      * @see SimpleStore#find
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#find}. Adds any found record to the store.
      *
@@ -12275,11 +12892,13 @@
       var mapper = this.getMapper(name);
       var pendingQuery = this._pendingQueries[name][id];
       var usePendingFind = opts.usePendingFind === undefined ? this.usePendingFind : opts.usePendingFind;
+
       utils._(opts, mapper);
 
       if (pendingQuery && (utils.isFunction(usePendingFind) ? usePendingFind.call(this, name, id, opts) : usePendingFind)) {
         return pendingQuery;
       }
+
       var item = this.cachedFind(name, id, opts);
 
       if (opts.force || !item) {
@@ -12287,7 +12906,9 @@
         return promise.then(function (result) {
           delete _this8._pendingQueries[name][id];
           result = _this8._end(name, result, opts);
+
           _this8.cacheFind(name, result, id, opts);
+
           return result;
         }, function (err) {
           delete _this8._pendingQueries[name][id];
@@ -12298,7 +12919,6 @@
       return utils.resolve(item);
     },
 
-
     /**
      * Fired during {@link SimpleStore#findAll}. See
      * {@link SimpleStore~beforeFindAllListener} for how to listen for this event.
@@ -12307,6 +12927,7 @@
      * @see SimpleStore~beforeFindAllListener
      * @see SimpleStore#findAll
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeFindAll} event.
      *
@@ -12324,6 +12945,7 @@
      * @see SimpleStore#findAll
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#findAll}. See
      * {@link SimpleStore~afterFindAllListener} for how to listen for this event.
@@ -12332,6 +12954,7 @@
      * @see SimpleStore~afterFindAllListener
      * @see SimpleStore#findAll
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterFindAll} event.
      *
@@ -12350,6 +12973,7 @@
      * @see SimpleStore#findAll
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#findAll}. Adds any found records to the store.
      *
@@ -12390,6 +13014,7 @@
       var hash = this.hashQuery(name, query, opts);
       var pendingQuery = this._pendingQueries[name][hash];
       var usePendingFindAll = opts.usePendingFindAll === undefined ? this.usePendingFindAll : opts.usePendingFindAll;
+
       utils._(opts, mapper);
 
       if (pendingQuery && (utils.isFunction(usePendingFindAll) ? usePendingFindAll.call(this, name, query, opts) : usePendingFindAll)) {
@@ -12403,7 +13028,9 @@
         return promise.then(function (result) {
           delete _this9._pendingQueries[name][hash];
           result = _this9._end(name, result, opts);
+
           _this9.cacheFindAll(name, result, hash, opts);
+
           return result;
         }, function (err) {
           delete _this9._pendingQueries[name][hash];
@@ -12413,7 +13040,6 @@
 
       return utils.resolve(items);
     },
-
 
     /**
      * Return the {@link Collection} with the given name, if for some
@@ -12428,12 +13054,13 @@
      */
     getCollection: function getCollection(name) {
       var collection = this._collections[name];
+
       if (!collection) {
-        throw utils.err(DOMAIN$8 + '#getCollection', name)(404, 'collection');
+        throw utils.err("".concat(DOMAIN$8, "#getCollection"), name)(404, 'collection');
       }
+
       return collection;
     },
-
 
     /**
      * Hashing function used to cache {@link SimpleStore#find} and
@@ -12457,7 +13084,6 @@
       console.warn('DEPRECATED: "inject" is deprecated, use "add" instead');
       return this.add(name, records, opts);
     },
-
 
     /**
      * Wrapper for {@link Collection#remove}. Removes the specified
@@ -12490,12 +13116,13 @@
      */
     remove: function remove(name, id, opts) {
       var record = this.getCollection(name).remove(id, opts);
+
       if (record) {
         this.removeRelated(name, [record], opts);
       }
+
       return record;
     },
-
 
     /**
      * Wrapper for {@link Collection#removeAll}. Removes the selected
@@ -12536,13 +13163,15 @@
       } else {
         this._completedQueries[name][this.hashQuery(name, query, opts)] = undefined;
       }
+
       var records = this.getCollection(name).removeAll(query, opts);
+
       if (records.length) {
         this.removeRelated(name, records, opts);
       }
+
       return records;
     },
-
 
     /**
      * Remove from the store {@link Record}s that are related to the provided
@@ -12564,43 +13193,48 @@
       if (!utils.isArray(records)) {
         records = [records];
       }
+
       utils.forEachRelation(this.getMapper(name), opts, function (def, optsCopy) {
         records.forEach(function (record) {
-          var relatedData = void 0;
-          var query = void 0;
+          var relatedData;
+          var query;
+
           if (def.foreignKey && (def.type === hasOneType || def.type === hasManyType)) {
-            query = defineProperty({}, def.foreignKey, def.getForeignKey(record));
+            query = _defineProperty({}, def.foreignKey, def.getForeignKey(record));
           } else if (def.type === hasManyType && def.localKeys) {
             query = {
-              where: defineProperty({}, def.getRelation().idAttribute, {
+              where: _defineProperty({}, def.getRelation().idAttribute, {
                 'in': utils.get(record, def.localKeys)
               })
             };
           } else if (def.type === hasManyType && def.foreignKeys) {
             query = {
-              where: defineProperty({}, def.foreignKeys, {
+              where: _defineProperty({}, def.foreignKeys, {
                 'contains': def.getForeignKey(record)
               })
             };
           } else if (def.type === belongsToType) {
             relatedData = _this10.remove(def.relation, def.getForeignKey(record), optsCopy);
           }
+
           if (query) {
             relatedData = _this10.removeAll(def.relation, query, optsCopy);
           }
+
           if (relatedData) {
             if (utils.isArray(relatedData) && !relatedData.length) {
               return;
             }
+
             if (def.type === hasOneType) {
               relatedData = relatedData[0];
             }
+
             def.setLocalField(record, relatedData);
           }
         });
       });
     },
-
 
     /**
      * Fired during {@link SimpleStore#update}. See
@@ -12610,6 +13244,7 @@
      * @see SimpleStore~beforeUpdateListener
      * @see SimpleStore#update
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeUpdate} event.
      *
@@ -12628,6 +13263,7 @@
      * @see SimpleStore#update
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#update}. See
      * {@link SimpleStore~afterUpdateListener} for how to listen for this event.
@@ -12636,6 +13272,7 @@
      * @see SimpleStore~afterUpdateListener
      * @see SimpleStore#update
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterUpdate} event.
      *
@@ -12655,6 +13292,7 @@
      * @see SimpleStore#update
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#update}. Adds the updated {@link Record} to the
      * store.
@@ -12697,7 +13335,6 @@
       });
     },
 
-
     /**
      * Fired during {@link SimpleStore#updateAll}. See
      * {@link SimpleStore~beforeUpdateAllListener} for how to listen for this event.
@@ -12706,6 +13343,7 @@
      * @see SimpleStore~beforeUpdateAllListener
      * @see SimpleStore#updateAll
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeUpdateAll} event.
      *
@@ -12724,6 +13362,7 @@
      * @see SimpleStore#updateAll
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#updateAll}. See
      * {@link SimpleStore~afterUpdateAllListener} for how to listen for this event.
@@ -12732,6 +13371,7 @@
      * @see SimpleStore~afterUpdateAllListener
      * @see SimpleStore#updateAll
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterUpdateAll} event.
      *
@@ -12751,6 +13391,7 @@
      * @see SimpleStore#updateAll
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#updateAll}. Adds the updated {@link Record}s to
      * the store.
@@ -12793,7 +13434,6 @@
       });
     },
 
-
     /**
      * Fired during {@link SimpleStore#updateMany}. See
      * {@link SimpleStore~beforeUpdateManyListener} for how to listen for this event.
@@ -12802,6 +13442,7 @@
      * @see SimpleStore~beforeUpdateManyListener
      * @see SimpleStore#updateMany
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:beforeUpdateMany} event.
      *
@@ -12819,6 +13460,7 @@
      * @see SimpleStore#updateMany
      * @since 3.0.0
      */
+
     /**
      * Fired during {@link SimpleStore#updateMany}. See
      * {@link SimpleStore~afterUpdateManyListener} for how to listen for this event.
@@ -12827,6 +13469,7 @@
      * @see SimpleStore~afterUpdateManyListener
      * @see SimpleStore#updateMany
      */
+
     /**
      * Callback signature for the {@link SimpleStore#event:afterUpdateMany} event.
      *
@@ -12845,6 +13488,7 @@
      * @see SimpleStore#updateMany
      * @since 3.0.0
      */
+
     /**
      * Wrapper for {@link Mapper#updateMany}. Adds the updated {@link Record}s to
      * the store.
@@ -12889,23 +13533,172 @@
       });
     }
   };
-
   proxiedCollectionMethods.forEach(function (method) {
     props$1[method] = function (name) {
-      var _getCollection;
+      var _this$getCollection;
 
-      for (var _len4 = arguments.length, args = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+      for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
         args[_key4 - 1] = arguments[_key4];
       }
 
-      return (_getCollection = this.getCollection(name))[method].apply(_getCollection, args);
+      return (_this$getCollection = this.getCollection(name))[method].apply(_this$getCollection, args);
     };
   });
-
   var SimpleStore$1 = Container.extend(props$1);
+  /**
+   * Fired when a record changes. Only works for records that have tracked fields.
+   * See {@link SimpleStore~changeListener} on how to listen for this event.
+   *
+   * @event SimpleStore#change
+   * @see SimpleStore~changeListener
+   */
+
+  /**
+   * Callback signature for the {@link SimpleStore#event:change} event.
+   *
+   * @example
+   * function onChange (mapperName, record, changes) {
+   *   // do something
+   * }
+   * store.on('change', onChange);
+   *
+   * @callback SimpleStore~changeListener
+   * @param {string} name The name of the associated {@link Mapper}.
+   * @param {Record} record The Record that changed.
+   * @param {object} changes The changes.
+   * @see SimpleStore#event:change
+   * @since 3.0.0
+   */
+
+  /**
+   * Fired when one or more records are added to the in-memory store. See
+   * {@link SimpleStore~addListener} on how to listen for this event.
+   *
+   * @event SimpleStore#add
+   * @see SimpleStore~addListener
+   * @see SimpleStore#event:add
+   * @see SimpleStore#add
+   * @see SimpleStore#create
+   * @see SimpleStore#createMany
+   * @see SimpleStore#find
+   * @see SimpleStore#findAll
+   * @see SimpleStore#update
+   * @see SimpleStore#updateAll
+   * @see SimpleStore#updateMany
+   */
+
+  /**
+   * Callback signature for the {@link SimpleStore#event:add} event.
+   *
+   * @example
+   * function onAdd (mapperName, recordOrRecords) {
+   *   // do something
+   * }
+   * store.on('add', onAdd);
+   *
+   * @callback SimpleStore~addListener
+   * @param {string} name The name of the associated {@link Mapper}.
+   * @param {Record|Record[]} The Record or Records that were added.
+   * @see SimpleStore#event:add
+   * @see SimpleStore#add
+   * @see SimpleStore#create
+   * @see SimpleStore#createMany
+   * @see SimpleStore#find
+   * @see SimpleStore#findAll
+   * @see SimpleStore#update
+   * @see SimpleStore#updateAll
+   * @see SimpleStore#updateMany
+   * @since 3.0.0
+   */
+
+  /**
+   * Fired when one or more records are removed from the in-memory store. See
+   * {@link SimpleStore~removeListener} for how to listen for this event.
+   *
+   * @event SimpleStore#remove
+   * @see SimpleStore~removeListener
+   * @see SimpleStore#event:remove
+   * @see SimpleStore#clear
+   * @see SimpleStore#destroy
+   * @see SimpleStore#destroyAll
+   * @see SimpleStore#remove
+   * @see SimpleStore#removeAll
+   */
+
+  /**
+   * Callback signature for the {@link SimpleStore#event:remove} event.
+   *
+   * @example
+   * function onRemove (mapperName, recordsOrRecords) {
+   *   // do something
+   * }
+   * store.on('remove', onRemove);
+   *
+   * @callback SimpleStore~removeListener
+   * @param {string} name The name of the associated {@link Mapper}.
+   * @param {Record|Record[]} Record or Records that were removed.
+   * @see SimpleStore#event:remove
+   * @see SimpleStore#clear
+   * @see SimpleStore#destroy
+   * @see SimpleStore#destroyAll
+   * @see SimpleStore#remove
+   * @see SimpleStore#removeAll
+   * @since 3.0.0
+   */
+
+  /**
+   * Create a subclass of this SimpleStore:
+   * @example <caption>SimpleStore.extend</caption>
+   * const JSData = require('js-data');
+   * const { SimpleStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * // Extend the class using ES2015 class syntax.
+   * class CustomSimpleStoreClass extends SimpleStore {
+   *   foo () { return 'bar'; }
+   *   static beep () { return 'boop'; }
+   * }
+   * const customSimpleStore = new CustomSimpleStoreClass();
+   * console.log(customSimpleStore.foo());
+   * console.log(CustomSimpleStoreClass.beep());
+   *
+   * // Extend the class using alternate method.
+   * const OtherSimpleStoreClass = SimpleStore.extend({
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * })
+   * const otherSimpleStore = new OtherSimpleStoreClass();
+   * console.log(otherSimpleStore.foo());
+   * console.log(OtherSimpleStoreClass.beep());
+   *
+   * // Extend the class, providing a custom constructor.
+   * function AnotherSimpleStoreClass () {
+   *   SimpleStore.call(this)
+   *   this.created_at = new Date().getTime()
+   * }
+   * SimpleStore.extend({
+   *   constructor: AnotherSimpleStoreClass,
+   *   foo () { return 'bar'; }
+   * }, {
+   *   beep () { return 'boop'; }
+   * })
+   * const anotherSimpleStore = new AnotherSimpleStoreClass();
+   * console.log(anotherSimpleStore.created_at);
+   * console.log(anotherSimpleStore.foo());
+   * console.log(AnotherSimpleStoreClass.beep());
+   *
+   * @method SimpleStore.extend
+   * @param {object} [props={}] Properties to add to the prototype of the
+   * subclass.
+   * @param {object} [props.constructor] Provide a custom constructor function
+   * to be used as the subclass itself.
+   * @param {object} [classProps={}] Static properties to add to the subclass.
+   * @returns {Constructor} Subclass of this SimpleStore class.
+   * @since 3.0.0
+   */
 
   var DOMAIN$9 = 'LinkedCollection';
-
   /**
    * Extends {@link Collection}. Used by a {@link DataStore} to implement an
    * Identity Map.
@@ -12921,9 +13714,10 @@
    * @param {object} [opts] Configuration options. See {@link Collection}.
    * @returns {Mapper}
    */
+
   function LinkedCollection(records, opts) {
-    utils.classCallCheck(this, LinkedCollection);
-    // Make sure this collection has somewhere to store "added" timestamps
+    utils.classCallCheck(this, LinkedCollection); // Make sure this collection has somewhere to store "added" timestamps
+
     Object.defineProperties(this, {
       _added: {
         value: {}
@@ -12933,18 +13727,15 @@
         value: undefined
       }
     });
+    Collection$1.call(this, records, opts); // Make sure this collection has a reference to a datastore
 
-    Collection$1.call(this, records, opts);
-
-    // Make sure this collection has a reference to a datastore
     if (!this.datastore) {
-      throw utils.err('new ' + DOMAIN$9, 'opts.datastore')(400, 'DataStore', this.datastore);
+      throw utils.err("new ".concat(DOMAIN$9), 'opts.datastore')(400, 'DataStore', this.datastore);
     }
   }
 
   var LinkedCollection$1 = Collection$1.extend({
     constructor: LinkedCollection,
-
     _addMeta: function _addMeta(record, timestamp) {
       // Track when this record was added
       this._added[this.recordId(record)] = timestamp;
@@ -12955,19 +13746,22 @@
     },
     _clearMeta: function _clearMeta(record) {
       delete this._added[this.recordId(record)];
+
       if (utils.isFunction(record._set)) {
         record._set('$'); // unset
+
       }
     },
     _onRecordEvent: function _onRecordEvent() {
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
 
       Collection$1.prototype._onRecordEvent.apply(this, args);
-      var event = args[0];
-      // This is a very brute force method
+
+      var event = args[0]; // This is a very brute force method
       // Lots of room for optimization
+
       if (utils.isString(event) && event.indexOf('change') === 0) {
         this.updateIndexes(args[1]);
       }
@@ -12982,6 +13776,7 @@
       if (singular) {
         records = [records];
       }
+
       records = Collection$1.prototype.add.call(this, records, opts);
 
       if (mapper.relationList.length && records.length) {
@@ -12995,12 +13790,12 @@
       records.forEach(function (record) {
         return _this._addMeta(record, timestamp);
       });
-
       return singular ? records[0] : records;
     },
     remove: function remove(idOrRecord, opts) {
       var mapper = this.mapper;
       var record = Collection$1.prototype.remove.call(this, idOrRecord, opts);
+
       if (record) {
         this._clearMeta(record);
       }
@@ -13027,7 +13822,6 @@
       return records;
     }
   });
-
   /**
    * Create a subclass of this LinkedCollection:
    *
@@ -13092,61 +13886,61 @@
      * @type {boolean}
      */
     unlinkOnDestroy: true
+  };
+  /**
+   * The `DataStore` class is an extension of {@link SimpleStore}. Not only does
+   * `DataStore` manage mappers and store data in collections, it uses the
+   * {@link LinkedCollection} class to link related records together in memory.
+   *
+   * ```javascript
+   * import { DataStore } from 'js-data';
+   * ```
+   *
+   * @example
+   * import { DataStore } from 'js-data';
+   * import HttpAdapter from 'js-data-http';
+   * const store = new DataStore();
+   *
+   * // DataStore#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user');
+   *
+   * // DataStore#as returns the store scoped to a particular Mapper.
+   * const UserStore = store.as('user');
+   *
+   * // Call "find" on "UserMapper" (Stateless ORM)
+   * UserMapper.find(1).then((user) => {
+   *   // retrieved a "user" record via the http adapter, but that's it
+   *
+   *   // Call "find" on "store" targeting "user" (Stateful DataStore)
+   *   return store.find('user', 1); // same as "UserStore.find(1)"
+   * }).then((user) => {
+   *   // not only was a "user" record retrieved, but it was added to the
+   *   // store's "user" collection
+   *   const cachedUser = store.getCollection('user').get(1);
+   *   console.log(user === cachedUser); // true
+   * });
+   *
+   * @class DataStore
+   * @extends SimpleStore
+   * @param {object} [opts] Configuration options. See {@link SimpleStore}.
+   * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
+   * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+   * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
+   * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
+   * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
+   * @returns {DataStore}
+   * @see SimpleStore
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
+   * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+   */
 
-    /**
-     * The `DataStore` class is an extension of {@link SimpleStore}. Not only does
-     * `DataStore` manage mappers and store data in collections, it uses the
-     * {@link LinkedCollection} class to link related records together in memory.
-     *
-     * ```javascript
-     * import { DataStore } from 'js-data';
-     * ```
-     *
-     * @example
-     * import { DataStore } from 'js-data';
-     * import HttpAdapter from 'js-data-http';
-     * const store = new DataStore();
-     *
-     * // DataStore#defineMapper returns a direct reference to the newly created
-     * // Mapper.
-     * const UserMapper = store.defineMapper('user');
-     *
-     * // DataStore#as returns the store scoped to a particular Mapper.
-     * const UserStore = store.as('user');
-     *
-     * // Call "find" on "UserMapper" (Stateless ORM)
-     * UserMapper.find(1).then((user) => {
-     *   // retrieved a "user" record via the http adapter, but that's it
-     *
-     *   // Call "find" on "store" targeting "user" (Stateful DataStore)
-     *   return store.find('user', 1); // same as "UserStore.find(1)"
-     * }).then((user) => {
-     *   // not only was a "user" record retrieved, but it was added to the
-     *   // store's "user" collection
-     *   const cachedUser = store.getCollection('user').get(1);
-     *   console.log(user === cachedUser); // true
-     * });
-     *
-     * @class DataStore
-     * @extends SimpleStore
-     * @param {object} [opts] Configuration options. See {@link SimpleStore}.
-     * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
-     * @param {boolean} [opts.debug=false] See {@link Component#debug}.
-     * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
-     * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
-     * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
-     * @returns {DataStore}
-     * @see SimpleStore
-     * @since 3.0.0
-     * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
-     * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
-     * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
-     */
-  };function DataStore(opts) {
+  function DataStore(opts) {
     utils.classCallCheck(this, DataStore);
+    opts || (opts = {}); // Fill in any missing options with the defaults
 
-    opts || (opts = {});
-    // Fill in any missing options with the defaults
     utils.fillIn(opts, DATASTORE_DEFAULTS);
     opts.collectionClass || (opts.collectionClass = LinkedCollection$1);
     SimpleStore$1.call(this, opts);
@@ -13154,22 +13948,22 @@
 
   var props$2 = {
     constructor: DataStore,
-
     defineMapper: function defineMapper(name, opts) {
       // Complexity of this method is beyond simply using => functions to bind context
       var self = this;
       var mapper = SimpleStore$1.prototype.defineMapper.call(self, name, opts);
       var idAttribute = mapper.idAttribute;
       var collection = this.getCollection(name);
-
       mapper.relationList.forEach(function (def) {
         var relation = def.relation;
         var localField = def.localField;
-        var path = 'links.' + localField;
+        var path = "links.".concat(localField);
         var foreignKey = def.foreignKey;
         var type = def.type;
-        var updateOpts = { index: foreignKey };
-        var descriptor = void 0;
+        var updateOpts = {
+          index: foreignKey
+        };
+        var descriptor;
 
         var getter = function getter() {
           return this._get(path);
@@ -13186,32 +13980,33 @@
             // or comment.post = somePost
             set: function set(record) {
               // e.g. const otherUser = profile.user
-              var currentParent = this._get(path);
-              // e.g. profile.user === someUser
+              var currentParent = this._get(path); // e.g. profile.user === someUser
+
+
               if (record === currentParent) {
                 return currentParent;
               }
-              var id = utils.get(this, idAttribute);
-              var inverseDef = def.getInverse(mapper);
 
-              // e.g. profile.user !== someUser
+              var id = utils.get(this, idAttribute);
+              var inverseDef = def.getInverse(mapper); // e.g. profile.user !== someUser
               // or comment.post !== somePost
+
               if (currentParent && inverseDef) {
                 this.removeInverseRelation(currentParent, id, inverseDef, idAttribute);
               }
+
               if (record) {
                 // e.g. profile.user = someUser
                 var relatedIdAttribute = def.getRelation().idAttribute;
-                var relatedId = utils.get(record, relatedIdAttribute);
+                var relatedId = utils.get(record, relatedIdAttribute); // Prefer store record
 
-                // Prefer store record
                 if (relatedId !== undefined && this._get('$')) {
                   record = self.get(relation, relatedId) || record;
-                }
-
-                // Set locals
+                } // Set locals
                 // e.g. profile.user = someUser
                 // or comment.post = somePost
+
+
                 safeSetLink(this, localField, record);
                 safeSetProp(this, foreignKey, relatedId);
                 collection.updateIndex(this, updateOpts);
@@ -13225,30 +14020,37 @@
                 // or comment.post = undefined
                 safeSetLink(this, localField, undefined);
               }
+
               return record;
             }
           };
-
           var foreignKeyDescriptor = Object.getOwnPropertyDescriptor(mapper.recordClass.prototype, foreignKey);
+
           if (!foreignKeyDescriptor) {
             foreignKeyDescriptor = {
               enumerable: true
             };
           }
+
           var originalGet = foreignKeyDescriptor.get;
+
           foreignKeyDescriptor.get = function () {
             if (originalGet) {
               return originalGet.call(this);
             }
-            return this._get('props.' + foreignKey);
+
+            return this._get("props.".concat(foreignKey));
           };
+
           var originalSet = foreignKeyDescriptor.set;
+
           foreignKeyDescriptor.set = function (value) {
             var _this = this;
 
             if (originalSet) {
               originalSet.call(this, value);
             }
+
             var currentParent = utils.get(this, localField);
             var id = utils.get(this, idAttribute);
             var inverseDef = def.getInverse(mapper);
@@ -13259,6 +14061,7 @@
                 safeSetLink(currentParent, inverseDef.localField, undefined);
               } else if (inverseDef.type === hasManyType) {
                 var children = utils.get(currentParent, inverseDef.localField);
+
                 if (id === undefined) {
                   utils.remove(children, function (child) {
                     return child === _this;
@@ -13281,17 +14084,18 @@
               }
             } else if (this._get('$')) {
               var storeRecord = self.get(relation, value);
+
               if (storeRecord) {
                 utils.set(this, localField, storeRecord);
               }
             }
           };
+
           Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor);
         } else if (type === hasManyType) {
           var localKeys = def.localKeys;
-          var foreignKeys = def.foreignKeys;
+          var foreignKeys = def.foreignKeys; // TODO: Handle case when belongsTo relation isn't ever defined
 
-          // TODO: Handle case when belongsTo relation isn't ever defined
           if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
             self.getCollection(relation).createIndex(foreignKey);
           }
@@ -13299,12 +14103,13 @@
           descriptor = {
             get: function get() {
               var current = getter.call(this);
+
               if (!current) {
                 this._set(path, []);
               }
+
               return getter.call(this);
             },
-
             // e.g. post.comments = someComments
             // or user.groups = someGroups
             // or group.users = someUsers
@@ -13314,6 +14119,7 @@
               if (records && !utils.isArray(records)) {
                 records = [records];
               }
+
               var id = utils.get(this, idAttribute);
               var relatedIdAttribute = def.getRelation().idAttribute;
               var inverseDef = def.getInverse(mapper);
@@ -13327,9 +14133,10 @@
                   // e.g. comment.id
                   var relatedId = utils.get(record, relatedIdAttribute);
                   var currentParent = utils.get(record, inverseLocalField);
+
                   if (currentParent && currentParent !== _this2) {
-                    var currentChildrenOfParent = utils.get(currentParent, localField);
-                    // e.g. somePost.comments.remove(comment)
+                    var currentChildrenOfParent = utils.get(currentParent, localField); // e.g. somePost.comments.remove(comment)
+
                     if (relatedId === undefined) {
                       utils.remove(currentChildrenOfParent, function (child) {
                         return child === record;
@@ -13340,42 +14147,47 @@
                       });
                     }
                   }
+
                   if (relatedId !== undefined) {
                     if (_this2._get('$')) {
                       // Prefer store record
                       record = self.get(relation, relatedId) || record;
-                    }
-                    // e.g. toLinkIds[comment.id] = comment
+                    } // e.g. toLinkIds[comment.id] = comment
+
+
                     toLinkIds[relatedId] = record;
                   }
+
                   toLink.push(record);
                 });
-              }
+              } // e.g. post.comments = someComments
 
-              // e.g. post.comments = someComments
+
               if (foreignKey) {
                 current.forEach(function (record) {
                   // e.g. comment.id
                   var relatedId = utils.get(record, relatedIdAttribute);
+
                   if (relatedId === undefined && toLink.indexOf(record) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
                     // Update (unset) inverse relation
                     if (records) {
                       // e.g. comment.post_id = undefined
-                      safeSetProp(record, foreignKey, undefined);
-                      // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                      safeSetProp(record, foreignKey, undefined); // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+
                       self.getCollection(relation).updateIndex(record, updateOpts);
-                    }
-                    // e.g. comment.post = undefined
+                    } // e.g. comment.post = undefined
+
+
                     safeSetLink(record, inverseLocalField, undefined);
                   }
                 });
                 toLink.forEach(function (record) {
                   // Update (set) inverse relation
                   // e.g. comment.post_id = post.id
-                  safeSetProp(record, foreignKey, id);
-                  // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
-                  self.getCollection(relation).updateIndex(record, updateOpts);
-                  // e.g. comment.post = post
+                  safeSetProp(record, foreignKey, id); // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+
+                  self.getCollection(relation).updateIndex(record, updateOpts); // e.g. comment.post = post
+
                   safeSetLink(record, inverseLocalField, _this2);
                 });
               } else if (localKeys) {
@@ -13386,18 +14198,19 @@
                   return utils.get(child, relatedIdAttribute);
                 }).filter(function (id) {
                   return id !== undefined;
-                });
-                // e.g. group.user_ids = [1,2,3,...]
-                utils.set(this, localKeys, ids);
-                // Update (unset) inverse relation
+                }); // e.g. group.user_ids = [1,2,3,...]
+
+                utils.set(this, localKeys, ids); // Update (unset) inverse relation
+
                 if (inverseDef.foreignKeys) {
                   current.forEach(function (child) {
                     var relatedId = utils.get(child, relatedIdAttribute);
+
                     if (relatedId === undefined && toLink.indexOf(child) === -1 || relatedId !== undefined && !(relatedId in toLinkIds)) {
                       // Update inverse relation
                       // safeSetLink(child, inverseLocalField, undefined)
-                      var parents = utils.get(child, inverseLocalField) || [];
-                      // e.g. someUser.groups.remove(group)
+                      var parents = utils.get(child, inverseLocalField) || []; // e.g. someUser.groups.remove(group)
+
                       if (id === undefined) {
                         utils.remove(parents, function (parent) {
                           return parent === _this2;
@@ -13411,8 +14224,8 @@
                   });
                   toLink.forEach(function (child) {
                     // Update (set) inverse relation
-                    var parents = utils.get(child, inverseLocalField);
-                    // e.g. someUser.groups.push(group)
+                    var parents = utils.get(child, inverseLocalField); // e.g. someUser.groups.push(group)
+
                     if (id === undefined) {
                       utils.noDupeAdd(parents, _this2, function (parent) {
                         return parent === _this2;
@@ -13428,13 +14241,13 @@
                 // e.g. user.groups = someGroups
                 // Update (unset) inverse relation
                 current.forEach(function (parent) {
-                  var ids = utils.get(parent, foreignKeys) || [];
-                  // e.g. someGroup.user_ids.remove(user.id)
+                  var ids = utils.get(parent, foreignKeys) || []; // e.g. someGroup.user_ids.remove(user.id)
+
                   utils.remove(ids, function (_key) {
                     return id === _key;
                   });
-                  var children = utils.get(parent, inverseLocalField);
-                  // e.g. someGroup.users.remove(user)
+                  var children = utils.get(parent, inverseLocalField); // e.g. someGroup.users.remove(user)
+
                   if (id === undefined) {
                     utils.remove(children, function (child) {
                       return child === _this2;
@@ -13444,14 +14257,15 @@
                       return child === _this2 || id === utils.get(child, idAttribute);
                     });
                   }
-                });
-                // Update (set) inverse relation
+                }); // Update (set) inverse relation
+
                 toLink.forEach(function (parent) {
                   var ids = utils.get(parent, foreignKeys) || [];
                   utils.noDupeAdd(ids, id, function (_key) {
                     return id === _key;
                   });
                   var children = utils.get(parent, inverseLocalField);
+
                   if (id === undefined) {
                     utils.noDupeAdd(children, _this2, function (child) {
                       return child === _this2;
@@ -13465,6 +14279,7 @@
               }
 
               this._set(path, toLink);
+
               return toLink;
             }
           };
@@ -13473,32 +14288,35 @@
           if (self._collections[relation] && foreignKey && !self.getCollection(relation).indexes[foreignKey]) {
             self.getCollection(relation).createIndex(foreignKey);
           }
+
           descriptor = {
             get: getter,
             // e.g. user.profile = someProfile
             set: function set(record) {
               var current = this._get(path);
+
               if (record === current) {
                 return current;
               }
-              var inverseLocalField = def.getInverse(mapper).localField;
-              // Update (unset) inverse relation
+
+              var inverseLocalField = def.getInverse(mapper).localField; // Update (unset) inverse relation
+
               if (current) {
                 safeSetProp(current, foreignKey, undefined);
                 self.getCollection(relation).updateIndex(current, updateOpts);
                 safeSetLink(current, inverseLocalField, undefined);
               }
+
               if (record) {
-                var relatedId = utils.get(record, def.getRelation().idAttribute);
-                // Prefer store record
+                var relatedId = utils.get(record, def.getRelation().idAttribute); // Prefer store record
+
                 if (relatedId !== undefined) {
                   record = self.get(relation, relatedId) || record;
-                }
+                } // Set locals
 
-                // Set locals
-                safeSetLink(this, localField, record);
 
-                // Update (set) inverse relation
+                safeSetLink(this, localField, record); // Update (set) inverse relation
+
                 safeSetProp(record, foreignKey, utils.get(this, idAttribute));
                 self.getCollection(relation).updateIndex(record, updateOpts);
                 safeSetLink(record, inverseLocalField, this);
@@ -13506,6 +14324,7 @@
                 // Unset locals
                 safeSetLink(this, localField, undefined);
               }
+
               return record;
             }
           };
@@ -13513,13 +14332,15 @@
 
         if (descriptor) {
           descriptor.enumerable = def.enumerable === undefined ? false : def.enumerable;
+
           if (def.get) {
             var origGet = descriptor.get;
+
             descriptor.get = function () {
               var _this3 = this;
 
               return def.get(def, this, function () {
-                for (var _len = arguments.length, args = Array(_len), _key2 = 0; _key2 < _len; _key2++) {
+                for (var _len = arguments.length, args = new Array(_len), _key2 = 0; _key2 < _len; _key2++) {
                   args[_key2] = arguments[_key2];
                 }
 
@@ -13527,8 +14348,10 @@
               });
             };
           }
+
           if (def.set) {
             var origSet = descriptor.set;
+
             descriptor.set = function (related) {
               var _this4 = this;
 
@@ -13537,10 +14360,10 @@
               });
             };
           }
+
           Object.defineProperty(mapper.recordClass.prototype, localField, descriptor);
         }
       });
-
       return mapper;
     },
     destroy: function destroy(name, id, opts) {
@@ -13548,7 +14371,8 @@
 
       opts || (opts = {});
       return SimpleStore$1.prototype.destroy.call(this, name, id, opts).then(function (result) {
-        var record = void 0;
+        var record;
+
         if (opts.raw) {
           record = result.data;
         } else {
@@ -13557,11 +14381,13 @@
 
         if (record && _this5.unlinkOnDestroy) {
           var _opts = utils.plainCopy(opts);
+
           _opts.withAll = true;
           utils.forEachRelation(_this5.getMapper(name), _opts, function (def) {
             utils.set(record, def.localField, undefined);
           });
         }
+
         return result;
       });
     },
@@ -13570,7 +14396,8 @@
 
       opts || (opts = {});
       return SimpleStore$1.prototype.destroyAll.call(this, name, query, opts).then(function (result) {
-        var records = void 0;
+        var records;
+
         if (opts.raw) {
           records = result.data;
         } else {
@@ -13579,6 +14406,7 @@
 
         if (records && records.length && _this6.unlinkOnDestroy) {
           var _opts = utils.plainCopy(opts);
+
           _opts.withAll = true;
           utils.forEachRelation(_this6.getMapper(name), _opts, function (def) {
             records.forEach(function (record) {
@@ -13586,13 +14414,12 @@
             });
           });
         }
+
         return result;
       });
     }
   };
-
   var DataStore$1 = SimpleStore$1.extend(props$2);
-
   /**
    * Create a subclass of this DataStore:
    * @example <caption>DataStore.extend</caption>
@@ -13672,7 +14499,6 @@
    * @example <caption>Load into your app via AMD</caption>
    * define('myApp', ['js-data'], function (JSData) { ... });
    */
-
   /**
    * Describes the version of this `JSData` object.
    *
@@ -13692,14 +14518,14 @@
    * @since 2.0.0
    * @type {Object}
    */
+
   var version = {
-  full: '3.0.5',
+  full: '3.0.6',
   major: 3,
   minor: 0,
-  patch: 5
+  patch: 6
 };
 
-  exports.version = version;
   exports.Collection = Collection$1;
   exports.Component = Component$1;
   exports.Container = Container;
@@ -13712,13 +14538,14 @@
   exports.Schema = Schema$1;
   exports.Settable = Settable;
   exports.SimpleStore = SimpleStore$1;
-  exports.utils = utils;
   exports.belongsTo = belongsTo;
-  exports.hasMany = hasMany;
-  exports.hasOne = hasOne;
   exports.belongsToType = belongsToType;
+  exports.hasMany = hasMany;
   exports.hasManyType = hasManyType;
+  exports.hasOne = hasOne;
   exports.hasOneType = hasOneType;
+  exports.utils = utils;
+  exports.version = version;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
