@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#toJSON', function () {
-  it('should be an instance method', function () {
+describe('Mapper#toJSON', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'user' })
     assert.equal(typeof mapper.toJSON, 'function')
@@ -45,7 +45,7 @@ describe('Mapper#toJSON', function () {
       }
     )
   })
-  it('should strictly keep schema props', function () {
+  it('should strictly keep schema props', () => {
     const UserMapper = new JSData.Mapper({
       name: 'user',
       schema: {
@@ -65,7 +65,7 @@ describe('Mapper#toJSON', function () {
       age: 30
     })
   })
-  it('should allow custom getters/setters', function () {
+  it('should allow custom getters/setters', () => {
     const UserMapper = new JSData.Mapper({
       name: 'user',
       schema: {
@@ -93,7 +93,7 @@ describe('Mapper#toJSON', function () {
     })
     assert.equal(user.name, 'John Anderson')
   })
-  it('should make json when the record class does not have a mapper', function () {
+  it('should make json when the record class does not have a mapper', () => {
     const props = { name: 'John' }
     const record = new JSData.Record(props)
     assert.notStrictEqual(record.toJSON(), props, 'should not return passed in data')

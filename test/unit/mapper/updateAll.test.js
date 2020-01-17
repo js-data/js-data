@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#updateAll', function () {
-  it('should be an instance method', function () {
+describe('Mapper#updateAll', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.updateAll, 'function')
     assert.strictEqual(mapper.updateAll, Mapper.prototype.updateAll)
   })
-  it('should update', async function () {
+  it('should update', async () => {
     const id = 1
     const query = { a: 'b' }
     const props = { name: 'John' }
@@ -19,7 +19,7 @@ describe('Mapper#updateAll', function () {
     User.registerAdapter('mock', {
       updateAll (mapper, _props, _query, Opts) {
         updateAllCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Mapper')
           assert.deepEqual(_props, props, 'should pass in the props')
           assert.deepEqual(_query, query, 'should pass in the query')
@@ -35,7 +35,7 @@ describe('Mapper#updateAll', function () {
     assert.equal(users[0].foo, 'bar', 'user has a new field')
     assert(users[0] instanceof User.recordClass, 'user is a record')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const id = 1
     const query = { a: 'b' }
     const props = { name: 'John' }
@@ -48,7 +48,7 @@ describe('Mapper#updateAll', function () {
     User.registerAdapter('mock', {
       updateAll (mapper, _props, _query, Opts) {
         updateAllCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Mapper')
           assert.deepEqual(_props, props, 'should pass in the props')
           assert.deepEqual(_query, query, 'should pass in the query')
@@ -69,7 +69,7 @@ describe('Mapper#updateAll', function () {
     assert.equal(data.adapter, 'mock', 'should have adapter name in response')
     assert.equal(data.updated, 1, 'should have other metadata in response')
   })
-  it('should validate', async function () {
+  it('should validate', async () => {
     const props = { name: 1234 }
     let updateCalled = false
     let users

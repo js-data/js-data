@@ -1,27 +1,27 @@
 import { assert, JSData, sinon } from '../../_setup'
 
-describe('Collection', function () {
-  it('should be a constructor function', function () {
+describe('Collection', () => {
+  it('should be a constructor function', () => {
     assert.equal(typeof JSData.Collection, 'function', 'should be a function')
     const collection = new JSData.Collection()
     assert(collection instanceof JSData.Collection, 'collection should be an instance')
     assert.equal(collection.recordId(), 'id', 'collection should get initialization properties')
   })
 
-  it('should accept just opts', function () {
+  it('should accept just opts', () => {
     assert.doesNotThrow(() => {
       new JSData.Collection({ idAttribute: 'id' }) // eslint-disable-line
     })
   })
 
-  it('should accept opts as string', function () {
+  it('should accept opts as string', () => {
     assert.doesNotThrow(() => {
       const collection = new JSData.Collection('_id')
       assert.equal(collection.idAttribute, '_id')
     })
   })
 
-  it('should accept initialization data', function () {
+  it('should accept initialization data', () => {
     const data = [
       { id: 2 },
       { id: 3 },
@@ -31,7 +31,7 @@ describe('Collection', function () {
     assert.deepEqual(collection.getAll(), [data[2], data[0], data[1]], 'data should be in order')
   })
 
-  it('should bubble up record events', function () {
+  it('should bubble up record events', () => {
     const data = [
       { id: 2 },
       { id: 3 },
@@ -53,13 +53,15 @@ describe('Collection', function () {
     assert.deepEqual(stub2.secondCall.args, ['foo', 2, 3])
   })
 
-  it('can make a subclass', function () {
-    const FooCollection = JSData.Collection.extend({
+  it('can make a subclass', () => {
+    class FooCollection extends JSData.Collection {
       foo () { return 'foo' }
-    })
+    }
+
     class BarCollection extends JSData.Collection {
       bar () { return 'bar' }
     }
+
     const fooC = new FooCollection(null, { test: 'test' })
     const barC = new BarCollection(null, { test: 'test' })
     assert.equal(fooC.foo(), 'foo')

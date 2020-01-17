@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('DataStore#defineMapper', function () {
-  it('should be an instance method', function () {
+describe('DataStore#defineMapper', () => {
+  it('should be an instance method', () => {
     const DataStore = JSData.DataStore
     const store = new DataStore()
     assert.equal(typeof store.defineMapper, 'function')
     assert.strictEqual(store.defineMapper, DataStore.prototype.defineMapper)
   })
-  it('should create indexes for indexed properties', function () {
+  it('should create indexes for indexed properties', () => {
     const store = new JSData.DataStore()
     store.defineMapper('user', {
       schema: {
@@ -28,7 +28,7 @@ describe('DataStore#defineMapper', function () {
     ])
 
     assert.objectsEqual(
-      store.getAll('user', 19, { index: 'age' }).map(function (user) {
+      store.getAll('user', 19, { index: 'age' }).map((user) => {
         return user.toJSON()
       }),
       [
@@ -39,7 +39,7 @@ describe('DataStore#defineMapper', function () {
       'should have found all of age:19 using 1 keyList'
     )
   })
-  it('can get a scoped reference', function () {
+  it('can get a scoped reference', () => {
     const DataStore = JSData.DataStore
     const store = new DataStore()
     const fooMapper = store.defineMapper('foo')

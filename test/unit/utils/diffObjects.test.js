@@ -1,12 +1,12 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.diffObjects', function () {
-  it('should be a static method', function () {
+describe('utils.diffObjects', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.diffObjects, 'function', 'has the diffObjects method')
   })
 
-  it('returns diff betwen two different objects', function () {
+  it('returns diff betwen two different objects', () => {
     const newObject = { name: 'John', age: 30, friends: 7 }
     const oldObject = { name: 'John', age: 90, id: 20 }
     const expected = {
@@ -18,7 +18,7 @@ describe('utils.diffObjects', function () {
     assert.deepEqual(result, expected)
   })
 
-  it('returns diff betwen two equal objects', function () {
+  it('returns diff betwen two equal objects', () => {
     const oldObject = { name: 'John', age: 90, friends: 7 }
     const newObject = { name: 'John', age: 90, friends: 7 }
     const expected = {

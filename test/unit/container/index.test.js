@@ -1,7 +1,8 @@
 import { assert, JSData, sinon } from '../../_setup'
+import { proxiedMapperMethods } from '../../../src/Container'
 
-describe('Container', function () {
-  it('should be a constructor function', function () {
+describe('Container', () => {
+  it('should be a constructor function', () => {
     const Container = JSData.Container
     assert.equal(typeof Container, 'function')
     const container = new Container()
@@ -11,7 +12,7 @@ describe('Container', function () {
     assert.deepEqual(container.mapperDefaults, {})
     assert.strictEqual(container.mapperClass, JSData.Mapper)
   })
-  it('should accept overrides', function () {
+  it('should accept overrides', () => {
     const Container = JSData.Container
     class Foo {}
     const container = new Container({
@@ -29,14 +30,14 @@ describe('Container', function () {
     })
     assert.strictEqual(container.mapperClass, Foo)
   })
-  it('should have events', function () {
+  it('should have events', () => {
     const store = new JSData.Container()
     const listener = sinon.stub()
     store.on('bar', listener)
     store.emit('bar')
     assert(listener.calledOnce)
   })
-  it('should proxy Mapper events', function () {
+  it('should proxy Mapper events', () => {
     const store = new JSData.Container()
     store.defineMapper('user')
     const listener = sinon.stub()
@@ -45,7 +46,7 @@ describe('Container', function () {
     assert(listener.calledOnce)
     assert.deepEqual(listener.firstCall.args, ['user', 'foo'])
   })
-  it('should proxy all Mapper events', function () {
+  it('should proxy all Mapper events', () => {
     const store = new JSData.Container()
     store.defineMapper('user')
     const listener = sinon.stub()
@@ -54,11 +55,19 @@ describe('Container', function () {
     assert(listener.calledOnce)
     assert.deepEqual(listener.firstCall.args, ['bar', 'user', 'foo'])
   })
-  it('should proxy Mapper methods', function () {
-    const store = new JSData.Container()
-    store.defineMapper('user')
-    assert.doesNotThrow(() => {
-      assert.deepEqual(store.toJSON('user', { id: 1 }), { id: 1 })
+  it('should proxy Mapper methods', () => {
+    const container = new JSData.Container()
+    const mapper = container.defineMapper('user')
+    proxiedMapperMethods.forEach(method => {
+      const errorMsg = `${method} called with wrong arguments`
+      sinon.replace(mapper, method, sinon.fake())
+      if (method === 'getSchema') {
+        container[method]('user')
+        assert(mapper[method].calledWithMatch(), errorMsg)
+      } else {
+        container[method]('user', { id: 1 })
+        assert(mapper[method].calledWithMatch({ id: 1 }), errorMsg)
+      }
     })
   })
 })

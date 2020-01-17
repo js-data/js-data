@@ -1,7 +1,7 @@
 import { assert, JSData, TYPES_EXCEPT_OBJECT_OR_ARRAY } from '../../_setup'
 
-describe('Collection#add', function () {
-  it('should inject new items into the collection', function () {
+describe('Collection#add', () => {
+  it('should inject new items into the collection', () => {
     const collection = new JSData.Collection()
     const user = collection.add({ id: 1 })
     const users = collection.add([{ id: 2 }, { id: 3 }])
@@ -69,7 +69,7 @@ describe('Collection#add', function () {
     }).length, 3)
     assert.objectsEqual(this.PostCollection.filter().length, 8)
   })
-  it('should inject existing items into the collection and call Record#commit', function () {
+  it('should inject existing items into the collection and call Record#commit', () => {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
 
     const user = collection.add({ id: 1 })
@@ -91,7 +91,7 @@ describe('Collection#add', function () {
     }), usersAgain, 're-inject of array should work')
     assert.deepEqual(users, usersAgain, 'inject arrays should be equal')
   })
-  it('should insert a record into all indexes', function () {
+  it('should insert a record into all indexes', () => {
     const data = [
       { id: 2, age: 19 },
       { id: 1, age: 27 }
@@ -102,20 +102,20 @@ describe('Collection#add', function () {
     assert(collection.get(1) === data[1])
     assert.equal(collection.getAll(20, { index: 'age' }).length, 1)
   })
-  it('should not require an id', function () {
+  it('should not require an id', () => {
     const collection = new JSData.Collection()
     assert.doesNotThrow(() => {
       collection.add({})
     })
   })
-  it('should test opts.onConflict', function () {
+  it('should test opts.onConflict', () => {
     const collection = new JSData.Collection()
     collection.add({ id: 1 })
     assert.throws(() => {
       collection.add({ id: 1 }, { onConflict: 'invalid_choice' })
     }, Error, '[Collection#add:opts.onConflict] expected: one of (merge, replace, skip), found: invalid_choice\nhttp://www.js-data.io/v3.0/docs/errors#400')
   })
-  it('should respect opts.noValidate', function () {
+  it('should respect opts.noValidate', () => {
     const mapper = new JSData.Mapper({
       name: 'user',
       noValidate: false,
@@ -136,7 +136,7 @@ describe('Collection#add', function () {
     // original noValidate prop value should be restored
     assert.equal(user._get('noValidate'), false)
   })
-  it('should required an argument', function () {
+  it('should required an argument', () => {
     const collection = new JSData.Collection()
     TYPES_EXCEPT_OBJECT_OR_ARRAY.forEach((value) => {
       assert.throws(() => {
@@ -144,7 +144,7 @@ describe('Collection#add', function () {
       }, Error, `[Collection#add:records] expected: object or array, found: ${typeof value}\nhttp://www.js-data.io/v3.0/docs/errors#400`)
     })
   })
-  it('should replace existing items', function () {
+  it('should replace existing items', () => {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
     const user = collection.add({ id: 1, foo: 'bar', beep: 'boop' })
     assert.equal(user.id, 1)
@@ -198,7 +198,7 @@ describe('Collection#add', function () {
       id: 5
     })
   })
-  it('should keep existing items', function () {
+  it('should keep existing items', () => {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
     const user = collection.add({ id: 1, foo: 'bar', beep: 'boop' })
     assert.equal(user.id, 1)
@@ -258,7 +258,7 @@ describe('Collection#add', function () {
     this.UserCollection.add(users)
     console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
   })
-  it('should inject 1,000 items where there is an index on "age"', function () {
+  it('should inject 1,000 items where there is an index on "age"', () => {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
     collection.createIndex('age')
     collection.createIndex('created')
@@ -277,7 +277,7 @@ describe('Collection#add', function () {
     collection.add(users)
     // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
   })
-  it.skip('should inject 10,000 items where there is an index on "age"', function () {
+  it.skip('should inject 10,000 items where there is an index on "age"', () => {
     const store = new JSData.DataStore()
     store.defineMapper('user')
     store.createIndex('user', 'age')
@@ -298,7 +298,7 @@ describe('Collection#add', function () {
     // console.log('\tinject 10,000 users time taken: ', new Date().getTime() - start, 'ms')
     // console.log('\tusers age 40-44', User.between(40, 45, { index: 'age' }).length)
   })
-  it('should update a records relation when the inverse relation does not exist', function () {
+  it('should update a records relation when the inverse relation does not exist', () => {
     const store = new JSData.DataStore()
     store.defineMapper('user')
     store.defineMapper('post', {

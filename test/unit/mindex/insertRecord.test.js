@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Index#insertRecord', function () {
-  it('should insert records', function () {
+describe('Index#insertRecord', () => {
+  it('should insert records', () => {
     const index = new JSData.Index(['id'], {
       hashCode (obj) {
         return JSData.utils.get(obj, 'id')

@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../../_setup'
 
-describe('Schema.typeGroupValidators', function () {
-  it('has the right default validators', function () {
+describe('Schema.typeGroupValidators', () => {
+  it('has the right default validators', () => {
     const typeGroupValidators = JSData.Schema.typeGroupValidators
     const EXPECTED_KEYS = [
       'array',
@@ -18,7 +18,7 @@ describe('Schema.typeGroupValidators', function () {
     )
   })
 
-  it('allows custom validation keywords', function () {
+  it('allows custom validation keywords', () => {
     const STRING_OPS = JSData.Schema.STRING_OPS
     const validationKeywords = JSData.Schema.validationKeywords
     STRING_OPS.push('foo')

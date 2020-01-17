@@ -1,6 +1,6 @@
 import { assert } from '../../_setup'
 
-describe('LinkedCollection#remove', function () {
+describe('LinkedCollection#remove', () => {
   it('should remove an item from the collection', function () {
     this.UserCollection.createIndex('age')
     const user = this.UserCollection.add({ id: 1, age: 30 })

@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#map', function () {
-  it('should map', function () {
+describe('Collection#map', () => {
+  it('should map', () => {
     const data = [
       { id: 2 },
       { id: 3 },

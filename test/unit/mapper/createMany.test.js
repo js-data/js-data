@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#createMany', function () {
-  it('should be an instance method', function () {
+describe('Mapper#createMany', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.createMany, 'function')
     assert.strictEqual(mapper.createMany, Mapper.prototype.createMany)
   })
-  it('should createMany', async function () {
+  it('should createMany', async () => {
     const props = [{ name: 'John' }]
     let createCalled = false
     const UserMapper = new JSData.Mapper({
@@ -17,7 +17,7 @@ describe('Mapper#createMany', function () {
     UserMapper.registerAdapter('mock', {
       createMany (mapper, _props, Opts) {
         createCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, UserMapper, 'should pass in the Model')
           assert.objectsEqual(_props, props, 'should pass in the props')
           _props[0][mapper.idAttribute] = new Date().getTime()
@@ -30,7 +30,7 @@ describe('Mapper#createMany', function () {
     assert(users[0][UserMapper.idAttribute], 'new user has an id')
     assert(users[0] instanceof UserMapper.recordClass, 'user is a record')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const props = [{ name: 'John' }]
     let createCalled = false
     const User = new JSData.Mapper({
@@ -41,7 +41,7 @@ describe('Mapper#createMany', function () {
     User.registerAdapter('mock', {
       createMany (mapper, _props, Opts) {
         createCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.objectsEqual(_props, props, 'should pass in the props')
           assert.equal(Opts.raw, true, 'Opts are provided')
@@ -79,7 +79,7 @@ describe('Mapper#createMany', function () {
     store.registerAdapter('mock', {
       createMany (mapper, _props, Opts) {
         incCreate(mapper.name)
-        _props.forEach(function (__props) {
+        _props.forEach((__props) => {
           __props[mapper.idAttribute] = id
           id++
         })
@@ -109,7 +109,7 @@ describe('Mapper#createMany', function () {
     ]
 
     const getProps = function () {
-      return JSData.utils.plainCopy(userProps).map(function (props) {
+      return JSData.utils.plainCopy(userProps).map((props) => {
         return store.createRecord('user', props)
       })
     }
@@ -251,15 +251,15 @@ describe('Mapper#createMany', function () {
     store.registerAdapter('mock', {
       createMany (mapper, _props, Opts) {
         incCreate(mapper.name)
-        _props.forEach(function (__props) {
+        _props.forEach((__props) => {
           __props[mapper.idAttribute] = id
           id++
         })
-        mapper.relationFields.forEach(function (field) {
-          _props.forEach(function (__props) {
+        mapper.relationFields.forEach((field) => {
+          _props.forEach((__props) => {
             if (__props[field]) {
               if (utils.isArray(__props[field])) {
-                __props[field].forEach(function (item) {
+                __props[field].forEach((item) => {
                   item.id = id
                   id++
                 })
@@ -296,7 +296,7 @@ describe('Mapper#createMany', function () {
     ]
 
     const getProps = function () {
-      return JSData.utils.copy(userProps).map(function (props) {
+      return JSData.utils.copy(userProps).map((props) => {
         return store.createRecord('user', props)
       })
     }
@@ -438,15 +438,15 @@ describe('Mapper#createMany', function () {
     store.registerAdapter('mock', {
       createMany (mapper, _props, Opts) {
         incCreate(mapper.name)
-        _props.forEach(function (__props) {
+        _props.forEach((__props) => {
           __props[mapper.idAttribute] = id
           id++
         })
-        mapper.relationFields.forEach(function (field) {
-          _props.forEach(function (__props) {
+        mapper.relationFields.forEach((field) => {
+          _props.forEach((__props) => {
             if (__props[field]) {
               if (utils.isArray(__props[field])) {
-                __props[field].forEach(function (item) {
+                __props[field].forEach((item) => {
                   item.id = id
                   id++
                 })
@@ -483,7 +483,7 @@ describe('Mapper#createMany', function () {
     ]
 
     const getProps = function () {
-      return JSData.utils.copy(userProps).map(function (props) {
+      return JSData.utils.copy(userProps).map((props) => {
         return store.createRecord('user', props)
       })
     }
@@ -571,7 +571,7 @@ describe('Mapper#createMany', function () {
     assert.equal(createCalledCount.profile, 2)
     assert(!createCalledCount.organization)
   })
-  it('should validate', async function () {
+  it('should validate', async () => {
     const props = [{ name: true }, {}, { name: 1234, age: 25 }]
     let createCalled = false
     let users
@@ -617,7 +617,7 @@ describe('Mapper#createMany', function () {
     assert.equal(users, undefined, 'users were not created')
     assert.equal(props[0][User.idAttribute], undefined, 'props[0] does NOT have an id')
   })
-  it('should validate required', async function () {
+  it('should validate required', async () => {
     const props = [{ name: 'John' }, {}, { name: 'Sally', age: 25 }]
     let createCalled = false
     let users

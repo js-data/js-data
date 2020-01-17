@@ -8,11 +8,16 @@ import Settable from './Settable'
  * Typically you won't instantiate this class directly, but you may find it
  * useful as an abstract class for your own components.
  *
- * See {@link Component.extend} for an example of using {@link Component} as a
- * base class.
- *
  *```javascript
  * import {Component} from 'js-data'
+ *
+ * class CustomComponentClass extends Component {
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
+ * }
+ * const customComponent = new CustomComponentClass();
+ * console.log(customComponent.foo());
+ * console.log(CustomComponentClass.beep());
  * ```
  *
  * @class Component
@@ -21,11 +26,11 @@ import Settable from './Settable'
  * @returns {Component} A new {@link Component} instance.
  * @since 3.0.0
  */
-function Component (opts) {
-  Settable.call(this)
-  opts || (opts = {})
+export default class Component extends Settable {
+  constructor (opts = {}) {
+    super()
 
-  /**
+    /**
    * Whether to enable debug-level logs for this component. Anything that
    * extends `Component` inherits this option and the corresponding logging
    * functionality.
@@ -46,78 +51,21 @@ function Component (opts) {
    * @since 3.0.0
    * @type {boolean}
    */
-  this.debug = Object.hasOwnProperty.call(opts, 'debug') ? !!opts.debug : false
+    this.debug = Object.hasOwnProperty.call(opts, 'debug') ? !!opts.debug : false
 
-  /**
-   * Event listeners attached to this Component. __Do not modify.__ Use
-   * {@link Component#on} and {@link Component#off} instead.
-   *
-   * @name Component#_listeners
-   * @private
-   * @instance
-   * @since 3.0.0
-   * @type {Object}
-   */
-  Object.defineProperty(this, '_listeners', { value: {}, writable: true })
+    /**
+     * Event listeners attached to this Component. __Do not modify.__ Use
+     * {@link Component#on} and {@link Component#off} instead.
+     *
+     * @name Component#_listeners
+     * @private
+     * @instance
+     * @since 3.0.0
+     * @type {Object}
+     */
+    Object.defineProperty(this, '_listeners', { value: {}, writable: true })
+  }
 }
-
-export default Settable.extend({
-  constructor: Component
-})
-
-/**
- * Create a subclass of this Component:
- *
- * @example <caption>Component.extend</caption>
- * const JSData = require('js-data');
- * const { Component } = JSData;
- * console.log('Using JSData v' + JSData.version.full);
- *
- * // Extend the class using ES2015 class syntax.
- * class CustomComponentClass extends Component {
- *   foo () { return 'bar'; }
- *   static beep () { return 'boop'; }
- * }
- * const customComponent = new CustomComponentClass();
- * console.log(customComponent.foo());
- * console.log(CustomComponentClass.beep());
- *
- * // Extend the class using alternate method.
- * const OtherComponentClass = Component.extend({
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * });
- * const otherComponent = new OtherComponentClass();
- * console.log(otherComponent.foo());
- * console.log(OtherComponentClass.beep());
- *
- * // Extend the class, providing a custom constructor.
- * function AnotherComponentClass () {
- *   Component.call(this);
- *   this.created_at = new Date().getTime();
- * }
- * Component.extend({
- *   constructor: AnotherComponentClass,
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * })
- * const anotherComponent = new AnotherComponentClass();
- * console.log(anotherComponent.created_at);
- * console.log(anotherComponent.foo());
- * console.log(AnotherComponentClass.beep());
- *
- * @method Component.extend
- * @param {object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {object} [props.constructor] Provide a custom constructor function
- * to be used as the subclass itself.
- * @param {object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Component class.
- * @since 3.0.0
- */
-Component.extend = utils.extend
 
 /**
  * Log the provided values at the "debug" level. Debug-level logs are only

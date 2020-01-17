@@ -1,18 +1,18 @@
 import { assert, JSData, sinon } from '../../../_setup'
 
-describe('Schema.typeGroupValidators.string', function () {
-  it('executes correct validation keywords', function () {
+describe('Schema.typeGroupValidators.string', () => {
+  it('executes correct validation keywords', () => {
     const forOwn = JSData.utils.forOwn
     const validationKeywords = JSData.Schema.validationKeywords
     const TARGET_KEYWORDS = ['maxLength', 'minLength', 'pattern']
 
-    forOwn(validationKeywords, function (func, key) {
+    forOwn(validationKeywords, (func, key) => {
       sinon.spy(validationKeywords, key)
     })
 
     const string = JSData.Schema.typeGroupValidators.string
 
-    forOwn(validationKeywords, function (func, key) {
+    forOwn(validationKeywords, (func, key) => {
       assert.equal(func.callCount, 0, `${key} should not have been called yet`)
     })
 
@@ -64,7 +64,7 @@ describe('Schema.typeGroupValidators.string', function () {
     assert.equal(validationKeywords.maxLength.callCount, 3)
     assert.equal(validationKeywords.minLength.callCount, 3)
 
-    forOwn(validationKeywords, function (func, key) {
+    forOwn(validationKeywords, (func, key) => {
       if (TARGET_KEYWORDS.indexOf(key) === -1) {
         assert.equal(func.callCount, 0, `${key} should not have been called`)
       }

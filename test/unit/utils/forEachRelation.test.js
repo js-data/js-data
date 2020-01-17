@@ -1,8 +1,8 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.forEachRelation', function () {
-  it('should be a static method', function () {
+describe('utils.forEachRelation', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.forEachRelation, 'function', 'has the forEachRelation method')
   })
 

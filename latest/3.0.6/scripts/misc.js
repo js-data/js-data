@@ -34,8 +34,8 @@ function copyFunction(id){
     // capturing all pre element on the page
     var all_pre = document.getElementsByTagName("pre");
 
-    
-    
+
+
     var i, lang_name, classList, lang_name_div;
     for( i = 0; i < all_pre.length; i++){
         // get the list of class in current pre element
@@ -44,7 +44,7 @@ function copyFunction(id){
 
         // tooltip
         var tooltip = '<div class="tooltip" id="tooltip-'+ id +'">Copied!</div>';
-        
+
         // template of copy to clipboard icon container
         var copy_to_clipboard = '<div class="code-copy-icon-container" onclick="copyFunction(\''+ id +'\')"><div><svg class="sm-icon" alt="click to copy"><use xlink:href="#copy-icon"></use></svg>'+ tooltip +'<div></div>';
 
@@ -52,11 +52,11 @@ function copyFunction(id){
         lang_name = classList[classList.length - 1].split('-')[1];
 
         if( lang_name == undefined ) lang_name = 'JavaScript'
-        
+
         // if(lang_name != undefined)
             lang_name_div = '<div class="code-lang-name-container"><div class="code-lang-name">'+ lang_name.toLocaleUpperCase() +'</div></div>';
         // else lang_name_div = '';
-        
+
         // appending everythin to the current pre element
         all_pre[i].innerHTML += lang_name_div + copy_to_clipboard;
         all_pre[i].setAttribute('id', id);

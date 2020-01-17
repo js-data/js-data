@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('DataStore#find', function () {
-  it('should be an instance method', function () {
+describe('DataStore#find', () => {
+  it('should be an instance method', () => {
     const DataStore = JSData.DataStore
     const store = new DataStore()
     assert.equal(typeof store.find, 'function')
@@ -36,8 +36,8 @@ describe('DataStore#find', function () {
     this.store.registerAdapter('mock', {
       find () {
         callCount++
-        return new Promise(function (resolve) {
-          setTimeout(function () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
             resolve(props)
           }, 300)
         })
@@ -58,8 +58,8 @@ describe('DataStore#find', function () {
     this.store.registerAdapter('mock', {
       find () {
         callCount++
-        return new Promise(function (resolve, reject) {
-          setTimeout(function () {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
             reject(new Error('foo'))
           }, 300)
         })

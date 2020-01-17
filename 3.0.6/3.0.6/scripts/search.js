@@ -11,7 +11,7 @@ document.getElementById("nav-search").addEventListener("keyup", function(event) 
     if (!search) {
         //no search, show all results
         document.documentElement.removeAttribute(searchAttr);
-        
+
         document.querySelectorAll("nav > ul > li:not(.level-hide)").forEach(function(elem) {
             elem.style.display = "block";
         });
@@ -52,7 +52,7 @@ document.getElementById("nav-search").addEventListener("keyup", function(event) 
                     countSearchA++;
                 }
             });
-            
+
             var countUl = 0;
             var countUlVisible = 0;
             parent.querySelectorAll("ul").forEach(function(ulP) {
@@ -60,7 +60,7 @@ document.getElementById("nav-search").addEventListener("keyup", function(event) 
                 if (contains(ulP, search)) {
                     countUl++;
                 }
-                
+
                 // count all visible elements
                 var children = ulP.children
                 for (i=0; i<children.length; i++) {
@@ -70,7 +70,7 @@ document.getElementById("nav-search").addEventListener("keyup", function(event) 
                     }
                 }
             });
-          
+
             if (countSearchA == 0 && countUl === 0){
                 //has no child at all and does not contain text
                 parent.style.display = "none";

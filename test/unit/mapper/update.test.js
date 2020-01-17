@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#update', function () {
-  it('should be an instance method', function () {
+describe('Mapper#update', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.update, 'function')
     assert.strictEqual(mapper.update, Mapper.prototype.update)
   })
-  it('should update', async function () {
+  it('should update', async () => {
     const id = 1
     const props = { name: 'John' }
     let updateCalled = false
@@ -18,7 +18,7 @@ describe('Mapper#update', function () {
     User.registerAdapter('mock', {
       update (mapper, _id, _props, Opts) {
         updateCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Mapper')
           assert.deepEqual(_id, id, 'should pass in the id')
           assert.deepEqual(_props, props, 'should pass in the props')
@@ -34,7 +34,7 @@ describe('Mapper#update', function () {
     assert.equal(user.foo, 'bar', 'user has a new field')
     assert(user instanceof User.recordClass, 'user is a record')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const id = 1
     const props = { name: 'John' }
     let updateCalled = false
@@ -46,7 +46,7 @@ describe('Mapper#update', function () {
     User.registerAdapter('mock', {
       update (mapper, _id, _props, Opts) {
         updateCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Mapper')
           assert.deepEqual(_id, id, 'should pass in the id')
           assert.deepEqual(_props, props, 'should pass in the props')
@@ -67,7 +67,7 @@ describe('Mapper#update', function () {
     assert.equal(data.adapter, 'mock', 'should have adapter name in response')
     assert.equal(data.updated, 1, 'should have other metadata in response')
   })
-  it('should validate', async function () {
+  it('should validate', async () => {
     const props = { name: 1234 }
     let updateCalled = false
     let user
@@ -102,7 +102,7 @@ describe('Mapper#update', function () {
     assert.equal(updateCalled, false, 'Adapter#update should NOT have been called')
     assert.equal(user, undefined, 'user was not updated')
   })
-  it('should update nested', async function () {
+  it('should update nested', async () => {
     const props = {
       id: 1,
       addresses: [

@@ -281,7 +281,7 @@ nav .search-box input{
   width: 230px;
   top: 35px;
   background: #fff;
-  border-radius: 4px; 
+  border-radius: 4px;
 }
 
 .search-item-ul{
@@ -433,7 +433,7 @@ footer {
 h4.name::before{
   content: '# ';
   font-size: 28px;
-  
+
 }
 
 .details {

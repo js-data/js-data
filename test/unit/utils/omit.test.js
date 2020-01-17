@@ -1,12 +1,12 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.omit', function () {
-  it('should be a static method', function () {
+describe('utils.omit', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.omit, 'function', 'has the omit method')
   })
 
-  it('Clones an object and omits specific properties', function () {
+  it('Clones an object and omits specific properties', () => {
     const src = { name: 'John', $hashKey: 1214910 }
     const actual = utils.omit(src, ['$hashKey'])
     const expected = { name: 'John' }
@@ -14,12 +14,12 @@ describe('utils.omit', function () {
   })
 })
 
-describe('utils.isBlacklisted', function () {
-  it('should be a static method', function () {
+describe('utils.isBlacklisted', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.isBlacklisted, 'function', 'has the isBlacklisted method')
   })
 
-  it('matches a value against an array of strings or regular expressions', function () {
+  it('matches a value against an array of strings or regular expressions', () => {
     const valuesTocheck = ['$hashKey', 'id', '_hidden']
     const blackList = [/^\$hashKey/g, /^_/g, 'id']
     valuesTocheck.forEach((v) => {
@@ -32,12 +32,12 @@ describe('utils.isBlacklisted', function () {
   })
 })
 
-describe('utils.pick', function () {
-  it('should be a static method', function () {
+describe('utils.pick', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.pick, 'function', 'has the pick method')
   })
 
-  it('Shallow copies an object, but only include the properties specified', function () {
+  it('Shallow copies an object, but only include the properties specified', () => {
     const src = { name: 'John', $hashKey: 1214910 }
     const actual = utils.pick(src, ['$hashKey'])
     const expected = { $hashKey: 1214910 }

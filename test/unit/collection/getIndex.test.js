@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#getIndex', function () {
-  it('should get an index', function () {
+describe('Collection#getIndex', () => {
+  it('should get an index', () => {
     const collection = new JSData.Collection()
     collection.createIndex('age')
     assert.doesNotThrow(() => {
@@ -10,7 +10,7 @@ describe('Collection#getIndex', function () {
     })
   })
 
-  it('should error if index does not exist', function () {
+  it('should error if index does not exist', () => {
     const collection = new JSData.Collection()
     assert.throws(() => {
       collection.getIndex('age')

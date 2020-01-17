@@ -1,12 +1,12 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.set', function () {
-  it('should be a static method', function () {
+describe('utils.set', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.set, 'function', 'has the set method')
   })
 
-  it('can set a value of an object at the provided key or path', function () {
+  it('can set a value of an object at the provided key or path', () => {
     const john = { name: 'John', age: 25, parent: { name: 'Mom', age: 50 } }
     utils.set(john, 'spy', true)
     utils.set(john, 'parent.age', 55)
@@ -14,7 +14,7 @@ describe('utils.set', function () {
     assert.equal(55, john.parent.age)
   })
 
-  it('can set a values of an object with a path/value map', function () {
+  it('can set a values of an object with a path/value map', () => {
     const john = { name: 'John', age: 25, parent: { name: 'Mom', age: 50 } }
     utils.set(john, {
       spy: true,
@@ -27,12 +27,12 @@ describe('utils.set', function () {
   })
 })
 
-describe('utils.unset', function () {
-  it('should be a static method', function () {
+describe('utils.unset', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.unset, 'function', 'has the unset method')
   })
 
-  it('can unSet a value of an object at the provided key or path', function () {
+  it('can unSet a value of an object at the provided key or path', () => {
     const john = { name: 'John', age: 25, spy: true, parent: { name: 'Mom', age: 50 } }
     utils.unset(john, 'spy', true)
     utils.unset(john, 'parent.age')

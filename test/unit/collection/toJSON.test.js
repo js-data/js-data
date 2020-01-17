@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#toJSON', function () {
-  it('should call toJSON on records in the collection', function () {
+describe('Collection#toJSON', () => {
+  it('should call toJSON on records in the collection', () => {
     const data = [
       { id: 1 },
       { id: 2 }

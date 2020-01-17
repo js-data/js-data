@@ -1,10 +1,6 @@
 import utils, { safeSetLink } from './utils'
-import Component from './Component'
 import Settable from './Settable'
-import {
-  hasManyType,
-  hasOneType
-} from './decorators'
+import { hasManyType, hasOneType } from './decorators'
 
 const DOMAIN = 'Record'
 
@@ -110,7 +106,7 @@ const previousPath = 'previous'
  * console.log('user.isValid(): ' + user.isValid());
  *
  * @class Record
- * @extends Component
+ * @extends Settable
  * @param {object} [props] The initial properties of the new Record instance.
  * @param {object} [opts] Configuration options.
  * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
@@ -119,38 +115,33 @@ const previousPath = 'previous'
  * validation on properties after the Record has been initialized.
  * @since 3.0.0
  */
-function Record (props, opts) {
-  utils.classCallCheck(this, Record)
-  Settable.call(this)
-  props || (props = {})
-  opts || (opts = {})
-  const _set = this._set
-  const mapper = this.constructor.mapper
+export default class Record extends Settable {
+  constructor (props = {}, opts = {}) {
+    super()
+    const _set = this._set
+    const mapper = this.constructor.mapper
 
-  _set(creatingPath, true)
-  _set(noValidatePath, !!opts.noValidate)
-  _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? (mapper ? mapper.keepChangeHistory : true) : opts.keepChangeHistory)
+    _set(creatingPath, true)
+    _set(noValidatePath, !!opts.noValidate)
+    _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? (mapper ? mapper.keepChangeHistory : true) : opts.keepChangeHistory)
 
-  // Set the idAttribute value first, if it exists.
-  const id = mapper ? utils.get(props, mapper.idAttribute) : undefined
-  if (id !== undefined) {
-    utils.set(this, mapper.idAttribute, id)
+    // Set the idAttribute value first, if it exists.
+    const id = mapper ? utils.get(props, mapper.idAttribute) : undefined
+    if (id !== undefined) {
+      utils.set(this, mapper.idAttribute, id)
+    }
+
+    utils.fillIn(this, props)
+    _set(creatingPath, false)
+    if (opts.validateOnSet !== undefined) {
+      _set(noValidatePath, !opts.validateOnSet)
+    } else if (mapper && mapper.validateOnSet !== undefined) {
+      _set(noValidatePath, !mapper.validateOnSet)
+    } else {
+      _set(noValidatePath, false)
+    }
+    _set(previousPath, mapper ? mapper.toJSON(props) : utils.plainCopy(props))
   }
-
-  utils.fillIn(this, props)
-  _set(creatingPath, false)
-  if (opts.validateOnSet !== undefined) {
-    _set(noValidatePath, !opts.validateOnSet)
-  } else if (mapper && mapper.validateOnSet !== undefined) {
-    _set(noValidatePath, !mapper.validateOnSet)
-  } else {
-    _set(noValidatePath, false)
-  }
-  _set(previousPath, mapper ? mapper.toJSON(props) : utils.plainCopy(props))
-}
-
-export default Component.extend({
-  constructor: Record,
 
   /**
    * Returns the {@link Mapper} paired with this record's class, if any.
@@ -165,7 +156,7 @@ export default Component.extend({
       throw utils.err(`${DOMAIN}#_mapper`, '')(404, 'mapper')
     }
     return mapper
-  },
+  }
 
   /**
    * Lifecycle hook.
@@ -175,7 +166,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Record#loadRelations}.
    * @since 3.0.0
    */
-  afterLoadRelations () {},
+  afterLoadRelations () {}
 
   /**
    * Lifecycle hook.
@@ -185,7 +176,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Record#loadRelations}.
    * @since 3.0.0
    */
-  beforeLoadRelations () {},
+  beforeLoadRelations () {}
 
   /**
    * Return the change history of this record since it was instantiated or
@@ -196,7 +187,7 @@ export default Component.extend({
    */
   changeHistory () {
     return (this._get('history') || []).slice()
-  },
+  }
 
   /**
    * Return changes to this record since it was instantiated or
@@ -222,10 +213,9 @@ export default Component.extend({
    * instantiated or its {@link Record#commit} method was last called.
    * @since 3.0.0
    */
-  changes (opts) {
-    opts || (opts = {})
+  changes (opts = {}) {
     return utils.diffObjects(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts)
-  },
+  }
 
   /**
    * Make the record's current in-memory state it's only state, with any
@@ -254,7 +244,7 @@ export default Component.extend({
     this._set('changing', false)
     this._set('history', []) // clear history
     this._set('previous', this.toJSON(opts))
-  },
+  }
 
   /**
    * Call {@link Mapper#destroy} using this record's primary key.
@@ -279,11 +269,10 @@ export default Component.extend({
    * primary key of this record.
    * @since 3.0.0
    */
-  destroy (opts) {
-    opts || (opts = {})
+  destroy (opts = {}) {
     const mapper = this._mapper()
     return superMethod(mapper, 'destroy')(utils.get(this, mapper.idAttribute), opts)
-  },
+  }
 
   /**
    * Return the value at the given path for this instance.
@@ -305,7 +294,7 @@ export default Component.extend({
    */
   'get' (key) {
     return utils.get(this, key)
-  },
+  }
 
   /**
    * Return whether this record has changed since it was instantiated or
@@ -335,7 +324,7 @@ export default Component.extend({
   hasChanges (opts) {
     const quickHasChanges = !!(this._get('changed') || []).length
     return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts)
-  },
+  }
 
   /**
    * Return whether the record is unsaved. Records that have primary keys are
@@ -360,7 +349,7 @@ export default Component.extend({
    */
   isNew (opts) {
     return utils.get(this, this._mapper().idAttribute) === undefined
-  },
+  }
 
   /**
    * Return whether the record in its current state passes validation.
@@ -394,7 +383,7 @@ export default Component.extend({
    */
   isValid (opts) {
     return !this._mapper().validate(this, opts)
-  },
+  }
 
   removeInverseRelation (currentParent, id, inverseDef, idAttribute) {
     if (inverseDef.type === hasOneType) {
@@ -408,7 +397,7 @@ export default Component.extend({
         utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
       }
     }
-  },
+  }
 
   setupInverseRelation (record, id, inverseDef, idAttribute) {
     // Update (set) inverse relation
@@ -424,7 +413,7 @@ export default Component.extend({
         utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
       }
     }
-  },
+  }
 
   /**
    * Lazy load relations of this record, to be attached to the record once their
@@ -473,7 +462,7 @@ export default Component.extend({
    * attached.
    * @since 3.0.0
    */
-  loadRelations (relations, opts) {
+  loadRelations (relations, opts = {}) {
     let op
     const mapper = this._mapper()
 
@@ -482,7 +471,6 @@ export default Component.extend({
     if (utils.isString(relations)) {
       relations = [relations]
     }
-    opts || (opts = {})
     opts.with = relations
 
     // Fill in "opts" with the Model's configuration
@@ -548,7 +536,7 @@ export default Component.extend({
       op = opts.op = 'afterLoadRelations'
       return utils.resolve(this[op](relations, opts)).then(() => this)
     })
-  },
+  }
 
   /**
    * Return the properties with which this record was instantiated.
@@ -579,7 +567,7 @@ export default Component.extend({
       return this._get(`previous.${key}`)
     }
     return this._get('previous')
-  },
+  }
 
   /**
    * Revert changes to this record back to the properties it had when it was
@@ -606,9 +594,8 @@ export default Component.extend({
    * denoting properties that should not be reverted.
    * @since 3.0.0
    */
-  revert (opts) {
+  revert (opts = {}) {
     const previous = this._get('previous')
-    opts || (opts = {})
     opts.preserve || (opts.preserve = [])
     utils.forOwn(this, (value, key) => {
       if (key !== this._mapper().idAttribute && !Object.hasOwnProperty.call(previous, key) && Object.hasOwnProperty.call(this, key) && opts.preserve.indexOf(key) === -1) {
@@ -621,7 +608,7 @@ export default Component.extend({
       }
     })
     this.commit()
-  },
+  }
 
   /**
    * Delegates to {@link Mapper#create} or {@link Mapper#update}.
@@ -657,8 +644,7 @@ export default Component.extend({
    * {@link Mapper#update}.
    * @since 3.0.0
    */
-  save (opts) {
-    opts || (opts = {})
+  save (opts = {}) {
     const mapper = this._mapper()
     const id = utils.get(this, mapper.idAttribute)
     let props = this
@@ -682,7 +668,7 @@ export default Component.extend({
       utils.fillIn(props, changes.changed)
     }
     return superMethod(mapper, 'update')(id, props, opts).then(postProcess)
-  },
+  }
 
   /**
    * Set the value for a given key, or the values for the given keys if "key" is
@@ -713,11 +699,10 @@ export default Component.extend({
    * @param {boolean} [opts.silent=false] Whether to trigger change events.
    * @since 3.0.0
    */
-  'set' (key, value, opts) {
+  set (key, value, opts = {}) {
     if (utils.isObject(key)) {
-      opts = value
+      opts = value || {}
     }
-    opts || (opts = {})
     if (opts.silent) {
       this._set('silent', true)
     }
@@ -725,7 +710,7 @@ export default Component.extend({
     if (!this._get('eventId')) {
       this._set('silent') // unset
     }
-  },
+  }
 
   /**
    * Return a plain object representation of this record. If the class from
@@ -771,7 +756,7 @@ export default Component.extend({
       })
       return json
     }
-  },
+  }
 
   /**
    * Unset the value for a given key. Triggers change events on those properties
@@ -800,7 +785,7 @@ export default Component.extend({
    */
   unset (key, opts) {
     this.set(key, undefined, opts)
-  },
+  }
 
   /**
    * Validate this record based on its current properties.
@@ -834,12 +819,12 @@ export default Component.extend({
   validate (opts) {
     return this._mapper().validate(this, opts)
   }
-}, {
-  creatingPath,
-  noValidatePath,
-  keepChangeHistoryPath,
-  previousPath
-})
+
+  static creatingPath = creatingPath
+  static noValidatePath = noValidatePath
+  static keepChangeHistoryPath = keepChangeHistoryPath
+  static previousPath = previousPath
+}
 
 /**
  * Allow records to emit events.

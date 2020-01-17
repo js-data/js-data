@@ -1,12 +1,12 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.deepEqual', function () {
-  it('should be a static method', function () {
+describe('utils.deepEqual', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.deepEqual, 'function', 'has the deepEqual method')
   })
 
-  it('does deep equal comparison', function () {
+  it('does deep equal comparison', () => {
     const objA = { name: 'John', age: 90 }
     const arrA = ['a', 'b', 'c']
     const arrB = ['a', 'b', 'c', 'd', 'e']
@@ -23,7 +23,7 @@ describe('utils.deepEqual', function () {
     assert.isFalse(utils.deepEqual(arrA, arrB), 'arrA does not deep equal arrB')
   })
 
-  it('compares identical objects', function () {
+  it('compares identical objects', () => {
     const objA = {
       name: 'John',
       id: 27,

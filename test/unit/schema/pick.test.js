@@ -1,12 +1,12 @@
 import { assert, JSData } from '../../_setup'
 import { productSchema } from './_productSchema'
 
-describe('Schema.pick', function () {
-  it('has the right exports', function () {
+describe('Schema.pick', () => {
+  it('has the right exports', () => {
     assert.isFunction(JSData.Schema.prototype.pick)
   })
 
-  it('Copies a value based on the properties defined in the schema', function () {
+  it('Copies a value based on the properties defined in the schema', () => {
     const schema = new JSData.Schema(productSchema)
 
     const data = {
@@ -34,7 +34,7 @@ describe('Schema.pick', function () {
     })
   })
 
-  it('Copies a value based on the items defined in the schema allowing extra properties', function () {
+  it('Copies a value based on the items defined in the schema allowing extra properties', () => {
     const schema = new JSData.Schema({
       type: 'object',
       properties: {
@@ -86,7 +86,7 @@ describe('Schema.pick', function () {
     })
   })
 
-  it('Copies a value based on the items defined in the schema disallowing extra properties', function () {
+  it('Copies a value based on the items defined in the schema disallowing extra properties', () => {
     const schema = new JSData.Schema({
       type: 'object',
       properties: {
@@ -136,7 +136,7 @@ describe('Schema.pick', function () {
     })
   })
 
-  it('Copies a value based on the parent schema', function () {
+  it('Copies a value based on the parent schema', () => {
     const schema = new JSData.Schema({
       type: 'object',
       extends: productSchema,
@@ -195,7 +195,7 @@ describe('Schema.pick', function () {
     })
   })
 
-  it('should ignore undefined properties', function () {
+  it('should ignore undefined properties', () => {
     const store = new JSData.DataStore()
 
     const countrySchema = new JSData.Schema({

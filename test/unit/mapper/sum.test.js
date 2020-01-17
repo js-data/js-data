@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#sum', function () {
-  it('should be an instance method', function () {
+describe('Mapper#sum', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.sum, 'function')
     assert.strictEqual(mapper.sum, Mapper.prototype.sum)
   })
-  it('should sum', async function () {
+  it('should sum', async () => {
     const query = { id: 1 }
     let sumCalled = false
     const User = new JSData.Mapper({ // eslint-disable-line
@@ -17,7 +17,7 @@ describe('Mapper#sum', function () {
     User.registerAdapter('mock', {
       sum (mapper, _field, _query, Opts) {
         sumCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.equal(_field, 'age', 'should pass in the field')
           assert.deepEqual(_query, query, 'should pass in the query')
@@ -30,7 +30,7 @@ describe('Mapper#sum', function () {
     assert(sumCalled, 'Adapter#sum should have been called')
     assert.deepEqual(sum, 30, 'sum should be 30')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const query = { id: 1 }
     let sumCalled = false
     const User = new JSData.Mapper({
@@ -41,7 +41,7 @@ describe('Mapper#sum', function () {
     User.registerAdapter('mock', {
       sum (mapper, _field, _query, Opts) {
         sumCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.equal(_field, 'age', 'should pass in the field')
           assert.deepEqual(_query, query, 'should pass in the query')

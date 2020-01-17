@@ -1,6 +1,6 @@
 import { assert, JSData, sinon } from '../../_setup'
 
-it('should work', function () {
+it('should work', () => {
   assert.equal(typeof JSData.Component, 'function', 'should be a function')
   const component = new JSData.Component()
   assert(component instanceof JSData.Component, 'component should be an instance')

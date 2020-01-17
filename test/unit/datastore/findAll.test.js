@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('DataStore#findAll', function () {
-  it('should be an instance method', function () {
+describe('DataStore#findAll', () => {
+  it('should be an instance method', () => {
     const DataStore = JSData.DataStore
     const store = new DataStore()
     assert.equal(typeof store.findAll, 'function')
@@ -60,8 +60,8 @@ describe('DataStore#findAll', function () {
     this.store.registerAdapter('mock', {
       findAll () {
         callCount++
-        return new Promise(function (resolve) {
-          setTimeout(function () {
+        return new Promise((resolve) => {
+          setTimeout(() => {
             resolve(props)
           }, 300)
         })
@@ -82,8 +82,8 @@ describe('DataStore#findAll', function () {
     this.store.registerAdapter('mock', {
       findAll () {
         callCount++
-        return new Promise(function (resolve, reject) {
-          setTimeout(function () {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
             reject(new Error('foo'))
           }, 300)
         })

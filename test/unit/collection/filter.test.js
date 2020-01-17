@@ -1,6 +1,6 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#filter', function () {
+describe('Collection#filter', () => {
   // Most filter tests are on the Query class
   it('should work', function () {
     const collection = this.PostCollection
@@ -17,7 +17,7 @@ describe('Collection#filter', function () {
 
     assert.objectsEqual(collection.filter(params), [p1], 'should default a string to "=="')
   })
-  it.skip('should allow use of scopes', function () {
+  it.skip('should allow use of scopes', () => {
     const store = new JSData.DataStore({
       scopes: {
         defaultScope: {
