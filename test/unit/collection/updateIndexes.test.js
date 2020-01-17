@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#updateIndexes', function () {
-  it('should update a record in all indexes', function () {
+describe('Collection#updateIndexes', () => {
+  it('should update a record in all indexes', () => {
     const data = [
       { id: 2, age: 19 },
       { id: 1, age: 27 }

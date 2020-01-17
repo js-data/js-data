@@ -1,6 +1,6 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#remove', function () {
+describe('Collection#remove', () => {
   it('should remove an item from the collection', function () {
     this.UserCollection.createIndex('age')
     const user = this.UserCollection.add({ id: 1, age: 30 })
@@ -23,7 +23,7 @@ describe('Collection#remove', function () {
     }), users, 'user 1 cannot be retrieved by index')
   })
 
-  it('should remove plain records', function () {
+  it('should remove plain records', () => {
     const data = [
       { id: 1, getId () { return this.id } },
       { id: 2, getId () { return this.id } }

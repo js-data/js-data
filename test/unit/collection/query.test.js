@@ -1,3 +1,3 @@
-describe('Collection#query', function () {
+describe('Collection#query', () => {
   it('should work')
 })

@@ -1,8 +1,8 @@
 import { assert, JSData } from '../../_setup'
 import { productSchema } from '../schema/_productSchema'
 
-describe('Mapper#validate', function () {
-  it('should validate a record', function () {
+describe('Mapper#validate', () => {
+  it('should validate a record', () => {
     const ProductMapper = new JSData.Mapper({
       name: 'product',
       schema: productSchema
@@ -92,7 +92,7 @@ describe('Mapper#validate', function () {
       ]
     )
   })
-  it('should validate based on json-schema.org rules', function () {
+  it('should validate based on json-schema.org rules', () => {
     const User = new JSData.Mapper({
       name: 'user',
       schema: {
@@ -125,7 +125,7 @@ describe('Mapper#validate', function () {
       assert.deepEqual(err.errors, [{ actual: 'object', expected: 'one of (number)', path: 'age' }], 'should require a number')
       assert.equal(err.message, 'validation failed')
     }
-    assert.doesNotThrow(function () {
+    assert.doesNotThrow(() => {
       user.age = undefined
     }, 'should accept undefined')
     try {
@@ -135,13 +135,13 @@ describe('Mapper#validate', function () {
       assert.deepEqual(err.errors, [{ actual: 'number', expected: 'one of (string, null)', path: 'title' }], 'should require a string or null')
       assert.equal(err.message, 'validation failed')
     }
-    assert.doesNotThrow(function () {
+    assert.doesNotThrow(() => {
       user.title = 'foo'
     }, 'should accept a string')
-    assert.doesNotThrow(function () {
+    assert.doesNotThrow(() => {
       user.title = null
     }, 'should accept null')
-    assert.doesNotThrow(function () {
+    assert.doesNotThrow(() => {
       user.title = undefined
     }, 'should accept undefined')
 
@@ -154,7 +154,7 @@ describe('Mapper#validate', function () {
       assert.equal(err.message, 'validation failed')
     }
 
-    assert.doesNotThrow(function () {
+    assert.doesNotThrow(() => {
       const user = User.createRecord({ age: 'foo' }, { noValidate: true })
       user.set('foo', 'bar')
     }, 'should NOT validate on create')

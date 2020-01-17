@@ -44,8 +44,7 @@ const segmentToString = function (segment, prev) {
 /**
  * @ignore
  */
-const makePath = function (opts) {
-  opts || (opts = {})
+const makePath = function (opts = {}) {
   let path = ''
   const segments = opts.path || []
   segments.forEach(function (segment) {
@@ -196,8 +195,7 @@ const validationKeywords = {
    * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
-  items (value, schema, opts) {
-    opts || (opts = {})
+  items (value, schema, opts = {}) {
     // TODO: additionalItems
     let items = schema.items
     let errors = []
@@ -482,9 +480,7 @@ const validationKeywords = {
    * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
-  properties (value, schema, opts) {
-    opts || (opts = {})
-
+  properties (value, schema, opts = {}) {
     if (utils.isArray(value)) {
       return
     }
@@ -549,8 +545,7 @@ const validationKeywords = {
    * @param {object} [opts] Configuration options.
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
-  required (value, schema, opts) {
-    opts || (opts = {})
+  required (value, schema, opts = {}) {
     const required = schema.required
     const errors = []
     if (!opts.existingOnly) {
@@ -733,9 +728,8 @@ const validateAny = function (value, schema, opts) {
  * @param {object} [opts] Configuration options.
  * @returns {(array|undefined)} Array of errors or `undefined` if valid.
  */
-const validate = function (value, schema, opts) {
+const validate = function (value, schema, opts = {}) {
   let errors = []
-  opts || (opts = {})
   opts.ctx || (opts.ctx = { value, schema })
   let shouldPop
   const prevProp = opts.prop
@@ -944,37 +938,36 @@ const typeGroupValidators = {
  * @extends Component
  * @param {object} definition Schema definition according to json-schema.org
  */
-function Schema (definition) {
-  definition || (definition = {})
-  // TODO: schema validation
-  utils.fillIn(this, definition)
+export default class Schema extends Component {
+  constructor (definition) {
+    super()
+    definition || (definition = {})
+    // TODO: schema validation
+    utils.fillIn(this, definition)
 
-  if (this.type === 'object') {
-    this.properties = this.properties || {}
-    utils.forOwn(this.properties, (_definition, prop) => {
-      if (!(_definition instanceof Schema)) {
-        this.properties[prop] = new Schema(_definition)
-      }
-    })
-  } else if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
-    this.items = new Schema(this.items)
-  }
-  if (this.extends && !(this.extends instanceof Schema)) {
-    this.extends = new Schema(this.extends)
-  }
-  ['allOf', 'anyOf', 'oneOf'].forEach((validationKeyword) => {
-    if (this[validationKeyword]) {
-      this[validationKeyword].forEach((_definition, i) => {
+    if (this.type === 'object') {
+      this.properties = this.properties || {}
+      utils.forOwn(this.properties, (_definition, prop) => {
         if (!(_definition instanceof Schema)) {
-          this[validationKeyword][i] = new Schema(_definition)
+          this.properties[prop] = new Schema(_definition)
         }
       })
+    } else if (this.type === 'array' && this.items && !(this.items instanceof Schema)) {
+      this.items = new Schema(this.items)
     }
-  })
-}
-
-export default Component.extend({
-  constructor: Schema,
+    if (this.extends && !(this.extends instanceof Schema)) {
+      this.extends = new Schema(this.extends)
+    }
+    ['allOf', 'anyOf', 'oneOf'].forEach((validationKeyword) => {
+      if (this[validationKeyword]) {
+        this[validationKeyword].forEach((_definition, i) => {
+          if (!(_definition instanceof Schema)) {
+            this[validationKeyword][i] = new Schema(_definition)
+          }
+        })
+      }
+    })
+  }
 
   /**
    * This adds ES5 getters/setters to the target based on the "properties" in
@@ -984,9 +977,9 @@ export default Component.extend({
    * @name Schema#apply
    * @method
    * @param {object} target The prototype to which to apply this schema.
+   * @param {object} opts
    */
-  apply (target, opts) {
-    opts || (opts = {})
+  apply (target, opts = {}) {
     opts.getter || (opts.getter = '_get')
     opts.setter || (opts.setter = '_set')
     opts.unsetter || (opts.unsetter = '_unset')
@@ -999,7 +992,7 @@ export default Component.extend({
         this.makeDescriptor(prop, schema, opts)
       )
     })
-  },
+  }
 
   /**
    * Apply default values to the target object for missing values.
@@ -1034,7 +1027,7 @@ export default Component.extend({
         schema.applyDefaults(utils.get(target, prop))
       }
     })
-  },
+  }
 
   /**
    * Assemble a property descriptor for tracking and validating changes to
@@ -1178,7 +1171,7 @@ export default Component.extend({
     }
 
     return descriptor
-  },
+  }
 
   /**
    * Create a copy of the given value that contains only the properties defined
@@ -1223,7 +1216,7 @@ export default Component.extend({
       })
     }
     return utils.plainCopy(value)
-  },
+  }
 
   /**
    * Validate the provided value against this schema.
@@ -1237,17 +1230,17 @@ export default Component.extend({
   validate (value, opts) {
     return validate(value, this, opts)
   }
-}, {
-  ANY_OPS,
-  ARRAY_OPS,
-  NUMERIC_OPS,
-  OBJECT_OPS,
-  STRING_OPS,
-  typeGroupValidators,
-  types,
-  validate,
-  validationKeywords
-})
+
+  static ANY_OPS = ANY_OPS
+  static ARRAY_OPS = ARRAY_OPS;
+  static NUMERIC_OPS = NUMERIC_OPS;
+  static OBJECT_OPS = OBJECT_OPS;
+  static STRING_OPS = STRING_OPS;
+  static typeGroupValidators = typeGroupValidators;
+  static types = types;
+  static validate = validate;
+  static validationKeywords = validationKeywords;
+}
 
 /**
  * Create a subclass of this Schema:

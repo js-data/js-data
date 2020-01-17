@@ -1,6 +1,6 @@
 import { assert } from '../../_setup'
 
-describe('Collection#get', function () {
+describe('Collection#get', () => {
   it('should get an item from the collection', function () {
     const user = this.UserCollection.add({ id: 1 })
     assert(this.UserCollection.get(1) === user, 'should get the user from the collection')

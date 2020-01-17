@@ -1,12 +1,12 @@
 import { assert, JSData, sinon } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.logify', function () {
-  it('should be a static method', function () {
+describe('utils.logify', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.logify, 'function', 'has the logify method')
   })
 
-  it('adds hidden dbg and log methods to target', function () {
+  it('adds hidden dbg and log methods to target', () => {
     const user = { name: 'John' }
     assert.isUndefined(user.dbg)
     assert.isUndefined(user.log)
@@ -15,7 +15,7 @@ describe('utils.logify', function () {
     assert.isDefined(user.log)
   })
 
-  it('logs message to the console with the specified log level', function () {
+  it('logs message to the console with the specified log level', () => {
     const user = { name: 'John' }
     const infoStub = sinon.stub(console, 'info')
     const logStub = sinon.stub(console, 'log')
@@ -28,7 +28,7 @@ describe('utils.logify', function () {
     logStub.restore()
   })
 
-  it('logs debug messages only when `this.debug` is true', function () {
+  it('logs debug messages only when `this.debug` is true', () => {
     const user = { name: 'John' }
     const prev = console.debug
     console.debug = sinon.stub()

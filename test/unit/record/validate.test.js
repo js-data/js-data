@@ -1,8 +1,8 @@
 import { assert, JSData } from '../../_setup'
 import { productSchema } from '../schema/_productSchema'
 
-describe('Record#validate', function () {
-  it('should validate', function () {
+describe('Record#validate', () => {
+  it('should validate', () => {
     const ProductMapper = new JSData.Mapper({
       name: 'product',
       schema: productSchema

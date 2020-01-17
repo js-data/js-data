@@ -1,7 +1,7 @@
 import { assert, JSData, sinon } from '../../_setup'
 
-describe('Record#hasChanges', function () {
-  it('should be an instance method', function () {
+describe('Record#hasChanges', () => {
+  it('should be an instance method', () => {
     const Record = JSData.Record
     const record = new Record()
     assert.equal(typeof record.hasChanges, 'function')
@@ -33,7 +33,7 @@ describe('Record#hasChanges', function () {
     assert(post.hasChanges())
     post.author = 'John'
     assert(!post.hasChanges())
-    setTimeout(function () {
+    setTimeout(() => {
       assert.equal(listener.callCount, 0)
       done()
     }, 5)
@@ -67,7 +67,7 @@ describe('Record#hasChanges', function () {
       assert(!post.hasChanges())
       done()
     }
-    setTimeout(function () {
+    setTimeout(() => {
       assert.equal(listener.callCount, 1)
       post.author = 'John'
       setTimeout(secondSpec, 5)

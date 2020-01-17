@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Record#previous', function () {
-  it('should be an instance method', function () {
+describe('Record#previous', () => {
+  it('should be an instance method', () => {
     const Record = JSData.Record
     const record = new Record()
     assert.equal(typeof record.previous, 'function')

@@ -1,11 +1,11 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Query#between', function () {
-  it('should work', function () {
+describe('Query#between', () => {
+  it('should work', () => {
     let result
     const collection = new JSData.Collection()
 
-    assert.throws(function () {
+    assert.throws(() => {
       collection.query().filter().between().run()
     }, Error)
 

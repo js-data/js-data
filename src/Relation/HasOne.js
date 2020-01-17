@@ -1,7 +1,7 @@
 import utils from '../utils'
 import { Relation } from '../Relation'
 
-export const HasOneRelation = Relation.extend({
+export class HasOneRelation extends Relation {
   findExistingLinksFor (relatedMapper, record) {
     const recordId = utils.get(record, relatedMapper.idAttribute)
     const records = this.findExistingLinksByForeignKey(recordId)
@@ -9,11 +9,11 @@ export const HasOneRelation = Relation.extend({
     if (records && records.length) {
       return records[0]
     }
-  },
+  }
 
   isRequiresChildId () {
     return true
   }
-}, {
-  TYPE_NAME: 'hasOne'
-})
+
+  static TYPE_NAME = 'hasOne'
+}

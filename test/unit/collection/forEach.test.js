@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#forEach', function () {
-  it('should visit all data', function () {
+describe('Collection#forEach', () => {
+  it('should visit all data', () => {
     const data = [
       { id: 2 },
       { id: 3 },
@@ -11,7 +11,7 @@ describe('Collection#forEach', function () {
     let prev
     let isInOrder = true
     const collection = new JSData.Collection(data)
-    collection.forEach(function (value) {
+    collection.forEach((value) => {
       if (prev) {
         isInOrder = isInOrder && value.id > prev.id
       }
@@ -27,7 +27,7 @@ describe('Collection#forEach', function () {
     assert.equal(count, 3, 'should have taken 3 iterations to visit all data')
     assert(isInOrder, 'items should have been visited in order')
   })
-  it('should forEach', function () {
+  it('should forEach', () => {
     const data = [
       { id: 2 },
       { id: 3 },
@@ -35,7 +35,7 @@ describe('Collection#forEach', function () {
     ]
     const collection = new JSData.Collection(data)
     let sum = 0
-    const expectedSum = data.reduce(function (prev, curr) {
+    const expectedSum = data.reduce((prev, curr) => {
       return prev + curr.id
     }, 0)
     const ctx = {}

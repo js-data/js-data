@@ -1,12 +1,12 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.intersection', function () {
-  it('should be a static method', function () {
+describe('utils.intersection', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.isArray, 'function', 'has the intersection method')
   })
 
-  it('intersects two arrays', function () {
+  it('intersects two arrays', () => {
     const arrA = ['green', 'red', 'blue', 'red']
     const arrB = ['green', 'yellow', 'red']
     const result = utils.intersection(arrA, arrB)
@@ -14,7 +14,7 @@ describe('utils.intersection', function () {
     assert.includeMembers(result, ['green', 'red'])
   })
 
-  it('intersect returns empty array when argument is undefined', function () {
+  it('intersect returns empty array when argument is undefined', () => {
     const arrA = ['green', 'red', 'blue']
     const arrB = undefined
     const result = utils.intersection(arrA, arrB)

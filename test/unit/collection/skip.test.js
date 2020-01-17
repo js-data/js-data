@@ -1,15 +1,15 @@
 import { assert, JSData, TYPES_EXCEPT_NUMBER } from '../../_setup'
 
-describe('Collection#skip', function () {
-  it('should skip', function () {
+describe('Collection#skip', () => {
+  it('should skip', () => {
     const data = [
       { id: 2 },
       { id: 3 },
       { id: 1 }
     ]
     const collection = new JSData.Collection(data)
-    TYPES_EXCEPT_NUMBER.forEach(function (value) {
-      assert.throws(function () {
+    TYPES_EXCEPT_NUMBER.forEach((value) => {
+      assert.throws(() => {
         collection.skip(value)
       }, Error, `[Query#skip:num] expected: number, found: ${typeof value}\nhttp://www.js-data.io/v3.0/docs/errors#400`)
     })
@@ -23,7 +23,7 @@ describe('Collection#skip', function () {
     assert.deepEqual(collection.skip(3), [], 'should have skipped all')
     assert.deepEqual(collection.skip(4), [], 'should have skipped all')
   })
-  it('should skip and limit', function () {
+  it('should skip and limit', () => {
     const data = [
       { id: 2 },
       { id: 3 },

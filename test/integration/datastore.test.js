@@ -1,7 +1,7 @@
 import { assert, JSData } from '../_setup'
 
-describe('DataStore integration tests', function () {
-  it('relation links should stay up-to-date', function () {
+describe('DataStore integration tests', () => {
+  it('relation links should stay up-to-date', () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
       schema: {
@@ -67,7 +67,7 @@ describe('DataStore integration tests', function () {
     assert.equal(bar88.foo_id, 66)
     assert.deepEqual(foo77.bars, [])
   })
-  it('should allow enhanced relation getters', function () {
+  it('should allow enhanced relation getters', () => {
     let wasItActivated = false
     const store = new JSData.DataStore({
       linkRelations: true
@@ -107,7 +107,7 @@ describe('DataStore integration tests', function () {
     assert.equal(foo.bar.id, 1)
     assert(wasItActivated)
   })
-  it('should configure enumerability and linking of relations', function () {
+  it('should configure enumerability and linking of relations', () => {
     const store = new JSData.DataStore()
     store.defineMapper('parent', {
       relations: {
@@ -230,7 +230,7 @@ describe('DataStore integration tests', function () {
     this.UserCollection.remove(22)
     assert(!this.ProfileCollection.get(21).user)
   })
-  it('should emit change events', function (done) {
+  it('should emit change events', (done) => {
     const store = new JSData.DataStore()
     let handlersCalled = 0
     store.defineMapper('foo', {
@@ -244,7 +244,7 @@ describe('DataStore integration tests', function () {
     const foo = store.add('foo', { id: 1 })
     assert.equal(foo.bar, undefined)
 
-    store.on('change', function (mapperName, record, changes) {
+    store.on('change', (mapperName, record, changes) => {
       assert.equal(mapperName, 'foo')
       assert.strictEqual(record, foo)
       try {
@@ -255,7 +255,7 @@ describe('DataStore integration tests', function () {
       handlersCalled++
     })
 
-    store.getCollection('foo').on('change', function (record, changes) {
+    store.getCollection('foo').on('change', (record, changes) => {
       assert.strictEqual(record, foo)
       try {
         assert.deepEqual(changes, { added: { bar: 'baz' }, changed: {}, removed: {} })
@@ -275,14 +275,14 @@ describe('DataStore integration tests', function () {
       handlersCalled++
     })
 
-    store.on('change:bar', function (mapperName, record, value) {
+    store.on('change:bar', (mapperName, record, value) => {
       assert.equal(mapperName, 'foo')
       assert.strictEqual(record, foo)
       assert(value === 'baz' || value === 'beep')
       handlersCalled++
     })
 
-    store.getCollection('foo').on('change:bar', function (record, value) {
+    store.getCollection('foo').on('change:bar', (record, value) => {
       assert.strictEqual(record, foo)
       assert(value === 'baz' || value === 'beep')
       handlersCalled++
@@ -314,7 +314,7 @@ describe('DataStore integration tests', function () {
       }
     }, 500)
   })
-  it('should add relations', function () {
+  it('should add relations', () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
       schema: {
@@ -394,7 +394,7 @@ describe('DataStore integration tests', function () {
     assert.equal(store.unsaved('bar').length, 1)
     assert.equal(store.unsaved('foo').length, 1)
   })
-  it('should correctly unlink inverse records', function () {
+  it('should correctly unlink inverse records', () => {
     const store = new JSData.DataStore()
 
     store.defineMapper('A', {
@@ -450,7 +450,7 @@ describe('DataStore integration tests', function () {
     assert.equal(bRecords2[0].a, undefined)
     assert.equal(bRecords2[1].a, undefined)
   })
-  it('should add property accessors to prototype of target and allow relation re-assignment using defaults', function () {
+  it('should add property accessors to prototype of target and allow relation re-assignment using defaults', () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
       relations: {
@@ -487,7 +487,7 @@ describe('DataStore integration tests', function () {
     assert.strictEqual(bar3.foo, foo)
   })
 
-  it('should not create an inverseLink if no inverseRelationship is defined', function () {
+  it('should not create an inverseLink if no inverseRelationship is defined', () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
     })
@@ -506,7 +506,7 @@ describe('DataStore integration tests', function () {
     assert.strictEqual(bar._foo, foo)
   })
 
-  it('should add property accessors to prototype of target and allow relation re-assignment using customizations', function () {
+  it('should add property accessors to prototype of target and allow relation re-assignment using customizations', () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
       relations: {
@@ -542,7 +542,7 @@ describe('DataStore integration tests', function () {
     assert.strictEqual(bar2._foo, foo)
     assert.strictEqual(bar3._foo, foo)
   })
-  it('should allow custom getter and setter', function () {
+  it('should allow custom getter and setter', () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
       relations: {
@@ -590,7 +590,7 @@ describe('DataStore integration tests', function () {
     assert.equal(getCalled, 11)
     assert.equal(setCalled, 4)
   })
-  it('supports tree-like relations', function () {
+  it('supports tree-like relations', () => {
     const store = new JSData.DataStore()
 
     store.defineMapper('node', {
@@ -654,7 +654,7 @@ describe('DataStore integration tests', function () {
     assert.deepEqual(nodes[4].children, [])
   })
 
-  it('should find hasMany foreignKeys with custom idAttribute', function () {
+  it('should find hasMany foreignKeys with custom idAttribute', () => {
     const store = new JSData.DataStore()
 
     store.defineMapper('foo', {

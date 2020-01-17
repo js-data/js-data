@@ -1,3 +1,3 @@
-describe('Collection#createIndex', function () {
+describe('Collection#createIndex', () => {
   it('should work')
 })

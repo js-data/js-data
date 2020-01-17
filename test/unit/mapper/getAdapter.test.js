@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#getAdapter', function () {
-  it('should get an adapter', function () {
+describe('Mapper#getAdapter', () => {
+  it('should get an adapter', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'user' })
     assert.equal(typeof mapper.getAdapter, 'function')

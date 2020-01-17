@@ -70,23 +70,24 @@ const DATASTORE_DEFAULTS = {
  * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
  */
-function DataStore (opts) {
-  utils.classCallCheck(this, DataStore)
+export default class DataStore extends SimpleStore {
+  constructor (opts = {}) {
+    // Fill in any missing options with the defaults
+    utils.fillIn(opts, DATASTORE_DEFAULTS)
+    opts.collectionClass || (opts.collectionClass = LinkedCollection)
+    super(opts)
+  }
 
-  opts || (opts = {})
-  // Fill in any missing options with the defaults
-  utils.fillIn(opts, DATASTORE_DEFAULTS)
-  opts.collectionClass || (opts.collectionClass = LinkedCollection)
-  SimpleStore.call(this, opts)
-}
-
-const props = {
-  constructor: DataStore,
-
+  /**
+   * Creates a new [Mapper] with [name] from the [opts]
+   * @param {string} name
+   * @param {object} opts
+   * @returns {*}
+   */
   defineMapper (name, opts) {
     // Complexity of this method is beyond simply using => functions to bind context
     const self = this
-    const mapper = SimpleStore.prototype.defineMapper.call(self, name, opts)
+    const mapper = super.defineMapper(name, opts)
     const idAttribute = mapper.idAttribute
     const collection = this.getCollection(name)
 
@@ -419,11 +420,10 @@ const props = {
     })
 
     return mapper
-  },
+  }
 
-  destroy (name, id, opts) {
-    opts || (opts = {})
-    return SimpleStore.prototype.destroy.call(this, name, id, opts).then((result) => {
+  destroy (name, id, opts = {}) {
+    return super.destroy(name, id, opts).then((result) => {
       let record
       if (opts.raw) {
         record = result.data
@@ -440,11 +440,10 @@ const props = {
       }
       return result
     })
-  },
+  }
 
-  destroyAll (name, query, opts) {
-    opts || (opts = {})
-    return SimpleStore.prototype.destroyAll.call(this, name, query, opts).then((result) => {
+  destroyAll (name, query, opts = {}) {
+    return super.destroyAll(name, query, opts).then((result) => {
       let records
       if (opts.raw) {
         records = result.data
@@ -465,57 +464,3 @@ const props = {
     })
   }
 }
-
-export default SimpleStore.extend(props)
-
-/**
- * Create a subclass of this DataStore:
- * @example <caption>DataStore.extend</caption>
- * const JSData = require('js-data');
- * const { DataStore } = JSData;
- * console.log('Using JSData v' + JSData.version.full);
- *
- * // Extend the class using ES2015 class syntax.
- * class CustomDataStoreClass extends DataStore {
- *   foo () { return 'bar'; }
- *   static beep () { return 'boop'; }
- * }
- * const customDataStore = new CustomDataStoreClass();
- * console.log(customDataStore.foo());
- * console.log(CustomDataStoreClass.beep());
- *
- * // Extend the class using alternate method.
- * const OtherDataStoreClass = DataStore.extend({
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * });
- * const otherDataStore = new OtherDataStoreClass();
- * console.log(otherDataStore.foo());
- * console.log(OtherDataStoreClass.beep());
- *
- * // Extend the class, providing a custom constructor.
- * function AnotherDataStoreClass () {
- *   DataStore.call(this);
- *   this.created_at = new Date().getTime();
- * }
- * DataStore.extend({
- *   constructor: AnotherDataStoreClass,
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * });
- * const anotherDataStore = new AnotherDataStoreClass();
- * console.log(anotherDataStore.created_at);
- * console.log(anotherDataStore.foo());
- * console.log(AnotherDataStoreClass.beep());
- *
- * @method DataStore.extend
- * @param {object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {object} [props.constructor] Provide a custom constructor function
- * to be used as the subclass itself.
- * @param {object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this DataStore class.
- * @since 3.0.0
- */

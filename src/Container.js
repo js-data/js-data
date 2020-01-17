@@ -5,6 +5,427 @@ import Mapper from './Mapper'
 const DOMAIN = 'Container'
 
 export const proxiedMapperMethods = [
+  'count',
+  'create',
+  'createMany',
+  'createRecord',
+  'destroy',
+  'destroyAll',
+  'find',
+  'findAll',
+  'getSchema',
+  'is',
+  'sum',
+  'toJSON',
+  'update',
+  'updateAll',
+  'updateMany',
+  'validate'
+]
+
+/**
+ * The `Container` class is a place to define and store {@link Mapper} instances.
+ *
+ * `Container` makes it easy to manage your Mappers. Without a container, you
+ * need to manage Mappers yourself, including resolving circular dependencies
+ * among relations. All Mappers in a container share the same adapters, so you
+ * don't have to register adapters for every single Mapper.
+ *
+ * @example <caption>Container#constructor</caption>
+ * // import { Container } from 'js-data';
+ * const JSData = require('js-data');
+ * const {Container} = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * const store = new Container();
+ *
+ * @class Container
+ * @extends Component
+ * @param {object} [opts] Configuration options.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @param {Constructor} [opts.mapperClass] See {@link Container#mapperClass}.
+ * @param {object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
+ * @since 3.0.0
+ */
+export class Container extends Component {
+  constructor (opts = {}) {
+    super()
+
+    Object.defineProperties(this, {
+      /**
+       * The adapters registered with this Container, which are also shared by all
+       * Mappers in this Container.
+       *
+       * @name Container#_adapters
+       * @see Container#registerAdapter
+       * @since 3.0.0
+       * @type {Object}
+       */
+      _adapters: {
+        value: {}
+      },
+
+      /**
+       * The the mappers in this container
+       *
+       * @name Container#_mappers
+       * @see Mapper
+       * @since 3.0.0
+       * @type {Object}
+       */
+      _mappers: {
+        value: {}
+      },
+
+      /**
+       * Constructor function to use in {@link Container#defineMapper} to create new
+       * {@link Mapper} instances. {@link Container#mapperClass} should extend
+       * {@link Mapper}. By default {@link Mapper} is used to instantiate Mappers.
+       *
+       * @example <caption>Container#mapperClass</caption>
+       * // import { Container, Mapper } from 'js-data';
+       * const JSData = require('js-data');
+       * const { Container, Mapper } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * class MyMapperClass extends Mapper {
+       *   foo () { return 'bar' }
+       * }
+       * const store = new Container({
+       *   mapperClass: MyMapperClass
+       * });
+       * store.defineMapper('user');
+       * console.log(store.getMapper('user').foo());
+       *
+       * @name Container#mapperClass
+       * @see Mapper
+       * @since 3.0.0
+       * @type {Constructor}
+       */
+      mapperClass: {
+        value: undefined,
+        writable: true
+      }
+    })
+
+    // Apply options provided by the user
+    utils.fillIn(this, opts)
+
+    /**
+     * Defaults options to pass to {@link Container#mapperClass} when creating a
+     * new {@link Mapper}.
+     *
+     * @example <caption>Container#mapperDefaults</caption>
+     * // import { Container } from 'js-data';
+     * const JSData = require('js-data');
+     * const { Container } = JSData;
+     * console.log('Using JSData v' + JSData.version.full);
+     *
+     * const store = new Container({
+     *   mapperDefaults: {
+     *     idAttribute: '_id'
+     *   }
+     * });
+     * store.defineMapper('user');
+     * console.log(store.getMapper('user').idAttribute);
+     *
+     * @default {}
+     * @name Container#mapperDefaults
+     * @since 3.0.0
+     * @type {Object}
+     */
+    this.mapperDefaults = this.mapperDefaults || {}
+
+    // Use the Mapper class if the user didn't provide a mapperClass
+    this.mapperClass || (this.mapperClass = Mapper)
+  }
+
+  /**
+   * Register a new event listener on this Container.
+   *
+   * Proxy for {@link Component#on}. If an event was emitted by a {@link Mapper}
+   * in the Container, then the name of the {@link Mapper} will be prepended to
+   * the arugments passed to the listener.
+   *
+   * @example <caption>Container#on</caption>
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new Container();
+   * store.on('foo', function (...args) { console.log(args.join(':')) });
+   * store.defineMapper('user');
+   * store.emit('foo', 'arg1', 'arg2');
+   * store.getMapper('user').emit('foo', 'arg1', 'arg2');
+   *
+   * @method Container#on
+   * @param {string} event Name of event to subsribe to.
+   * @param {Function} listener Listener function to handle the event.
+   * @param {*} [ctx] Optional content in which to invoke the listener.
+   * @since 3.0.0
+   */
+
+  /**
+   * Used to bind to events emitted by mappers in this container.
+   *
+   * @method Container#_onMapperEvent
+   * @param {string} name Name of the mapper that emitted the event.
+   * @param {...*} [args] Args See {@link Mapper#emit}.
+   * @private
+   * @since 3.0.0
+   */
+  _onMapperEvent (name, ...args) {
+    const type = args.shift()
+    this.emit(type, name, ...args)
+  }
+
+  /**
+   * Return a container scoped to a particular mapper.
+   *
+   * @example <caption>Container#as</caption>
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new Container();
+   * const UserMapper = store.defineMapper('user');
+   * const UserStore = store.as('user');
+   *
+   * const user1 = store.createRecord('user', { name: 'John' });
+   * const user2 = UserStore.createRecord({ name: 'John' });
+   * const user3 = UserMapper.createRecord({ name: 'John' });
+   * console.log(user1 === user2);
+   * console.log(user2 === user3);
+   * console.log(user1 === user3);
+   *
+   * @method Container#as
+   * @param {string} name Name of the {@link Mapper}.
+   * @returns {Object} A container scoped to a particular mapper.
+   * @since 3.0.0
+   */
+  as (name) {
+    const props = {}
+    const original = this
+    proxiedMapperMethods.forEach(function (method) {
+      props[method] = {
+        writable: true,
+        value (...args) {
+          return original[method](name, ...args)
+        }
+      }
+    })
+    props.getMapper = {
+      writable: true,
+      value () {
+        return original.getMapper(name)
+      }
+    }
+    return Object.create(this, props)
+  }
+
+  /**
+   * Create a new mapper and register it in this container.
+   *
+   * @example <caption>Container#defineMapper</caption>
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new Container({
+   *   mapperDefaults: { foo: 'bar' }
+   * });
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user');
+   * console.log(UserMapper === store.getMapper('user'));
+   * console.log(UserMapper === store.as('user').getMapper());
+   * console.log(UserMapper.foo);
+   *
+   * @method Container#defineMapper
+   * @param {string} name Name under which to register the new {@link Mapper}.
+   * {@link Mapper#name} will be set to this value.
+   * @param {object} [opts] Configuration options. Passed to
+   * {@link Container#mapperClass} when creating the new {@link Mapper}.
+   * @returns {Mapper} The newly created instance of {@link Mapper}.
+   * @see Container#as
+   * @since 3.0.0
+   */
+  defineMapper (name, opts = {}) {
+    // For backwards compatibility with defineResource
+    if (utils.isObject(name)) {
+      opts = name
+      name = opts.name
+    }
+    if (!utils.isString(name)) {
+      throw utils.err(`${DOMAIN}#defineMapper`, 'name')(400, 'string', name)
+    }
+
+    // Set Mapper#name
+    opts.name = name
+    opts.relations || (opts.relations = {})
+
+    // Check if the user is overriding the datastore's default mapperClass
+    const mapperClass = opts.mapperClass || this.mapperClass
+    delete opts.mapperClass
+
+    // Apply the datastore's defaults to the options going into the mapper
+    utils.fillIn(opts, this.mapperDefaults)
+
+    // Instantiate a mapper
+    const mapper = this._mappers[name] = new mapperClass(opts) // eslint-disable-line
+    mapper.relations || (mapper.relations = {})
+    // Make sure the mapper's name is set
+    mapper.name = name
+    // All mappers in this datastore will share adapters
+    mapper._adapters = this.getAdapters()
+
+    mapper.datastore = this
+
+    mapper.on('all', (...args) => this._onMapperEvent(name, ...args))
+    mapper.defineRelations()
+
+    return mapper
+  }
+
+  defineResource (name, opts) {
+    console.warn('DEPRECATED: defineResource is deprecated, use defineMapper instead')
+    return this.defineMapper(name, opts)
+  }
+
+  /**
+   * Return the registered adapter with the given name or the default adapter if
+   * no name is provided.
+   *
+   * @method Container#getAdapter
+   * @param {string} [name] The name of the adapter to retrieve.
+   * @returns {Adapter} The adapter.
+   * @since 3.0.0
+   */
+  getAdapter (name) {
+    const adapter = this.getAdapterName(name)
+    if (!adapter) {
+      throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
+    }
+    return this.getAdapters()[adapter]
+  }
+
+  /**
+   * Return the name of a registered adapter based on the given name or options,
+   * or the name of the default adapter if no name provided.
+   *
+   * @method Container#getAdapterName
+   * @param {(Object|string)} [opts] The name of an adapter or options, if any.
+   * @returns {string} The name of the adapter.
+   * @since 3.0.0
+   */
+  getAdapterName (opts = {}) {
+    if (utils.isString(opts)) {
+      opts = { adapter: opts }
+    }
+    return opts.adapter || this.mapperDefaults.defaultAdapter
+  }
+
+  /**
+   * Return the registered adapters of this container.
+   *
+   * @method Container#getAdapters
+   * @returns {Adapter}
+   * @since 3.0.0
+   */
+  getAdapters () {
+    return this._adapters
+  }
+
+  /**
+   * Return the mapper registered under the specified name.
+   *
+   * @example <caption>Container#getMapper</caption>
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new Container();
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user');
+   * console.log(UserMapper === store.getMapper('user'));
+   * console.log(UserMapper === store.as('user').getMapper());
+   * store.getMapper('profile'); // throws Error, there is no mapper with name "profile"
+   *
+   * @method Container#getMapper
+   * @param {string} name {@link Mapper#name}.
+   * @returns {Mapper}
+   * @since 3.0.0
+   */
+  getMapper (name) {
+    const mapper = this.getMapperByName(name)
+    if (!mapper) {
+      throw utils.err(`${DOMAIN}#getMapper`, name)(404, 'mapper')
+    }
+    return mapper
+  }
+
+  /**
+   * Return the mapper registered under the specified name.
+   * Doesn't throw error if mapper doesn't exist.
+   *
+   * @example <caption>Container#getMapperByName</caption>
+   * // import { Container } from 'js-data';
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new Container();
+   * // Container#defineMapper returns a direct reference to the newly created
+   * // Mapper.
+   * const UserMapper = store.defineMapper('user');
+   * console.log(UserMapper === store.getMapper('user'));
+   * console.log(UserMapper === store.as('user').getMapper());
+   * console.log(store.getMapper('profile')); // Does NOT throw an error
+   *
+   * @method Container#getMapperByName
+   * @param {string} name {@link Mapper#name}.
+   * @returns {Mapper}
+   * @since 3.0.0
+   */
+  getMapperByName (name) {
+    return this._mappers[name]
+  }
+
+  /**
+   * Register an adapter on this container under the given name. Adapters
+   * registered on a container are shared by all mappers in the container.
+   *
+   * @example
+   * import { Container } from 'js-data';
+   * import { RethinkDBAdapter } from 'js-data-rethinkdb';
+   * const store = new Container();
+   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
+   *
+   * @method Container#registerAdapter
+   * @param {string} name The name of the adapter to register.
+   * @param {Adapter} adapter The adapter to register.
+   * @param {object} [opts] Configuration options.
+   * @param {boolean} [opts.default=false] Whether to make the adapter the
+   * default adapter for all Mappers in this container.
+   * @since 3.0.0
+   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
+   */
+  registerAdapter (name, adapter, opts = {}) {
+    this.getAdapters()[name] = adapter
+    // Optionally make it the default adapter for the target.
+    if (opts === true || opts.default) {
+      this.mapperDefaults.defaultAdapter = name
+      utils.forOwn(this._mappers, function (mapper) {
+        mapper.defaultAdapter = name
+      })
+    }
+  }
+
   /**
    * Wrapper for {@link Mapper#count}.
    *
@@ -28,7 +449,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#count
    * @since 3.0.0
    */
-  'count',
+  count (name, opts) {
+    return this.getMapper(name).count(opts)
+  }
 
   /**
    * Fired during {@link Container#create}. See
@@ -63,6 +486,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterCreateListener
    * @see Container#create
    */
+
   /**
    * Callback signature for the {@link Container#event:afterCreate} event.
    *
@@ -109,7 +533,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#create
    * @since 3.0.0
    */
-  'create',
+  create (name, props, opts) {
+    return this.getMapper(name).create(props, opts)
+  }
 
   /**
    * Fired during {@link Container#createMany}. See
@@ -144,6 +570,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterCreateManyListener
    * @see Container#createMany
    */
+
   /**
    * Callback signature for the {@link Container#event:afterCreateMany} event.
    *
@@ -194,7 +621,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#createMany
    * @since 3.0.0
    */
-  'createMany',
+  createMany (name, records, opts) {
+    return this.getMapper(name).createMany(records, opts)
+  }
 
   /**
    * Wrapper for {@link Mapper#createRecord}.
@@ -217,7 +646,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#createRecord
    * @since 3.0.0
    */
-  'createRecord',
+  createRecord (name, props, opts) {
+    return this.getMapper(name).createRecord(props, opts)
+  }
 
   /**
    * Fired during {@link Container#destroy}. See
@@ -252,6 +683,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterDestroyListener
    * @see Container#destroy
    */
+
   /**
    * Callback signature for the {@link Container#event:afterDestroy} event.
    *
@@ -295,7 +727,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#destroy
    * @since 3.0.0
    */
-  'destroy',
+  destroy (name, id, opts) {
+    return this.getMapper(name).destroy(id, opts)
+  }
 
   /**
    * Fired during {@link Container#destroyAll}. See
@@ -330,6 +764,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterDestroyAllListener
    * @see Container#destroyAll
    */
+
   /**
    * Callback signature for the {@link Container#event:afterDestroyAll} event.
    *
@@ -373,7 +808,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#destroyAll
    * @since 3.0.0
    */
-  'destroyAll',
+  destroyAll (name, query, opts) {
+    return this.getMapper(name).destroyAll(query, opts)
+  }
 
   /**
    * Fired during {@link Container#find}. See
@@ -408,6 +845,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterFindListener
    * @see Container#find
    */
+
   /**
    * Callback signature for the {@link Container#event:afterFind} event.
    *
@@ -450,7 +888,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#find
    * @since 3.0.0
    */
-  'find',
+  find (name, id, opts) {
+    return this.getMapper(name).find(id, opts)
+  }
 
   /**
    * Fired during {@link Container#findAll}. See
@@ -485,6 +925,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterFindAllListener
    * @see Container#findAll
    */
+
   /**
    * Callback signature for the {@link Container#event:afterFindAll} event.
    *
@@ -528,7 +969,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#findAll
    * @since 3.0.0
    */
-  'findAll',
+  findAll (name, query, opts) {
+    return this.getMapper(name).findAll(query, opts)
+  }
 
   /**
    * Wrapper for {@link Mapper#getSchema}.
@@ -539,7 +982,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#getSchema
    * @since 3.0.0
    */
-  'getSchema',
+  getSchema (name) {
+    return this.getMapper(name).getSchema()
+  }
 
   /**
    * Wrapper for {@link Mapper#is}.
@@ -561,7 +1006,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#is
    * @since 3.0.0
    */
-  'is',
+  is (name, record) {
+    return this.getMapper(name).is(record)
+  }
 
   /**
    * Wrapper for {@link Mapper#sum}.
@@ -586,7 +1033,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#sum
    * @since 3.0.0
    */
-  'sum',
+  sum (name, field, query, opts) {
+    return this.getMapper(name).sum(field, query, opts)
+  }
 
   /**
    * Wrapper for {@link Mapper#toJSON}.
@@ -629,7 +1078,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#toJSON
    * @since 3.0.0
    */
-  'toJSON',
+  toJSON (name, records, opts) {
+    return this.getMapper(name).toJSON(records, opts)
+  }
 
   /**
    * Fired during {@link Container#update}. See
@@ -665,6 +1116,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterUpdateListener
    * @see Container#update
    */
+
   /**
    * Callback signature for the {@link Container#event:afterUpdate} event.
    *
@@ -706,14 +1158,16 @@ export const proxiedMapperMethods = [
    * @method Container#update
    * @param {string} name Name of the {@link Mapper} to target.
    * @param {(string|number)} id See {@link Mapper#update}.
-   * @param {object} record See {@link Mapper#update}.
+   * @param {object} props See {@link Mapper#update}.
    * @param {object} [opts] See {@link Mapper#update}.
    * @returns {Promise} See {@link Mapper#update}.
    * @see Mapper#update
    * @since 3.0.0
    * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
-  'update',
+  update (name, id, props, opts) {
+    return this.getMapper(name).update(id, props, opts)
+  }
 
   /**
    * Fired during {@link Container#updateAll}. See
@@ -749,6 +1203,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterUpdateAllListener
    * @see Container#updateAll
    */
+
   /**
    * Callback signature for the {@link Container#event:afterUpdateAll} event.
    *
@@ -789,14 +1244,16 @@ export const proxiedMapperMethods = [
    * @fires Container#afterUpdateAll
    * @method Container#updateAll
    * @param {string} name Name of the {@link Mapper} to target.
-   * @param {object} update See {@link Mapper#updateAll}.
+   * @param {object} props See {@link Mapper#updateAll}.
    * @param {object} [query] See {@link Mapper#updateAll}.
    * @param {object} [opts] See {@link Mapper#updateAll}.
    * @returns {Promise} See {@link Mapper#updateAll}.
    * @see Mapper#updateAll
    * @since 3.0.0
    */
-  'updateAll',
+  updateAll (name, props, query, opts) {
+    return this.getMapper(name).updateAll(props, query, opts)
+  }
 
   /**
    * Fired during {@link Container#updateMany}. See
@@ -831,6 +1288,7 @@ export const proxiedMapperMethods = [
    * @see Container~afterUpdateManyListener
    * @see Container#updateMany
    */
+
   /**
    * Callback signature for the {@link Container#event:afterUpdateMany} event.
    *
@@ -876,7 +1334,9 @@ export const proxiedMapperMethods = [
    * @see Mapper#updateMany
    * @since 3.0.0
    */
-  'updateMany',
+  updateMany (name, record, opts) {
+    return this.getMapper(name).updateMany(record, opts)
+  }
 
   /**
    * Wrapper for {@link Mapper#validate}.
@@ -905,477 +1365,7 @@ export const proxiedMapperMethods = [
    * @see Mapper#validate
    * @since 3.0.0
    */
-  'validate'
-]
-
-/**
- * The `Container` class is a place to define and store {@link Mapper} instances.
- *
- * `Container` makes it easy to manage your Mappers. Without a container, you
- * need to manage Mappers yourself, including resolving circular dependencies
- * among relations. All Mappers in a container share the same adapters, so you
- * don't have to register adapters for every single Mapper.
- *
- * @example <caption>Container#constructor</caption>
- * // import { Container } from 'js-data';
- * const JSData = require('js-data');
- * const {Container} = JSData;
- * console.log('Using JSData v' + JSData.version.full);
- *
- * const store = new Container();
- *
- * @class Container
- * @extends Component
- * @param {object} [opts] Configuration options.
- * @param {boolean} [opts.debug=false] See {@link Component#debug}.
- * @param {Constructor} [opts.mapperClass] See {@link Container#mapperClass}.
- * @param {object} [opts.mapperDefaults] See {@link Container#mapperDefaults}.
- * @since 3.0.0
- */
-export function Container (opts) {
-  utils.classCallCheck(this, Container)
-  Component.call(this)
-  opts || (opts = {})
-
-  Object.defineProperties(this, {
-    /**
-     * The adapters registered with this Container, which are also shared by all
-     * Mappers in this Container.
-     *
-     * @name Container#_adapters
-     * @see Container#registerAdapter
-     * @since 3.0.0
-     * @type {Object}
-     */
-    _adapters: {
-      value: {}
-    },
-
-    /**
-     * The the mappers in this container
-     *
-     * @name Container#_mappers
-     * @see Mapper
-     * @since 3.0.0
-     * @type {Object}
-     */
-    _mappers: {
-      value: {}
-    },
-
-    /**
-     * Constructor function to use in {@link Container#defineMapper} to create new
-     * {@link Mapper} instances. {@link Container#mapperClass} should extend
-     * {@link Mapper}. By default {@link Mapper} is used to instantiate Mappers.
-     *
-     * @example <caption>Container#mapperClass</caption>
-     * // import { Container, Mapper } from 'js-data';
-     * const JSData = require('js-data');
-     * const { Container, Mapper } = JSData;
-     * console.log('Using JSData v' + JSData.version.full);
-     *
-     * class MyMapperClass extends Mapper {
-     *   foo () { return 'bar' }
-     * }
-     * const store = new Container({
-     *   mapperClass: MyMapperClass
-     * });
-     * store.defineMapper('user');
-     * console.log(store.getMapper('user').foo());
-     *
-     * @name Container#mapperClass
-     * @see Mapper
-     * @since 3.0.0
-     * @type {Constructor}
-     */
-    mapperClass: {
-      value: undefined,
-      writable: true
-    }
-  })
-
-  // Apply options provided by the user
-  utils.fillIn(this, opts)
-
-  /**
-   * Defaults options to pass to {@link Container#mapperClass} when creating a
-   * new {@link Mapper}.
-   *
-   * @example <caption>Container#mapperDefaults</caption>
-   * // import { Container } from 'js-data';
-   * const JSData = require('js-data');
-   * const { Container } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new Container({
-   *   mapperDefaults: {
-   *     idAttribute: '_id'
-   *   }
-   * });
-   * store.defineMapper('user');
-   * console.log(store.getMapper('user').idAttribute);
-   *
-   * @default {}
-   * @name Container#mapperDefaults
-   * @since 3.0.0
-   * @type {Object}
-   */
-  this.mapperDefaults = this.mapperDefaults || {}
-
-  // Use the Mapper class if the user didn't provide a mapperClass
-  this.mapperClass || (this.mapperClass = Mapper)
-}
-
-const props = {
-  constructor: Container,
-
-  /**
-   * Register a new event listener on this Container.
-   *
-   * Proxy for {@link Component#on}. If an event was emitted by a {@link Mapper}
-   * in the Container, then the name of the {@link Mapper} will be prepended to
-   * the arugments passed to the listener.
-   *
-   * @example <caption>Container#on</caption>
-   * // import { Container } from 'js-data';
-   * const JSData = require('js-data');
-   * const { Container } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new Container();
-   * store.on('foo', function (...args) { console.log(args.join(':')) });
-   * store.defineMapper('user');
-   * store.emit('foo', 'arg1', 'arg2');
-   * store.getMapper('user').emit('foo', 'arg1', 'arg2');
-   *
-   * @method Container#on
-   * @param {string} event Name of event to subsribe to.
-   * @param {Function} listener Listener function to handle the event.
-   * @param {*} [ctx] Optional content in which to invoke the listener.
-   * @since 3.0.0
-   */
-
-  /**
-   * Used to bind to events emitted by mappers in this container.
-   *
-   * @method Container#_onMapperEvent
-   * @param {string} name Name of the mapper that emitted the event.
-   * @param {...*} [args] Args See {@link Mapper#emit}.
-   * @private
-   * @since 3.0.0
-   */
-  _onMapperEvent (name, ...args) {
-    const type = args.shift()
-    this.emit(type, name, ...args)
-  },
-
-  /**
-   * Return a container scoped to a particular mapper.
-   *
-   * @example <caption>Container#as</caption>
-   * // import { Container } from 'js-data';
-   * const JSData = require('js-data');
-   * const { Container } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new Container();
-   * const UserMapper = store.defineMapper('user');
-   * const UserStore = store.as('user');
-   *
-   * const user1 = store.createRecord('user', { name: 'John' });
-   * const user2 = UserStore.createRecord({ name: 'John' });
-   * const user3 = UserMapper.createRecord({ name: 'John' });
-   * console.log(user1 === user2);
-   * console.log(user2 === user3);
-   * console.log(user1 === user3);
-   *
-   * @method Container#as
-   * @param {string} name Name of the {@link Mapper}.
-   * @returns {Object} A container scoped to a particular mapper.
-   * @since 3.0.0
-   */
-  as (name) {
-    const props = {}
-    const original = this
-    proxiedMapperMethods.forEach(function (method) {
-      props[method] = {
-        writable: true,
-        value (...args) {
-          return original[method](name, ...args)
-        }
-      }
-    })
-    props.getMapper = {
-      writable: true,
-      value () {
-        return original.getMapper(name)
-      }
-    }
-    return Object.create(this, props)
-  },
-
-  /**
-   * Create a new mapper and register it in this container.
-   *
-   * @example <caption>Container#defineMapper</caption>
-   * // import { Container } from 'js-data';
-   * const JSData = require('js-data');
-   * const { Container } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new Container({
-   *   mapperDefaults: { foo: 'bar' }
-   * });
-   * // Container#defineMapper returns a direct reference to the newly created
-   * // Mapper.
-   * const UserMapper = store.defineMapper('user');
-   * console.log(UserMapper === store.getMapper('user'));
-   * console.log(UserMapper === store.as('user').getMapper());
-   * console.log(UserMapper.foo);
-   *
-   * @method Container#defineMapper
-   * @param {string} name Name under which to register the new {@link Mapper}.
-   * {@link Mapper#name} will be set to this value.
-   * @param {object} [opts] Configuration options. Passed to
-   * {@link Container#mapperClass} when creating the new {@link Mapper}.
-   * @returns {Mapper} The newly created instance of {@link Mapper}.
-   * @see Container#as
-   * @since 3.0.0
-   */
-  defineMapper (name, opts) {
-    // For backwards compatibility with defineResource
-    if (utils.isObject(name)) {
-      opts = name
-      name = opts.name
-    }
-    if (!utils.isString(name)) {
-      throw utils.err(`${DOMAIN}#defineMapper`, 'name')(400, 'string', name)
-    }
-
-    // Default values for arguments
-    opts || (opts = {})
-    // Set Mapper#name
-    opts.name = name
-    opts.relations || (opts.relations = {})
-
-    // Check if the user is overriding the datastore's default mapperClass
-    const mapperClass = opts.mapperClass || this.mapperClass
-    delete opts.mapperClass
-
-    // Apply the datastore's defaults to the options going into the mapper
-    utils.fillIn(opts, this.mapperDefaults)
-
-    // Instantiate a mapper
-    const mapper = this._mappers[name] = new mapperClass(opts) // eslint-disable-line
-    mapper.relations || (mapper.relations = {})
-    // Make sure the mapper's name is set
-    mapper.name = name
-    // All mappers in this datastore will share adapters
-    mapper._adapters = this.getAdapters()
-
-    mapper.datastore = this
-
-    mapper.on('all', (...args) => this._onMapperEvent(name, ...args))
-    mapper.defineRelations()
-
-    return mapper
-  },
-
-  defineResource (name, opts) {
-    console.warn('DEPRECATED: defineResource is deprecated, use defineMapper instead')
-    return this.defineMapper(name, opts)
-  },
-
-  /**
-   * Return the registered adapter with the given name or the default adapter if
-   * no name is provided.
-   *
-   * @method Container#getAdapter
-   * @param {string} [name] The name of the adapter to retrieve.
-   * @returns {Adapter} The adapter.
-   * @since 3.0.0
-   */
-  getAdapter (name) {
-    const adapter = this.getAdapterName(name)
-    if (!adapter) {
-      throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
-    }
-    return this.getAdapters()[adapter]
-  },
-
-  /**
-   * Return the name of a registered adapter based on the given name or options,
-   * or the name of the default adapter if no name provided.
-   *
-   * @method Container#getAdapterName
-   * @param {(Object|string)} [opts] The name of an adapter or options, if any.
-   * @returns {string} The name of the adapter.
-   * @since 3.0.0
-   */
-  getAdapterName (opts) {
-    opts || (opts = {})
-    if (utils.isString(opts)) {
-      opts = { adapter: opts }
-    }
-    return opts.adapter || this.mapperDefaults.defaultAdapter
-  },
-
-  /**
-   * Return the registered adapters of this container.
-   *
-   * @method Container#getAdapters
-   * @returns {Adapter}
-   * @since 3.0.0
-   */
-  getAdapters () {
-    return this._adapters
-  },
-
-  /**
-   * Return the mapper registered under the specified name.
-   *
-   * @example <caption>Container#getMapper</caption>
-   * // import { Container } from 'js-data';
-   * const JSData = require('js-data');
-   * const { Container } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new Container();
-   * // Container#defineMapper returns a direct reference to the newly created
-   * // Mapper.
-   * const UserMapper = store.defineMapper('user');
-   * console.log(UserMapper === store.getMapper('user'));
-   * console.log(UserMapper === store.as('user').getMapper());
-   * store.getMapper('profile'); // throws Error, there is no mapper with name "profile"
-   *
-   * @method Container#getMapper
-   * @param {string} name {@link Mapper#name}.
-   * @returns {Mapper}
-   * @since 3.0.0
-   */
-  getMapper (name) {
-    const mapper = this.getMapperByName(name)
-    if (!mapper) {
-      throw utils.err(`${DOMAIN}#getMapper`, name)(404, 'mapper')
-    }
-    return mapper
-  },
-
-  /**
-   * Return the mapper registered under the specified name.
-   * Doesn't throw error if mapper doesn't exist.
-   *
-   * @example <caption>Container#getMapperByName</caption>
-   * // import { Container } from 'js-data';
-   * const JSData = require('js-data');
-   * const { Container } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new Container();
-   * // Container#defineMapper returns a direct reference to the newly created
-   * // Mapper.
-   * const UserMapper = store.defineMapper('user');
-   * console.log(UserMapper === store.getMapper('user'));
-   * console.log(UserMapper === store.as('user').getMapper());
-   * console.log(store.getMapper('profile')); // Does NOT throw an error
-   *
-   * @method Container#getMapperByName
-   * @param {string} name {@link Mapper#name}.
-   * @returns {Mapper}
-   * @since 3.0.0
-   */
-  getMapperByName (name) {
-    return this._mappers[name]
-  },
-
-  /**
-   * Register an adapter on this container under the given name. Adapters
-   * registered on a container are shared by all mappers in the container.
-   *
-   * @example
-   * import { Container } from 'js-data';
-   * import { RethinkDBAdapter } from 'js-data-rethinkdb';
-   * const store = new Container();
-   * store.registerAdapter('rethinkdb', new RethinkDBAdapter(), { default: true });
-   *
-   * @method Container#registerAdapter
-   * @param {string} name The name of the adapter to register.
-   * @param {Adapter} adapter The adapter to register.
-   * @param {object} [opts] Configuration options.
-   * @param {boolean} [opts.default=false] Whether to make the adapter the
-   * default adapter for all Mappers in this container.
-   * @since 3.0.0
-   * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
-   */
-  registerAdapter (name, adapter, opts) {
-    opts || (opts = {})
-    this.getAdapters()[name] = adapter
-    // Optionally make it the default adapter for the target.
-    if (opts === true || opts.default) {
-      this.mapperDefaults.defaultAdapter = name
-      utils.forOwn(this._mappers, function (mapper) {
-        mapper.defaultAdapter = name
-      })
-    }
+  validate (name, record, opts) {
+    return this.getMapper(name).validate(record, opts)
   }
 }
-
-proxiedMapperMethods.forEach(function (method) {
-  props[method] = function (name, ...args) {
-    return this.getMapper(name)[method](...args)
-  }
-})
-
-Component.extend(props)
-
-/**
- * Create a subclass of this Container:
- * @example <caption>Container.extend</caption>
- * const JSData = require('js-data');
- * const { Container } = JSData;
- * console.log('Using JSData v' + JSData.version.full);
- *
- * // Extend the class using ES2015 class syntax.
- * class CustomContainerClass extends Container {
- *   foo () { return 'bar' }
- *   static beep () { return 'boop' }
- * }
- * const customContainer = new CustomContainerClass();
- * console.log(customContainer.foo());
- * console.log(CustomContainerClass.beep());
- *
- * // Extend the class using alternate method.
- * const OtherContainerClass = Container.extend({
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * });
- * const otherContainer = new OtherContainerClass();
- * console.log(otherContainer.foo());
- * console.log(OtherContainerClass.beep());
- *
- * // Extend the class, providing a custom constructor.
- * function AnotherContainerClass () {
- *   Container.call(this);
- *   this.created_at = new Date().getTime();
- * }
- * Container.extend({
- *   constructor: AnotherContainerClass,
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * })
- * const anotherContainer = new AnotherContainerClass();
- * console.log(anotherContainer.created_at);
- * console.log(anotherContainer.foo());
- * console.log(AnotherContainerClass.beep());
- *
- * @method Container.extend
- * @param {object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {object} [props.constructor] Provide a custom constructor function
- * to be used as the subclass itself.
- * @param {object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Container class.
- * @since 3.0.0
- */

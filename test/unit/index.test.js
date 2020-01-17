@@ -1,7 +1,7 @@
 import { assert, JSData } from '../_setup'
 
-describe('JSData', function () {
-  it('has all the right exports', function () {
+describe('JSData', () => {
+  it('has all the right exports', () => {
     assert.equal(typeof JSData.belongsTo, 'function', 'has the belongsTo decorator')
     assert.equal(typeof JSData.Collection, 'function', 'has the Collection class')
     assert.equal(typeof JSData.Container, 'function', 'has the Container class')

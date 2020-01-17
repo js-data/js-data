@@ -124,11 +124,10 @@ const utils = {
    * @private
    * @since 3.0.0
    */
-  _forRelation (opts, def, fn, thisArg) {
+  _forRelation (opts = {}, def, fn, thisArg) {
     const relationName = def.relation
     let containedName = null
     let index
-    opts || (opts = {})
     opts.with || (opts.with = [])
 
     if ((index = utils._getIndex(opts.with, relationName)) >= 0) {
@@ -238,40 +237,13 @@ const utils = {
    * @see utils.diffObjects
    * @since 3.0.0
    */
-  areDifferent (newObject, oldObject, opts) {
-    opts || (opts = {})
+  areDifferent (newObject, oldObject, opts = {}) {
     const diff = utils.diffObjects(newObject, oldObject, opts)
     const diffCount =
       Object.keys(diff.added).length +
       Object.keys(diff.removed).length +
       Object.keys(diff.changed).length
     return diffCount > 0
-  },
-
-  /**
-   * Verified that the given constructor is being invoked via `new`, as opposed
-   * to just being called like a normal function.
-   *
-   * @example
-   * import { utils } from 'js-data';
-   * function Cat () {
-   *   utils.classCallCheck(this, Cat);
-   * }
-   * const cat = new Cat(); // this is ok
-   * Cat(); // this throws an error
-   *
-   * @method utils.classCallCheck
-   * @param {*} instance Instance that is being constructed.
-   * @param {Constructor} ctor Constructor function used to construct the
-   * instance.
-   * @since 3.0.0
-   * @throws {Error} Throws an error if the constructor is being improperly
-   * invoked.
-   */
-  classCallCheck (instance, ctor) {
-    if (!(instance instanceof ctor)) {
-      throw utils.err(`${ctor.name}`)(500, 'Cannot call a class as a function')
-    }
   },
 
   /**
@@ -480,8 +452,7 @@ const utils = {
    * @see utils.areDifferent
    * @since 3.0.0
    */
-  diffObjects (newObject, oldObject, opts) {
-    opts || (opts = {})
+  diffObjects (newObject, oldObject, opts = {}) {
     let equalsFn = opts.equalsFn
     const blacklist = opts.ignore
     const diff = {
@@ -652,83 +623,6 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
         }
       }
     })
-  },
-
-  /**
-   * Used for sublcassing. Invoke this method in the context of a superclass to
-   * to produce a subclass based on `props` and `classProps`.
-   *
-   * @example
-   * import { utils } from 'js-data';
-   * function Animal () {}
-   * Animal.extend = utils.extend;
-   * const Cat = Animal.extend({
-   *   say () {
-   *     console.log('meow');
-   *   }
-   * });
-   * const cat = new Cat();
-   * cat instanceof Animal; // true
-   * cat instanceof Cat; // true
-   * cat.say(); // "meow"
-   *
-   * @method utils.extend
-   * @param {object} props Instance properties for the subclass.
-   * @param {object} [props.constructor] Provide a custom constructor function
-   * to use as the subclass.
-   * @param {object} props Static properties for the subclass.
-   * @returns {Constructor} A new subclass.
-   * @since 3.0.0
-   */
-  extend (props, classProps) {
-    const superClass = this
-    let subClass
-
-    props || (props = {})
-    classProps || (classProps = {})
-
-    if (Object.hasOwnProperty.call(props, 'constructor')) {
-      subClass = props.constructor
-      delete props.constructor
-    } else {
-      subClass = function (...args) {
-        utils.classCallCheck(this, subClass)
-        superClass.apply(this, args)
-      }
-    }
-
-    // Setup inheritance of instance members
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        configurable: true,
-        enumerable: false,
-        value: subClass,
-        writable: true
-      }
-    })
-
-    const obj = Object
-    // Setup inheritance of static members
-    if (obj.setPrototypeOf) {
-      obj.setPrototypeOf(subClass, superClass)
-    } else if (classProps.strictEs6Class) {
-      subClass.__proto__ = superClass // eslint-disable-line
-    } else {
-      utils.forOwn(superClass, function (value, key) {
-        subClass[key] = value
-      })
-    }
-    if (!Object.hasOwnProperty.call(subClass, '__super__')) {
-      Object.defineProperty(subClass, '__super__', {
-        configurable: true,
-        value: superClass
-      })
-    }
-
-    utils.addHiddenPropsToTarget(subClass.prototype, props)
-    utils.fillIn(subClass, classProps)
-
-    return subClass
   },
 
   /**

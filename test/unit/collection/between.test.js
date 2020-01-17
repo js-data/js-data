@@ -1,3 +1,3 @@
-describe('Collection#between', function () {
+describe('Collection#between', () => {
   it('should work')
 })

@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Container#defineMapper', function () {
-  it('should be an instance method', function () {
+describe('Container#defineMapper', () => {
+  it('should be an instance method', () => {
     const Container = JSData.Container
     const store = new Container()
     assert.equal(typeof store.defineMapper, 'function')
     assert.strictEqual(store.defineMapper, Container.prototype.defineMapper)
   })
-  it('should create a new mapper', function () {
+  it('should create a new mapper', () => {
     const Container = JSData.Container
     let container = new Container()
     let mapper = container.defineMapper('foo')
@@ -55,11 +55,11 @@ describe('Container#defineMapper', function () {
     assert.equal(mapper.foo, 'beep')
     assert.strictEqual(mapper.getAdapters(), container.getAdapters())
 
-    assert.throws(function () {
+    assert.throws(() => {
       mapper = container.defineMapper()
     }, Error, '[Container#defineMapper:name] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
 
-    assert.throws(function () {
+    assert.throws(() => {
       mapper = container.defineMapper({
         foo: 'bar'
       })
@@ -71,7 +71,7 @@ describe('Container#defineMapper', function () {
     })
     assert.equal(mapper.name, 'foo')
   })
-  it('can get a scoped reference', function () {
+  it('can get a scoped reference', () => {
     const Container = JSData.Container
     const container = new Container()
     const fooMapper = container.defineMapper('foo')

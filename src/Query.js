@@ -55,30 +55,28 @@ const escape = function (pattern) {
  * @param {Collection} collection The collection on which this query operates.
  * @since 3.0.0
  */
-function Query (collection) {
-  utils.classCallCheck(this, Query)
+export default class Query extends Component {
+  constructor (collection) {
+    super()
 
-  /**
-   * The {@link Collection} on which this query operates.
-   *
-   * @name Query#collection
-   * @since 3.0.0
-   * @type {Collection}
-   */
-  this.collection = collection
+    /**
+     * The {@link Collection} on which this query operates.
+     *
+     * @name Query#collection
+     * @since 3.0.0
+     * @type {Collection}
+     */
+    this.collection = collection
 
-  /**
-   * The current data result of this query.
-   *
-   * @name Query#data
-   * @since 3.0.0
-   * @type {Array}
-   */
-  this.data = null
-}
-
-export default Component.extend({
-  constructor: Query,
+    /**
+     * The current data result of this query.
+     *
+     * @name Query#data
+     * @since 3.0.0
+     * @type {Array}
+     */
+    this.data = null
+  }
 
   _applyWhereFromObject (where) {
     const fields = []
@@ -101,7 +99,7 @@ export default Component.extend({
       ops,
       predicates
     }
-  },
+  }
 
   _applyWhereFromArray (where) {
     const groups = []
@@ -119,7 +117,7 @@ export default Component.extend({
     })
     groups.isArray = true
     return groups
-  },
+  }
 
   _testObjectGroup (keep, first, group, item) {
     let i
@@ -138,7 +136,7 @@ export default Component.extend({
       first = false
     }
     return { keep, first }
-  },
+  }
 
   _testArrayGroup (keep, first, groups, item) {
     let i
@@ -159,7 +157,7 @@ export default Component.extend({
       first = result.first
     }
     return { keep, first }
-  },
+  }
 
   /**
    * Find all entities between two boundaries.
@@ -221,14 +219,13 @@ export default Component.extend({
    * @returns {Query} A reference to itself for chaining.
    * @since 3.0.0
    */
-  between (leftKeys, rightKeys, opts) {
-    opts || (opts = {})
+  between (leftKeys, rightKeys, opts = {}) {
     if (this.data) {
       throw utils.err(`${DOMAIN}#between`)(500, 'Cannot access index')
     }
     this.data = this.collection.getIndex(opts.index).between(leftKeys, rightKeys, opts)
     return this
-  },
+  }
 
   /**
    * The comparison function used by the {@link Query} class.
@@ -274,7 +271,7 @@ export default Component.extend({
         return 0
       }
     }
-  },
+  }
 
   /**
    * Predicate evaluation function used by the {@link Query} class.
@@ -287,7 +284,7 @@ export default Component.extend({
    * @since 3.0.0
    */
   evaluate (value, op, predicate) {
-    const ops = this.constructor.ops
+    const ops = Query.ops
     if (ops[op]) {
       return ops[op](value, predicate)
     }
@@ -296,7 +293,7 @@ export default Component.extend({
     } else if (op.indexOf('notLike') === 0) {
       return this.like(predicate, op.substr(7)).exec(value) === null
     }
-  },
+  }
 
   /**
    * Find the record or records that match the provided query or are accepted by
@@ -667,7 +664,7 @@ export default Component.extend({
       this.data = this.data.filter(query, thisArg)
     }
     return this
-  },
+  }
 
   /**
    * Iterate over all entities.
@@ -681,7 +678,7 @@ export default Component.extend({
   forEach (forEachFn, thisArg) {
     this.getData().forEach(forEachFn, thisArg)
     return this
-  },
+  }
 
   /**
    * Find the entity or entities that match the provided key.
@@ -712,9 +709,7 @@ export default Component.extend({
    * @returns {Query} A reference to itself for chaining.
    * @since 3.0.0
    */
-  get (keyList, opts) {
-    keyList || (keyList = [])
-    opts || (opts = {})
+  get (keyList = [], opts = {}) {
     if (this.data) {
       throw utils.err(`${DOMAIN}#get`)(500, INDEX_ERR)
     }
@@ -727,7 +722,7 @@ export default Component.extend({
     }
     this.data = this.collection.getIndex(opts.index).get(keyList)
     return this
-  },
+  }
 
   /**
    * Find the entity or entities that match the provided keyLists.
@@ -767,7 +762,7 @@ export default Component.extend({
       this.data = this.data.concat(index.get(keyList))
     })
     return this
-  },
+  }
 
   /**
    * Return the current data result of this query.
@@ -781,7 +776,7 @@ export default Component.extend({
       this.data = this.collection.index.getAll()
     }
     return this.data
-  },
+  }
 
   /**
    * Implementation used by the `like` operator. Takes a pattern and flags and
@@ -795,7 +790,7 @@ export default Component.extend({
    */
   like (pattern, flags) {
     return new RegExp(`^${(escape(pattern).replace(percentRegExp, '.*').replace(underscoreRegExp, '.'))}$`, flags)
-  },
+  }
 
   /**
    * Limit the result.
@@ -826,7 +821,7 @@ export default Component.extend({
     const data = this.getData()
     this.data = data.slice(0, Math.min(data.length, num))
     return this
-  },
+  }
 
   /**
    * Apply a mapping function to the result data.
@@ -863,7 +858,7 @@ export default Component.extend({
   map (mapFn, thisArg) {
     this.data = this.getData().map(mapFn, thisArg)
     return this
-  },
+  }
 
   /**
    * Return the result of calling the specified function on each item in this
@@ -883,7 +878,7 @@ export default Component.extend({
       return item[funcName](...args)
     })
     return this
-  },
+  }
 
   /**
    * Complete the execution of the query and return the resulting data.
@@ -896,7 +891,7 @@ export default Component.extend({
     const data = this.data
     this.data = null
     return data
-  },
+  }
 
   /**
    * Skip a number of results.
@@ -936,7 +931,7 @@ export default Component.extend({
     }
     return this
   }
-}, {
+
   /**
    * The filtering operators supported by {@link Query#filter}, and which are
    * implemented by adapters (for the most part).
@@ -1089,7 +1084,7 @@ export default Component.extend({
    * @since 3.0.0
    * @type {Object}
    */
-  ops: {
+  static ops = {
     '=': function (value, predicate) {
       return value == predicate // eslint-disable-line
     },
@@ -1136,56 +1131,4 @@ export default Component.extend({
       return (value || []).indexOf(predicate) === -1
     }
   }
-})
-
-/**
- * Create a subclass of this Query:
- * @example <caption>Query.extend</caption>
- * const JSData = require('js-data');
- * const { Query } = JSData;
- * console.log('Using JSData v' + JSData.version.full);
- *
- * // Extend the class using ES2015 class syntax.
- * class CustomQueryClass extends Query {
- *   foo () { return 'bar'; }
- *   static beep () { return 'boop'; }
- * }
- * const customQuery = new CustomQueryClass();
- * console.log(customQuery.foo());
- * console.log(CustomQueryClass.beep());
- *
- * // Extend the class using alternate method.
- * const OtherQueryClass = Query.extend({
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * });
- * const otherQuery = new OtherQueryClass();
- * console.log(otherQuery.foo());
- * console.log(OtherQueryClass.beep());
- *
- * // Extend the class, providing a custom constructor.
- * function AnotherQueryClass (collection) {
- *   Query.call(this, collection);
- *   this.created_at = new Date().getTime();
- * }
- * Query.extend({
- *   constructor: AnotherQueryClass,
- *   foo () { return 'bar'; }
- * }, {
- *   beep () { return 'boop'; }
- * });
- * const anotherQuery = new AnotherQueryClass();
- * console.log(anotherQuery.created_at);
- * console.log(anotherQuery.foo());
- * console.log(AnotherQueryClass.beep());
- *
- * @method Query.extend
- * @param {object} [props={}] Properties to add to the prototype of the
- * subclass.
- * @param {object} [props.constructor] Provide a custom constructor function
- * to be used as the subclass itself.
- * @param {object} [classProps={}] Static properties to add to the subclass.
- * @returns {Constructor} Subclass of this Query class.
- * @since 3.0.0
- */
+}

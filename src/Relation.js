@@ -7,30 +7,28 @@ export const hasOneType = 'hasOne'
 
 const DOMAIN = 'Relation'
 
-export function Relation (relatedMapper, options = {}) {
-  utils.classCallCheck(this, Relation)
+export class Relation {
+  constructor (relatedMapper, options = {}) {
+    options.type = this.constructor.TYPE_NAME
+    this.validateOptions(relatedMapper, options)
 
-  options.type = this.constructor.TYPE_NAME
-  this.validateOptions(relatedMapper, options)
+    if (typeof relatedMapper === 'object') {
+      Object.defineProperty(this, 'relatedMapper', { value: relatedMapper })
+    }
 
-  if (typeof relatedMapper === 'object') {
-    Object.defineProperty(this, 'relatedMapper', { value: relatedMapper })
+    Object.defineProperty(this, 'inverse', { writable: true })
+    utils.fillIn(this, options)
   }
 
-  Object.defineProperty(this, 'inverse', { writable: true })
-  utils.fillIn(this, options)
-}
+  // static extend = utils.extend
 
-Relation.extend = utils.extend
-
-utils.addHiddenPropsToTarget(Relation.prototype, {
   get canAutoAddLinks () {
     return this.add === undefined || !!this.add
-  },
+  }
 
   get relatedCollection () {
     return this.mapper.datastore.getCollection(this.relation)
-  },
+  }
 
   validateOptions (related, opts) {
     const DOMAIN_ERR = `new ${DOMAIN}`
@@ -55,7 +53,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     } else {
       throw utils.err(DOMAIN_ERR, 'related')(400, 'Mapper or string', related)
     }
-  },
+  }
 
   assignTo (mapper) {
     this.name = mapper.name
@@ -65,19 +63,19 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     mapper.relationFields || Object.defineProperty(mapper, 'relationFields', { value: [] })
     mapper.relationList.push(this)
     mapper.relationFields.push(this.localField)
-  },
+  }
 
   canFindLinkFor () {
     return !!(this.foreignKey || this.localKey)
-  },
+  }
 
   getRelation () {
     return this.relatedMapper
-  },
+  }
 
   getForeignKey (record) {
     return utils.get(record, this.mapper.idAttribute)
-  },
+  }
 
   setForeignKey (record, relatedRecord) {
     if (!record || !relatedRecord) {
@@ -85,7 +83,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     }
 
     this._setForeignKey(record, relatedRecord)
-  },
+  }
 
   _setForeignKey (record, relatedRecords) {
     const idAttribute = this.mapper.idAttribute
@@ -97,15 +95,15 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     relatedRecords.forEach((relatedRecord) => {
       utils.set(relatedRecord, this.foreignKey, utils.get(record, idAttribute))
     })
-  },
+  }
 
   getLocalField (record) {
     return utils.get(record, this.localField)
-  },
+  }
 
   setLocalField (record, relatedData) {
     return utils.set(record, this.localField, relatedData)
-  },
+  }
 
   getInverse (mapper) {
     if (!this.inverse) {
@@ -113,7 +111,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     }
 
     return this.inverse
-  },
+  }
 
   findInverseRelation (mapper) {
     this.getRelation().relationList.forEach((def) => {
@@ -122,11 +120,11 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
         return true
       }
     })
-  },
+  }
 
   isInversedTo (def) {
     return !def.foreignKey || def.foreignKey === this.foreignKey
-  },
+  }
 
   addLinkedRecords (records) {
     const datastore = this.mapper.datastore
@@ -150,14 +148,14 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
         this.setLocalField(record, relatedData)
       }
     })
-  },
+  }
 
   removeLinkedRecords (relatedMapper, records) {
     const localField = this.localField
     records.forEach((record) => {
       utils.set(record, localField, undefined)
     })
-  },
+  }
 
   linkRecord (record, relatedRecord) {
     const relatedId = utils.get(relatedRecord, this.mapper.idAttribute)
@@ -180,7 +178,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     }
 
     return relatedRecord
-  },
+  }
 
   // e.g. user hasMany post via "foreignKey", so find all posts of user
   findExistingLinksByForeignKey (id) {
@@ -190,7 +188,7 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return this.relatedCollection.filter({
       [this.foreignKey]: id
     })
-  },
+  }
 
   ensureLinkedDataHasProperType (props, opts) {
     const relatedMapper = this.getRelation()
@@ -203,15 +201,15 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     if (relationData && !relatedMapper.is(relationData)) {
       utils.set(props, this.localField, relatedMapper.createRecord(relationData, opts))
     }
-  },
+  }
 
   isRequiresParentId () {
     return false
-  },
+  }
 
   isRequiresChildId () {
     return false
-  },
+  }
 
   createChildRecord (props, relationData, opts) {
     this.setForeignKey(props, relationData)
@@ -219,11 +217,11 @@ utils.addHiddenPropsToTarget(Relation.prototype, {
     return this.createLinked(relationData, opts).then((result) => {
       this.setLocalField(props, result)
     })
-  },
+  }
 
   createLinked (props, opts) {
     const create = utils.isArray(props) ? 'createMany' : 'create'
 
     return this.getRelation()[create](props, opts)
   }
-})
+}

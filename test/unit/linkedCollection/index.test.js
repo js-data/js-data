@@ -1,7 +1,7 @@
 import { assert, JSData, sinon } from '../../_setup'
 
-describe('LinkedCollection', function () {
-  it('should create a linked collection', function (done) {
+describe('LinkedCollection', () => {
+  it('should create a linked collection', (done) => {
     assert.equal(typeof JSData.LinkedCollection, 'function', 'should be a function')
     const store = new JSData.DataStore()
     const mapper = store.defineMapper('user', {

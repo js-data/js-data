@@ -1,14 +1,14 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Record#destroy', function () {
-  it('should be an instance method', function () {
+describe('Record#destroy', () => {
+  it('should be an instance method', () => {
     const Record = JSData.Record
     const record = new Record()
     assert.equal(typeof record.destroy, 'function')
     assert.strictEqual(record.destroy, Record.prototype.destroy)
   })
 
-  it('can destroy itself', async function () {
+  it('can destroy itself', async () => {
     const store = new JSData.DataStore()
     const mockAdapter = {
       destroy (mapper, id, opts) {

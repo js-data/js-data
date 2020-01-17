@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#count', function () {
-  it('should be an instance method', function () {
+describe('Mapper#count', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.count, 'function')
     assert.strictEqual(mapper.count, Mapper.prototype.count)
   })
-  it('should count', async function () {
+  it('should count', async () => {
     const query = { id: 1 }
     let countCalled = false
     const User = new JSData.Mapper({
@@ -17,7 +17,7 @@ describe('Mapper#count', function () {
     User.registerAdapter('mock', {
       count (mapper, _query, Opts) {
         countCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.deepEqual(_query, query, 'should pass in the query')
           assert.equal(Opts.raw, false, 'Opts are provided')
@@ -29,7 +29,7 @@ describe('Mapper#count', function () {
     assert(countCalled, 'Adapter#count should have been called')
     assert.equal(count, 1, 'count should be 1')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const query = { id: 1 }
     let countCalled = false
     const User = new JSData.Mapper({
@@ -40,7 +40,7 @@ describe('Mapper#count', function () {
     User.registerAdapter('mock', {
       count (mapper, _query, Opts) {
         countCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.deepEqual(_query, query, 'should pass in the query')
           assert(Opts.raw, 'Opts are provided')

@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#destroyAll', function () {
-  it('should be an instance method', function () {
+describe('Mapper#destroyAll', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.destroyAll, 'function')
     assert.strictEqual(mapper.destroyAll, Mapper.prototype.destroyAll)
   })
-  it('should destroyAll', async function () {
+  it('should destroyAll', async () => {
     const query = {}
     let destroyAllCalled = false
     const User = new JSData.Mapper({
@@ -17,7 +17,7 @@ describe('Mapper#destroyAll', function () {
     User.registerAdapter('mock', {
       destroyAll (mapper, _query, Opts) {
         destroyAllCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.deepEqual(_query, query, 'should pass in the query')
           assert.equal(Opts.raw, false, 'Opts are provided')
@@ -29,7 +29,7 @@ describe('Mapper#destroyAll', function () {
     assert(destroyAllCalled, 'Adapter#destroyAll should have been called')
     assert.equal(result, 'foo', 'returned data')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const query = {}
     let destroyAllCalled = false
     const User = new JSData.Mapper({
@@ -40,7 +40,7 @@ describe('Mapper#destroyAll', function () {
     User.registerAdapter('mock', {
       destroyAll (mapper, _query, Opts) {
         destroyAllCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.deepEqual(_query, query, 'should pass in the query')
           assert.equal(Opts.raw, true, 'Opts are provided')

@@ -1,6 +1,6 @@
 import { assert } from '../../_setup'
 
-describe('LinkedCollection#removeAll', function () {
+describe('LinkedCollection#removeAll', () => {
   it('should eject items that meet the criteria from the store', function () {
     this.User.debug = true
     this.UserCollection.add([this.data.p1, this.data.p2, this.data.p3, this.data.p4, this.data.p5])

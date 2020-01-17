@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('LinkedCollection#add', function () {
-  it('should add', function () {
+describe('LinkedCollection#add', () => {
+  it('should add', () => {
     const store = new JSData.DataStore()
     const mapper = store.defineMapper('user') // eslint-disable-line
     const collection = store.getCollection('user')
@@ -98,7 +98,7 @@ describe('LinkedCollection#add', function () {
     assert.equal(0, this.UserCollection.get(1).comments.length)
     assert.equal(2, this.UserCollection.get(1).approvedComments.length)
   })
-  it('should inject cyclic dependencies', function () {
+  it('should inject cyclic dependencies', () => {
     const store = new JSData.DataStore({
       linkRelations: true
     })
@@ -168,7 +168,7 @@ describe('LinkedCollection#add', function () {
     assert(store.getCollection('foo').get(6))
     assert(store.getCollection('foo').get(7))
   })
-  it('should work when injecting child relations multiple times', function () {
+  it('should work when injecting child relations multiple times', () => {
     const store = new JSData.DataStore({
       linkRelations: true
     })
@@ -223,7 +223,7 @@ describe('LinkedCollection#add', function () {
     assert.deepEqual(store.filter('child', { parentId: 1 }), store.get('parent', 1).children)
   })
 
-  it('should not auto-add relations where auto-add has been disabled', function () {
+  it('should not auto-add relations where auto-add has been disabled', () => {
     const store = new JSData.DataStore({
       linkRelations: false
     })
@@ -263,7 +263,7 @@ describe('LinkedCollection#add', function () {
     assert.equal(foo.bars.length, 2)
     assert.deepEqual(store.getAll('bar'), [], 'nothing should have been injected')
   })
-  it('should allow custom relation injection logic', function () {
+  it('should allow custom relation injection logic', () => {
     const store = new JSData.DataStore({
       linkRelations: true
     })
@@ -275,7 +275,7 @@ describe('LinkedCollection#add', function () {
             foreignKey: 'fooId',
             add (store, relationDef, foo) {
               const bars = store.add(relationDef.relation, foo.test_bars)
-              bars.forEach(function (bar) {
+              bars.forEach((bar) => {
                 bar.beep = 'boop'
               })
               delete foo.test_bars
@@ -320,7 +320,7 @@ describe('LinkedCollection#add', function () {
       }
     ], 'bars should have been added')
   })
-  it('should update links', function () {
+  it('should update links', () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
       relations: {
@@ -377,7 +377,7 @@ describe('LinkedCollection#add', function () {
     this.UserCollection.add(users)
     // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
   })
-  it('should inject 1,000 items where there is an index on "age"', function () {
+  it('should inject 1,000 items where there is an index on "age"', () => {
     const collection = new JSData.Collection({ mapper: new JSData.Mapper({ name: 'user' }) })
     collection.createIndex('age')
     collection.createIndex('created')

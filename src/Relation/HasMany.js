@@ -1,21 +1,21 @@
 import utils from '../utils'
 import { Relation } from '../Relation'
 
-export const HasManyRelation = Relation.extend({
+export class HasManyRelation extends Relation {
   validateOptions (related, opts) {
-    Relation.prototype.validateOptions.call(this, related, opts)
+    super.validateOptions(related, opts)
 
     const { localKeys, foreignKeys, foreignKey } = opts
 
     if (!foreignKey && !localKeys && !foreignKeys) {
       throw utils.err('new Relation', 'opts.<foreignKey|localKeys|foreignKeys>')(400, 'string', foreignKey)
     }
-  },
+  }
 
   canFindLinkFor (record) {
     const hasForeignKeys = this.foreignKey || this.foreignKeys
     return !!(hasForeignKeys || (this.localKeys && utils.get(record, this.localKeys)))
-  },
+  }
 
   linkRecord (record, relatedRecords) {
     const relatedCollection = this.relatedCollection
@@ -38,7 +38,7 @@ export const HasManyRelation = Relation.extend({
 
       return relatedRecord
     })
-  },
+  }
 
   findExistingLinksFor (record) {
     const id = utils.get(record, this.mapper.idAttribute)
@@ -56,7 +56,7 @@ export const HasManyRelation = Relation.extend({
     if (records && records.length) {
       return records
     }
-  },
+  }
 
   // e.g. user hasMany group via "foreignKeys", so find all users of a group
   findExistingLinksByLocalKeys (ids) {
@@ -67,7 +67,7 @@ export const HasManyRelation = Relation.extend({
         }
       }
     })
-  },
+  }
 
   // e.g. group hasMany user via "localKeys", so find all groups that own a user
   findExistingLinksByForeignKeys (id) {
@@ -78,15 +78,15 @@ export const HasManyRelation = Relation.extend({
         }
       }
     })
-  },
+  }
 
   isRequiresParentId () {
     return !!this.localKeys && this.localKeys.length > 0
-  },
+  }
 
   isRequiresChildId () {
     return !!this.foreignKey
-  },
+  }
 
   createParentRecord (props, opts) {
     const relationData = this.getLocalField(props)
@@ -95,11 +95,11 @@ export const HasManyRelation = Relation.extend({
     return this.createLinked(relationData, opts).then((records) => {
       utils.set(props, this.localKeys, records.map((record) => utils.get(record, foreignIdField)))
     })
-  },
+  }
 
   createLinked (props, opts) {
     return this.getRelation().createMany(props, opts)
   }
-}, {
-  TYPE_NAME: 'hasMany'
-})
+
+  static TYPE_NAME = 'hasMany'
+}

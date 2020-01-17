@@ -1,13 +1,13 @@
 import { assert, JSData, TYPES_EXCEPT_OBJECT_OR_ARRAY } from '../../_setup'
 
-describe('Mapper#createRecord', function () {
-  it('should be an instance method', function () {
+describe('Mapper#createRecord', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.createRecord, 'function')
     assert.strictEqual(mapper.createRecord, Mapper.prototype.createRecord)
   })
-  it('should require an object or array', function () {
+  it('should require an object or array', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.doesNotThrow(() => {
@@ -24,7 +24,7 @@ describe('Mapper#createRecord', function () {
       }, `[Mapper#createRecord:props] expected: array or object, found: ${typeof value}\nhttp://www.js-data.io/v3.0/docs/errors#400`)
     })
   })
-  it('should create an instance', function () {
+  it('should create an instance', () => {
     const store = new JSData.DataStore()
     class Person extends JSData.Record {
       constructor (props, opts) {
