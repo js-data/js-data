@@ -53,7 +53,7 @@ describe('Mapper#createMany', function () {
         })
       }
     })
-    let data = await User.createMany(props)
+    const data = await User.createMany(props)
     assert(createCalled, 'Adapter#createMany should have been called')
     assert(data.data[0][User.idAttribute], 'new user has an id')
     assert(data.data[0] instanceof User.recordClass, 'user is a record')
@@ -62,11 +62,11 @@ describe('Mapper#createMany', function () {
   })
   it('should nested create everything in opts.with', async function () {
     const store = this.store
-    let createCalledCount = {}
+    const createCalledCount = {}
     let id = 1
 
     const incCreate = function (name) {
-      if (!createCalledCount.hasOwnProperty(name)) {
+      if (!Object.hasOwnProperty.call(createCalledCount, name)) {
         createCalledCount[name] = 0
       }
       createCalledCount[name]++
@@ -233,12 +233,12 @@ describe('Mapper#createMany', function () {
   })
   it('should pass everything opts.pass', async function () {
     const store = this.store
-    let createCalledCount = {}
+    const createCalledCount = {}
     let id = 1
     const utils = JSData.utils
 
     const incCreate = function (name) {
-      if (!createCalledCount.hasOwnProperty(name)) {
+      if (!Object.hasOwnProperty.call(createCalledCount, name)) {
         createCalledCount[name] = 0
       }
       createCalledCount[name]++
@@ -420,12 +420,12 @@ describe('Mapper#createMany', function () {
   })
   it('should combine opts.with and opts.pass', async function () {
     const store = this.store
-    let createCalledCount = {}
+    const createCalledCount = {}
     let id = 1
     const utils = JSData.utils
 
     const incCreate = function (name) {
-      if (!createCalledCount.hasOwnProperty(name)) {
+      if (!Object.hasOwnProperty.call(createCalledCount, name)) {
         createCalledCount[name] = 0
       }
       createCalledCount[name]++

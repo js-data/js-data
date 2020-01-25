@@ -68,7 +68,7 @@ describe('Index#insertRecord', function () {
       [record6],
       [record5, record7, record9, record8]
     ])
-    let records = index2.between([44], [98])
+    const records = index2.between([44], [98])
 
     assert.deepEqual(records, [
       record4,

@@ -5,7 +5,7 @@ import {
   hasManyType,
   hasOneType
 } from './decorators'
-import {proxiedMapperMethods, Container} from './Container'
+import { proxiedMapperMethods, Container } from './Container'
 import Collection from './Collection'
 
 const DOMAIN = 'SimpleStore'
@@ -945,7 +945,7 @@ const props = {
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
 
-    let collectionOpts = {
+    const collectionOpts = {
       // Make sure the collection has somewhere to store "added" timestamps
       _added: {},
       // Give the collection a reference to this SimpleStore
@@ -1588,7 +1588,7 @@ const props = {
           query = {
             where: {
               [def.getRelation().idAttribute]: {
-                'in': utils.get(record, def.localKeys)
+                in: utils.get(record, def.localKeys)
               }
             }
           }
@@ -1596,7 +1596,7 @@ const props = {
           query = {
             where: {
               [def.foreignKeys]: {
-                'contains': def.getForeignKey(record)
+                contains: def.getForeignKey(record)
               }
             }
           }

@@ -110,7 +110,7 @@ describe('Mapper#create', function () {
         })
       }
     })
-    let data = await User.create(props)
+    const data = await User.create(props)
     assert(createCalled, 'Adapter#create should have been called')
     assert(data.data[User.idAttribute], 'new user has an id')
     assert(data.data instanceof User.recordClass, 'user is a record')
@@ -119,10 +119,10 @@ describe('Mapper#create', function () {
   })
   it('should nested create everything in opts.with', async function () {
     const store = this.store
-    let createCalledCount = {}
+    const createCalledCount = {}
 
     const incCreate = function (name) {
-      if (!createCalledCount.hasOwnProperty(name)) {
+      if (!Object.hasOwnProperty.call(createCalledCount, name)) {
         createCalledCount[name] = 0
       }
       createCalledCount[name]++
@@ -162,8 +162,7 @@ describe('Mapper#create', function () {
       }
     }
 
-    let group
-    group = await store.create('group', store.createRecord('group', {
+    const group = await store.create('group', store.createRecord('group', {
       users: [{ name: 'John' }]
     }), { with: ['users'] })
     assert(group.users[0].id)
@@ -311,11 +310,11 @@ describe('Mapper#create', function () {
   })
   it('should pass everything opts.pass', async function () {
     const store = this.store
-    let createCalledCount = {}
+    const createCalledCount = {}
     const utils = JSData.utils
 
     const incCreate = function (name) {
-      if (!createCalledCount.hasOwnProperty(name)) {
+      if (!Object.hasOwnProperty.call(createCalledCount, name)) {
         createCalledCount[name] = 0
       }
       createCalledCount[name]++
@@ -507,11 +506,11 @@ describe('Mapper#create', function () {
   })
   it('should combine opts.with and opts.pass', async function () {
     const store = this.store
-    let createCalledCount = {}
+    const createCalledCount = {}
     const utils = JSData.utils
 
     const incCreate = function (name) {
-      if (!createCalledCount.hasOwnProperty(name)) {
+      if (!Object.hasOwnProperty.call(createCalledCount, name)) {
         createCalledCount[name] = 0
       }
       createCalledCount[name]++

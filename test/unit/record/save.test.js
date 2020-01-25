@@ -20,8 +20,8 @@ describe('Record#save', function () {
     }
     store.registerAdapter('mock', mockAdapter, { default: true })
     const FooMapper = store.defineMapper('foo')
-    let foo = store.createRecord('foo', { foo: 'bar' })
-    let createdFoo = await foo.save()
+    const foo = store.createRecord('foo', { foo: 'bar' })
+    const createdFoo = await foo.save()
     assert.objectsEqual(createdFoo, { id: 1, foo: 'bar' })
     assert(createdFoo instanceof FooMapper.recordClass)
     assert.strictEqual(foo, createdFoo)
@@ -29,8 +29,8 @@ describe('Record#save', function () {
 
     const BarMapper = new JSData.Mapper({ name: 'bar' })
     BarMapper.registerAdapter('mock', mockAdapter, { default: true })
-    let bar = BarMapper.createRecord({ bar: 'foo' })
-    let createdBar = await bar.save()
+    const bar = BarMapper.createRecord({ bar: 'foo' })
+    const createdBar = await bar.save()
     assert.objectsEqual(createdBar, { id: 2, bar: 'foo' })
     assert(createdBar instanceof BarMapper.recordClass)
   })
@@ -45,8 +45,8 @@ describe('Record#save', function () {
     }
     store.registerAdapter('mock', mockAdapter, { default: true })
     const FooMapper = store.defineMapper('foo')
-    let foo = store.add('foo', { id: 1, foo: 'bar' })
-    let updateFoo = await foo.save()
+    const foo = store.add('foo', { id: 1, foo: 'bar' })
+    const updateFoo = await foo.save()
     assert.objectsEqual(foo, { id: 1, foo: 'bar', beep: 'boop' })
     assert.objectsEqual(updateFoo, { id: 1, foo: 'bar', beep: 'boop' })
     assert(updateFoo instanceof FooMapper.recordClass)
@@ -55,8 +55,8 @@ describe('Record#save', function () {
 
     const BarMapper = new JSData.Mapper({ name: 'bar' })
     BarMapper.registerAdapter('mock', mockAdapter, { default: true })
-    let bar = BarMapper.createRecord({ id: 1, bar: 'foo' })
-    let updatedBar = await bar.save()
+    const bar = BarMapper.createRecord({ id: 1, bar: 'foo' })
+    const updatedBar = await bar.save()
     assert.objectsEqual(updatedBar, { id: 1, bar: 'foo', beep: 'boop' })
     assert(updatedBar instanceof BarMapper.recordClass)
   })
@@ -73,11 +73,11 @@ describe('Record#save', function () {
       name: 'bar'
     })
     BarMapper.registerAdapter('mock', mockAdapter, { default: true })
-    let bar = BarMapper.createRecord({ id: 1, bar: 'foo', beep: 'boop' })
+    const bar = BarMapper.createRecord({ id: 1, bar: 'foo', beep: 'boop' })
     bar.bing = 'bang'
     bar.bar = 'bar'
     bar.beep = null
-    let updatedBar = await bar.save({ changesOnly: true })
+    const updatedBar = await bar.save({ changesOnly: true })
     assert.objectsEqual(updatedBar, { id: 1, bar: 'bar', bing: 'bang', beep: null })
     assert(updatedBar instanceof BarMapper.recordClass)
   })

@@ -15,6 +15,6 @@ describe('Mapper#getAdapter', function () {
     assert.equal(mapper.defaultAdapter, 'bar')
     assert.throws(() => {
       mapper.getAdapter()
-    }, Error, `[Mapper#getAdapter:name] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400`)
+    }, Error, '[Mapper#getAdapter:name] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
   })
 })

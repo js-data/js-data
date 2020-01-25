@@ -30,4 +30,3 @@ doc/
 node_modules/
 typings
 yarn.lock
-package-lock.json

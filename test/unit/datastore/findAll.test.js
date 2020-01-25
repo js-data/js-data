@@ -16,7 +16,7 @@ describe('DataStore#findAll', function () {
         callCount++
         return JSData.utils.resolve(props)
       }
-    }, { 'default': true })
+    }, { default: true })
     const users = await this.store.findAll('user', query)
     assert.equal(callCount, 1, 'findAll should have been called once')
     assert.equal(typeof this.store._completedQueries.user[this.store.hashQuery('user', query)], 'function')
@@ -38,7 +38,7 @@ describe('DataStore#findAll', function () {
         callCount++
         return JSData.utils.resolve(props)
       }
-    }, { 'default': true })
+    }, { default: true })
     const scopedStore = this.store.as('user')
     const users = await scopedStore.findAll(query)
     assert.equal(callCount, 1, 'findAll should have been called once')
@@ -66,7 +66,7 @@ describe('DataStore#findAll', function () {
           }, 300)
         })
       }
-    }, { 'default': true })
+    }, { default: true })
     const results = await Promise.all([
       this.store.findAll('user', query),
       this.store.findAll('user', query)
@@ -88,7 +88,7 @@ describe('DataStore#findAll', function () {
           }, 300)
         })
       }
-    }, { 'default': true })
+    }, { default: true })
     const pendingQuery = this.store.findAll('user', query)
     assert(this.store._pendingQueries.user[this.store.hashQuery('user', query)])
     return pendingQuery.catch((err) => {
