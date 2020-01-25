@@ -57,8 +57,8 @@ describe('JSData.hasMany', function () {
       const Foo = store.getMapper('foo').recordClass
       const Bar = store.getMapper('bar').recordClass
 
-      assert.isTrue(Foo.prototype.hasOwnProperty('bars'))
-      assert.isTrue(Bar.prototype.hasOwnProperty('foo'))
+      assert.isTrue(Object.hasOwnProperty.call(Foo.prototype, 'bars'))
+      assert.isTrue(Object.hasOwnProperty.call(Bar.prototype, 'foo'))
     })
 
     it('should return empty array for association if there is no linked records', function () {
@@ -107,8 +107,8 @@ describe('JSData.hasMany', function () {
       const Foo = store.getMapper('foo').recordClass
       const Bar = store.getMapper('bar').recordClass
 
-      assert.isTrue(Foo.prototype.hasOwnProperty('bars'))
-      assert.isTrue(Bar.prototype.hasOwnProperty('foos'))
+      assert.isTrue(Object.hasOwnProperty.call(Foo.prototype, 'bars'))
+      assert.isTrue(Object.hasOwnProperty.call(Bar.prototype, 'foos'))
     })
 
     it('should return empty array for association if there is no linked records', function () {
@@ -159,8 +159,8 @@ describe('JSData.hasMany', function () {
       const Foo = store.getMapper('foo').recordClass
       const Bar = store.getMapper('bar').recordClass
 
-      assert.isTrue(Foo.prototype.hasOwnProperty('bars'))
-      assert.isTrue(Bar.prototype.hasOwnProperty('foos'))
+      assert.isTrue(Object.hasOwnProperty.call(Foo.prototype, 'bars'))
+      assert.isTrue(Object.hasOwnProperty.call(Bar.prototype, 'foos'))
     })
 
     it('should return empty array for association if there is no linked records', function () {

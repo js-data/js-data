@@ -17,8 +17,8 @@ describe('utils.logify', function () {
 
   it('logs message to the console with the specified log level', function () {
     const user = { name: 'John' }
-    let infoStub = sinon.stub(console, 'info')
-    let logStub = sinon.stub(console, 'log')
+    const infoStub = sinon.stub(console, 'info')
+    const logStub = sinon.stub(console, 'log')
     utils.logify(user)
     user.log('info', 'test log info')
     assert(infoStub.calledOnce, 'logged using console.info')

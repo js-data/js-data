@@ -73,7 +73,7 @@ describe('Container#defineMapper', function () {
   })
   it('can get a scoped reference', function () {
     const Container = JSData.Container
-    let container = new Container()
+    const container = new Container()
     const fooMapper = container.defineMapper('foo')
     const fooStore = container.as('foo')
 

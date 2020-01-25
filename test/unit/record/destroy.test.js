@@ -18,14 +18,14 @@ describe('Record#destroy', function () {
     }
     store.registerAdapter('mock', mockAdapter, { default: true })
     const FooMapper = store.defineMapper('foo') // eslint-disable-line
-    let foo = store.add('foo', { id: 1 })
+    const foo = store.add('foo', { id: 1 })
     let result = await foo.destroy()
     assert(!store.get('foo', 1))
     assert.strictEqual(foo, result)
 
     const BarMapper = new JSData.Mapper({ name: 'bar' })
     BarMapper.registerAdapter('mock', mockAdapter, { default: true })
-    let bar = BarMapper.createRecord({ id: 1 })
+    const bar = BarMapper.createRecord({ id: 1 })
     result = await bar.destroy()
     assert.equal(result, undefined)
   })

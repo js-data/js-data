@@ -218,7 +218,7 @@ const props = {
 
         descriptor = {
           get () {
-            let current = getter.call(this)
+            const current = getter.call(this)
             if (!current) {
               this._set(path, [])
             }
@@ -403,13 +403,13 @@ const props = {
       if (descriptor) {
         descriptor.enumerable = def.enumerable === undefined ? false : def.enumerable
         if (def.get) {
-          let origGet = descriptor.get
+          const origGet = descriptor.get
           descriptor.get = function () {
             return def.get(def, this, (...args) => origGet.apply(this, args))
           }
         }
         if (def.set) {
-          let origSet = descriptor.set
+          const origSet = descriptor.set
           descriptor.set = function (related) {
             return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
           }

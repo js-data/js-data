@@ -89,7 +89,7 @@ import Component from './Component'
  * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#container","Components of JSData: Container"]
  * @type {Constructor}
  */
-import {Container} from './Container'
+import { Container } from './Container'
 
 /**
  * JSData's {@link DataStore} class. Primarily for use in the browser. In

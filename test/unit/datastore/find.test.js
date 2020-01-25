@@ -16,7 +16,7 @@ describe('DataStore#find', function () {
         callCount++
         return JSData.utils.resolve(props)
       }
-    }, { 'default': true })
+    }, { default: true })
     const user = await this.store.find('user', id)
     assert.equal(callCount, 1, 'find should have been called once')
     assert.equal(typeof this.store._completedQueries.user[id], 'function')
@@ -42,7 +42,7 @@ describe('DataStore#find', function () {
           }, 300)
         })
       }
-    }, { 'default': true })
+    }, { default: true })
     const users = await Promise.all([
       this.store.find('user', id),
       this.store.find('user', id)
@@ -64,7 +64,7 @@ describe('DataStore#find', function () {
           }, 300)
         })
       }
-    }, { 'default': true })
+    }, { default: true })
     const pendingQuery = this.store.find('user', id)
     assert(this.store._pendingQueries.user[id])
     return pendingQuery.catch((err) => {

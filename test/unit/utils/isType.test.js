@@ -22,7 +22,7 @@ describe('utils.isArray', function () {
     const nonArrays = [
       1,
       'string',
-      { '0': 0, '1': 1 }
+      { 0: 0, 1: 1 }
     ]
     nonArrays.forEach((obj) => {
       assert.isNotArray(obj, obj + 'should not be an array')
@@ -109,7 +109,7 @@ describe('utils.isNull', function () {
   })
 
   it('isNull returns false for non null values', function () {
-    const falseVals = [0, 1, undefined, 'null', void (() => { })]
+    const falseVals = [0, 1, undefined, 'null', () => { }]
     falseVals.forEach((val) => {
       assert.isNotNull(val, val + ' is not null')
       assert.isNotTrue(utils.isNull(val))
@@ -233,7 +233,7 @@ describe('utils.isUndefined', function () {
   })
 
   it('isUndefined returns true for undefined values', function () {
-    const trueVals = [undefined, void (() => { })]
+    const trueVals = [undefined, (() => { })()]
     trueVals.forEach((val) => {
       assert.isUndefined(val, val + ' is undefined')
       assert.isTrue(utils.isUndefined(val))
