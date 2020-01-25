@@ -1,4 +1,4 @@
-var browsers = ['PhantomJS']
+var browsers = ['ChromeHeadless']
 
 var customLaunchers = {
   sl_chrome: {
@@ -61,7 +61,7 @@ module.exports = function (config) {
       'karma-sinon'
     ],
     files: [
-      'node_modules/babel-polyfill/dist/polyfill.js',
+      'node_modules/@babel/polyfill/dist/polyfill.js',
       'src/utils.js',
       'src/Relation.js',
       'src/Relation/*.js',
@@ -93,7 +93,7 @@ module.exports = function (config) {
     babelPreprocessor: {
       options: {
         presets: [
-          ['env', {
+          ['@babel/preset-env', {
             'targets': {
               'browsers': ['last 2 versions', 'safari >= 7',
                 '> 1%',
@@ -103,9 +103,8 @@ module.exports = function (config) {
           }]
         ],
         plugins: [
-          'syntax-async-functions',
-          'transform-regenerator',
-          'transform-es2015-modules-umd'
+          '@babel/transform-regenerator',
+          '@babel/transform-modules-umd'
         ],
         sourceMap: 'inline'
       }

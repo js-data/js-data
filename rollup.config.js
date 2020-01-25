@@ -10,10 +10,9 @@ export default {
   plugins: [
     babel({
       babelrc: false,
-      plugins: ['external-helpers'],
       presets: [
         [
-          'env',
+          '@babel/preset-env',
           {
             modules: false,
             targets: {
