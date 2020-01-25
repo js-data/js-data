@@ -542,7 +542,7 @@ export default Component.extend({
        * @since 3.0.0
        */
       if (orderBy) {
-        const index = 0
+        let index = 0
         orderBy.forEach(function (def, i) {
           if (utils.isString(def)) {
             orderBy[i] = [def, 'ASC']
@@ -1117,22 +1117,22 @@ export default Component.extend({
     '<=': function (value, predicate) {
       return value <= predicate
     },
-    isectEmpty: function (value, predicate) {
+    'isectEmpty': function (value, predicate) {
       return !utils.intersection((value || []), (predicate || [])).length
     },
-    isectNotEmpty: function (value, predicate) {
+    'isectNotEmpty': function (value, predicate) {
       return utils.intersection((value || []), (predicate || [])).length
     },
-    in: function (value, predicate) {
+    'in': function (value, predicate) {
       return predicate.indexOf(value) !== -1
     },
-    notIn: function (value, predicate) {
+    'notIn': function (value, predicate) {
       return predicate.indexOf(value) === -1
     },
-    contains: function (value, predicate) {
+    'contains': function (value, predicate) {
       return (value || []).indexOf(predicate) !== -1
     },
-    notContains: function (value, predicate) {
+    'notContains': function (value, predicate) {
       return (value || []).indexOf(predicate) === -1
     }
   }

@@ -2,11 +2,11 @@ import { assert } from '../../_setup'
 
 describe('DataStore collection methods', function () {
   it('add should work', function () {
-    const user = this.store.add('user', { id: 1, name: 'John' })
+    let user = this.store.add('user', { id: 1, name: 'John' })
     assert.objectsEqual(user, { id: 1, name: 'John' })
   })
   it('remove should remove relations', function () {
-    const user = this.store.add('user', this.data.user10)
+    let user = this.store.add('user', this.data.user10)
     this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
@@ -15,7 +15,7 @@ describe('DataStore collection methods', function () {
     assert(this.store.get('organization', user.organizationId))
     assert.equal(this.store.filter('profile', { userId: user.id }).length, 1)
 
-    const removedUser = this.store.remove('user', user.id, { with: ['organization'] })
+    let removedUser = this.store.remove('user', user.id, { with: ['organization'] })
 
     assert(user === removedUser)
     assert.equal(this.store.filter('comment', { userId: user.id }).length, 3)
@@ -24,7 +24,7 @@ describe('DataStore collection methods', function () {
     assert.equal(this.store.getAll('profile').length, 2)
   })
   it('remove should remove multiple relations', function () {
-    const user = this.store.add('user', this.data.user10)
+    let user = this.store.add('user', this.data.user10)
     this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
@@ -33,7 +33,7 @@ describe('DataStore collection methods', function () {
     assert(this.store.get('organization', user.organizationId))
     assert.equal(this.store.filter('profile', { userId: user.id }).length, 1)
 
-    const removedUser = this.store.remove('user', user.id, { with: ['organization', 'comment', 'profile'] })
+    let removedUser = this.store.remove('user', user.id, { with: ['organization', 'comment', 'profile'] })
 
     assert(user === removedUser)
     assert.equal(this.store.filter('comment', { userId: user.id }).length, 0)
@@ -44,7 +44,7 @@ describe('DataStore collection methods', function () {
     assert(!removedUser.profile)
   })
   it('removeAll should remove relations', function () {
-    const user = this.store.add('user', this.data.user10)
+    let user = this.store.add('user', this.data.user10)
     this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
@@ -53,7 +53,7 @@ describe('DataStore collection methods', function () {
     assert(this.store.get('organization', user.organizationId))
     assert.equal(this.store.filter('profile', { userId: user.id }).length, 1)
 
-    const removedUsers = this.store.removeAll('user', {}, { with: ['organization'] })
+    let removedUsers = this.store.removeAll('user', {}, { with: ['organization'] })
 
     assert(user === removedUsers[0])
     assert.equal(this.store.filter('comment', { userId: user.id }).length, 3)
@@ -62,7 +62,7 @@ describe('DataStore collection methods', function () {
     assert.equal(this.store.getAll('profile').length, 2)
   })
   it('removeAll should remove multiple relations', function () {
-    const user = this.store.add('user', this.data.user10)
+    let user = this.store.add('user', this.data.user10)
     this.store.add('organization', this.data.organization15)
     this.store.add('comment', this.data.comment19)
     this.store.add('profile', this.data.profile21)
@@ -71,7 +71,7 @@ describe('DataStore collection methods', function () {
     assert(this.store.get('organization', user.organizationId))
     assert.equal(this.store.filter('profile', { userId: user.id }).length, 1)
 
-    const removedUsers = this.store.removeAll('user', {}, { with: ['organization', 'comment', 'profile'] })
+    let removedUsers = this.store.removeAll('user', {}, { with: ['organization', 'comment', 'profile'] })
 
     assert(user === removedUsers[0])
     assert.equal(this.store.filter('comment', { userId: user.id }).length, 0)
@@ -89,7 +89,7 @@ describe('DataStore collection methods', function () {
         callCount++
         return Promise.resolve([{ id: 1, name: 'John' }])
       }
-    }, { default: true })
+    }, { 'default': true })
     return this.store.findAll('user', query)
       .then((users) => {
         assert.equal(callCount, 1)
@@ -114,7 +114,7 @@ describe('DataStore collection methods', function () {
         callCount++
         return Promise.resolve([])
       }
-    }, { default: true })
+    }, { 'default': true })
     return this.store.findAll('user', queryOne)
       .then((users) => {
         assert.equal(callCount, 1)

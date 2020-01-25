@@ -143,6 +143,6 @@ describe('utils.addHiddenPropsToTarget', function () {
   it('adds hidden properties to target', function () {
     const target = { name: 'John' }
     utils.addHiddenPropsToTarget(target, { age: 103 })
-    assert.isFalse(Object.propertyIsEnumerable.call(target, 'age'), 'age on target is not enumerable.')
+    assert.isFalse(target.propertyIsEnumerable('age'), 'age on target is not enumerable.')
   })
 })

@@ -35,8 +35,8 @@ describe('Collection#remove', function () {
   })
 
   it('should remove unsaved records', function () {
-    const alice = { author: 'Alice' }
-    const bob = this.store.createRecord('post', { author: 'Bob' })
+    let alice = { author: 'Alice' }
+    let bob = this.store.createRecord('post', { author: 'Bob' })
     assert.objectsEqual(this.PostCollection.add([
       this.data.p1,
       this.data.p2,
@@ -95,7 +95,7 @@ describe('Collection#remove', function () {
     }).length, 2)
     assert.objectsEqual(this.PostCollection.filter().length, 6)
 
-    const removedBob = this.PostCollection.remove(bob)
+    let removedBob = this.PostCollection.remove(bob)
     assert.strictEqual(removedBob, bob)
 
     assert.objectsEqual(this.PostCollection.filter({

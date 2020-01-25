@@ -2,7 +2,7 @@ import { assert, JSData } from '../_setup'
 
 describe('Mapper#update', function () {
   it('should update', async function () {
-    const id = 1
+    let id = 1
     const props = { name: 'John' }
     const propsUpdate = { name: 'Bill', foo: undefined }
     let updateCalled = false

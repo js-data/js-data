@@ -33,11 +33,9 @@ describe('Mapper#createRecord', function () {
           JSData.Record.call(this, props, opts)
         }
       }
-
       say () {
         return 'hi'
       }
-
       get fullName () {
         return `${this.first} ${this.last}`
       }
@@ -53,7 +51,6 @@ describe('Mapper#createRecord', function () {
           JSData.Record.call(this, props, opts)
         }
       }
-
       say () {
         return 'woof'
       }
@@ -70,7 +67,6 @@ describe('Mapper#createRecord', function () {
           JSData.Record.call(this, props, opts)
         }
       }
-
       say () {
         return 'meow'
       }

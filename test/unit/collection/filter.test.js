@@ -11,7 +11,7 @@ describe('Collection#filter', function () {
     const p5 = this.data.p5
     this.store.add('post', [p1, p2, p3, p4, p5])
 
-    const params = {
+    let params = {
       author: 'John'
     }
 
@@ -35,7 +35,7 @@ describe('Collection#filter', function () {
         }
       }
     })
-    const foos = store.add('foo', [
+    let foos = store.add('foo', [
       { id: 1, foo: 'bar' },
       { id: 2, beep: 'boop' },
       { id: 3, foo: 'bar', beep: 'boop' },

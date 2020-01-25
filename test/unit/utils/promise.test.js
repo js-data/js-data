@@ -7,7 +7,7 @@ describe('utils.resolve', function () {
   })
 
   it('returns a resolved promise with the specified value', function () {
-    const spy = sinon.spy(utils.Promise, 'resolve')
+    let spy = sinon.spy(utils.Promise, 'resolve')
     utils.resolve('test')
     assert(spy.withArgs('test').calledOnce)
     utils.Promise.resolve.restore()
@@ -20,7 +20,7 @@ describe('utils.reject', function () {
   })
 
   it('returns a rejected promise with the specified err', function () {
-    const spy = sinon.stub(utils.Promise, 'reject')
+    let spy = sinon.stub(utils.Promise, 'reject')
     utils.reject('rejecting for test')
     assert(spy.withArgs('rejecting for test').calledOnce)
     utils.Promise.reject.restore()

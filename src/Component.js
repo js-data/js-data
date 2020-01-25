@@ -46,7 +46,7 @@ function Component (opts) {
    * @since 3.0.0
    * @type {boolean}
    */
-  this.debug = Object.hasOwnProperty.apply(opts, 'debug') ? !!opts.debug : false
+  this.debug = opts.hasOwnProperty('debug') ? !!opts.debug : false
 
   /**
    * Event listeners attached to this Component. __Do not modify.__ Use

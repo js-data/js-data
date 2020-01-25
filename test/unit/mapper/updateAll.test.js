@@ -62,7 +62,7 @@ describe('Mapper#updateAll', function () {
         })
       }
     })
-    const data = await User.updateAll(props, query)
+    let data = await User.updateAll(props, query)
     assert(updateAllCalled, 'Adapter#update should have been called')
     assert.equal(data.data[0].foo, 'bar', 'user has a new field')
     assert(data.data[0] instanceof User.recordClass, 'user is a record')

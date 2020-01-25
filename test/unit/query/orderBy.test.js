@@ -9,7 +9,7 @@ describe('Query#orderBy', function () {
     const p4 = this.data.p4
     this.store.add('post', [p1, p2, p3, p4])
 
-    const params = {
+    let params = {
       orderBy: 'age'
     }
 
@@ -57,7 +57,7 @@ describe('Query#orderBy', function () {
       { id: 12, test: 3, test2: 6 }
     ]
     store.add('item', items)
-    const params = {}
+    let params = {}
 
     params.orderBy = [
       ['test', 'DESC'],
@@ -104,7 +104,7 @@ describe('Query#orderBy', function () {
   it('should order by nested keys', function () {
     const store = new JSData.DataStore()
     store.defineMapper('thing')
-    const things = [
+    let things = [
       {
         id: 1,
         foo: {

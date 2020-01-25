@@ -252,7 +252,7 @@ export default Component.extend({
     // they will be merged into the existing records according to the onConflict
     // option.
     records = records.map(record => {
-      const id = this.recordId(record)
+      let id = this.recordId(record)
       // Grab existing record if there is one
       const existing = id === undefined ? id : this.get(id)
       // If the currently visited record is just a reference to an existing

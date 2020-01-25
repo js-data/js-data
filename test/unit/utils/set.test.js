@@ -17,8 +17,8 @@ describe('utils.set', function () {
   it('can set a values of an object with a path/value map', function () {
     const john = { name: 'John', age: 25, parent: { name: 'Mom', age: 50 } }
     utils.set(john, {
-      spy: true,
-      parent: { age: 55 },
+      'spy': true,
+      'parent': { age: 55 },
       'parent.name': 'Grandma'
     })
     assert.equal(true, john.spy)

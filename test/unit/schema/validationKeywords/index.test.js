@@ -64,11 +64,11 @@ describe('Schema.validationKeywords', function () {
 
 const validationTestRunner = function (suites, group) {
   suites.forEach((suite) => {
-    const schema = new JSData.Schema(suite.schema)
+    let schema = new JSData.Schema(suite.schema)
     describe(suite.description, function () {
       suite.tests.forEach((test) => {
         it(test.description, function () {
-          const errors = group
+          let errors = group
             ? JSData.Schema.typeGroupValidators[group](test.data, schema)
             : JSData.Schema.validate(test.data, schema)
 
@@ -160,12 +160,12 @@ describe('Schema.validationKeywords.allOf', function () {
 
 describe('Schema.validationKeywords.anyOf', function () {
   anyOfTests.forEach((suite) => {
-    const Schema = new JSData.Schema(suite.schema)
+    let Schema = new JSData.Schema(suite.schema)
     describe(suite.description, function () {
       suite.tests.forEach((test) => {
         it(test.description, function () {
           // let errors = JSData.Schema.validationKeywords.anyOf(test.data, Schema, {})
-          const errors = Schema.validate(test.data)
+          let errors = Schema.validate(test.data)
           assert.equal(test.valid, !errors, errors)
         })
       })

@@ -54,7 +54,7 @@ describe('Mapper#find', function () {
         })
       }
     })
-    const data = await User.find(id)
+    let data = await User.find(id)
     assert(findCalled, 'Adapter#find should have been called')
     assert.objectsEqual(data.data, props, 'user should have been found')
     assert(data.data instanceof User.recordClass, 'user is a record')

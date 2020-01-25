@@ -1,31 +1,31 @@
 export const definitionsTests = [
   {
-    description: 'valid definition',
-    schema: { $ref: 'http://json-schema.org/draft-04/schema#' },
-    tests: [
+    'description': 'valid definition',
+    'schema': { '$ref': 'http://json-schema.org/draft-04/schema#' },
+    'tests': [
       {
-        description: 'valid definition schema',
-        data: {
-          definitions: {
-            foo: { type: 'integer' }
+        'description': 'valid definition schema',
+        'data': {
+          'definitions': {
+            'foo': { 'type': 'integer' }
           }
         },
-        valid: true
+        'valid': true
       }
     ]
   },
   {
-    description: 'invalid definition',
-    schema: { $ref: 'http://json-schema.org/draft-04/schema#' },
-    tests: [
+    'description': 'invalid definition',
+    'schema': { '$ref': 'http://json-schema.org/draft-04/schema#' },
+    'tests': [
       {
-        description: 'invalid definition schema',
-        data: {
-          definitions: {
-            foo: { type: 1 }
+        'description': 'invalid definition schema',
+        'data': {
+          'definitions': {
+            'foo': { 'type': 1 }
           }
         },
-        valid: false
+        'valid': false
       }
     ]
   }

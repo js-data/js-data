@@ -63,7 +63,7 @@ export const HasManyRelation = Relation.extend({
     return this.relatedCollection.filter({
       where: {
         [this.relatedCollection.mapper.idAttribute]: {
-          in: ids
+          'in': ids
         }
       }
     })
@@ -74,7 +74,7 @@ export const HasManyRelation = Relation.extend({
     return this.relatedCollection.filter({
       where: {
         [this.foreignKeys]: {
-          contains: id
+          'contains': id
         }
       }
     })

@@ -15,7 +15,7 @@ describe('DataStore#updateAll', function () {
         props[0].foo = 'bar'
         return JSData.utils.resolve(props)
       }
-    }, { default: true })
+    }, { 'default': true })
     const users = await this.store.updateAll('user', props, query)
     assert.equal(users[0].foo, 'bar', 'user was updated')
     assert(users[0] instanceof this.store.getMapper('user').recordClass, 'user is a record')

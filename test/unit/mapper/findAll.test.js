@@ -56,7 +56,7 @@ describe('Mapper#findAll', function () {
         })
       }
     })
-    const data = await User.findAll(query)
+    let data = await User.findAll(query)
     assert(findAllCalled, 'Adapter#findAll should have been called')
     assert.objectsEqual(data.data, props, 'user should have been found')
     assert(data.data[0] instanceof User.recordClass, 'user is a record')

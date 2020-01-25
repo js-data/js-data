@@ -113,7 +113,7 @@ describe('Collection#add', function () {
     collection.add({ id: 1 })
     assert.throws(() => {
       collection.add({ id: 1 }, { onConflict: 'invalid_choice' })
-    }, Error, '[Collection#add:opts.onConflict] expected: one of (merge, replace, skip), found: invalid_choice\nhttp://www.js-data.io/v3.0/docs/errors#400')
+    }, Error, `[Collection#add:opts.onConflict] expected: one of (merge, replace, skip), found: invalid_choice\nhttp://www.js-data.io/v3.0/docs/errors#400`)
   })
   it('should respect opts.noValidate', function () {
     const mapper = new JSData.Mapper({
@@ -204,7 +204,7 @@ describe('Collection#add', function () {
     assert.equal(user.id, 1)
     assert.equal(user.foo, 'bar')
     assert.equal(user.beep, 'boop')
-    const existing = collection.add({ id: 1, biz: 'baz', foo: 'BAR' }, { onConflict: 'skip' })
+    let existing = collection.add({ id: 1, biz: 'baz', foo: 'BAR' }, { onConflict: 'skip' })
     assert(user === existing)
     assert.equal(user.id, 1)
     assert.equal(user.foo, 'bar')
@@ -229,7 +229,7 @@ describe('Collection#add', function () {
     assert.equal(store.get('test', 'abcd').count, 1)
   })
   it('should inject 1,000 items', function () {
-    const users = []
+    let users = []
     for (var i = 0; i < 1000; i++) {
       users.push({
         id: i,
@@ -244,7 +244,7 @@ describe('Collection#add', function () {
     // console.log('\tinject 1,000 users time taken: ', new Date().getTime() - start, 'ms')
   })
   it.skip('should inject 10,000 items', function () {
-    const users = []
+    let users = []
     for (var i = 0; i < 10000; i++) {
       users.push({
         id: i,
@@ -263,7 +263,7 @@ describe('Collection#add', function () {
     collection.createIndex('age')
     collection.createIndex('created')
     collection.createIndex('updated')
-    const users = []
+    let users = []
     for (var i = 0; i < 1000; i++) {
       users.push({
         id: i,
@@ -283,7 +283,7 @@ describe('Collection#add', function () {
     store.createIndex('user', 'age')
     store.createIndex('user', 'created')
     store.createIndex('user', 'updated')
-    const users = []
+    let users = []
     for (var i = 0; i < 10000; i++) {
       users.push({
         id: i,

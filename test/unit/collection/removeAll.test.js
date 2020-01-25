@@ -37,8 +37,8 @@ describe('Collection#removeAll', function () {
   })
 
   it('should remove unsaved records', function () {
-    const alice = { author: 'Alice' }
-    const bob = this.store.createRecord('post', { author: 'Bob' })
+    let alice = { author: 'Alice' }
+    let bob = this.store.createRecord('post', { author: 'Bob' })
     assert.objectsEqual(this.PostCollection.add([
       this.data.p1,
       this.data.p2,
@@ -97,7 +97,7 @@ describe('Collection#removeAll', function () {
     }).length, 2)
     assert.objectsEqual(this.PostCollection.filter().length, 6)
 
-    const removedBobs = this.PostCollection.removeAll([bob2, bob])
+    let removedBobs = this.PostCollection.removeAll([bob2, bob])
     assert.strictEqual(removedBobs[0], bob2)
     assert.strictEqual(removedBobs[1], bob)
 
@@ -111,8 +111,8 @@ describe('Collection#removeAll', function () {
   })
 
   it('should remove unsaved records with convenience method', function () {
-    const alice = { author: 'Alice' }
-    const bob = this.store.createRecord('post', { author: 'Bob' })
+    let alice = { author: 'Alice' }
+    let bob = this.store.createRecord('post', { author: 'Bob' })
     assert.objectsEqual(this.PostCollection.add([
       this.data.p1,
       this.data.p2,

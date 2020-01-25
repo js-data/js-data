@@ -9,7 +9,7 @@ describe('Container#registerAdapter', function () {
 
     store.defineMapper('user')
 
-    store.registerAdapter('foo', {}, { default: true })
+    store.registerAdapter('foo', {}, { 'default': true })
     store.registerAdapter('bar', {})
     assert.deepEqual(store.getAdapters(), {
       foo: {},

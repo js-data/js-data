@@ -3,7 +3,7 @@ import { assert, JSData, sinon } from '../../_setup'
 describe('Collection', function () {
   it('should be a constructor function', function () {
     assert.equal(typeof JSData.Collection, 'function', 'should be a function')
-    const collection = new JSData.Collection()
+    let collection = new JSData.Collection()
     assert(collection instanceof JSData.Collection, 'collection should be an instance')
     assert.equal(collection.recordId(), 'id', 'collection should get initialization properties')
   })

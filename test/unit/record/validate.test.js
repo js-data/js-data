@@ -1,5 +1,5 @@
 import { assert, JSData } from '../../_setup'
-import { productSchema } from '../schema/_productSchema'
+import {productSchema} from '../schema/_productSchema'
 
 describe('Record#validate', function () {
   it('should validate', function () {

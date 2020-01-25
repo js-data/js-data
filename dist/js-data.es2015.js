@@ -405,7 +405,7 @@ var utils = {
         }
 
         for (var key in from) {
-          if (Object.hasOwnProperty.apply(from, key)) {
+          if (from.hasOwnProperty(key)) {
             if (utils.isBlacklisted(key, blacklist)) {
               continue;
             }
@@ -451,7 +451,7 @@ var utils = {
 
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepFillIn(existing, value);
-        } else if (!Object.hasOwnProperty.apply(dest, key) || dest[key] === undefined) {
+        } else if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
           dest[key] = value;
         }
       });
@@ -734,7 +734,7 @@ var utils = {
     props || (props = {});
     classProps || (classProps = {});
 
-    if (Object.hasOwnProperty.apply(props, 'constructor')) {
+    if (props.hasOwnProperty('constructor')) {
       _subClass = props.constructor;
       delete props.constructor;
     } else {
@@ -770,7 +770,7 @@ var utils = {
       });
     }
 
-    if (!Object.hasOwnProperty.apply(_subClass, '__super__')) {
+    if (!_subClass.hasOwnProperty('__super__')) {
       Object.defineProperty(_subClass, '__super__', {
         configurable: true,
         value: superClass
@@ -802,7 +802,7 @@ var utils = {
    */
   fillIn: function fillIn(dest, src) {
     utils.forOwn(src, function (value, key) {
-      if (!Object.hasOwnProperty.apply(dest, key) || dest[key] === undefined) {
+      if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
         dest[key] = value;
       }
     });
@@ -986,7 +986,7 @@ var utils = {
   getSuper: function getSuper(instance, isCtor) {
     var ctor = isCtor ? instance : instance.constructor;
 
-    if (Object.hasOwnProperty.apply(ctor, '__super__')) {
+    if (ctor.hasOwnProperty('__super__')) {
       return ctor.__super__;
     }
 
@@ -1920,7 +1920,7 @@ function Component(opts) {
    * @type {boolean}
    */
 
-  this.debug = Object.hasOwnProperty.apply(opts, 'debug') ? !!opts.debug : false;
+  this.debug = opts.hasOwnProperty('debug') ? !!opts.debug : false;
   /**
    * Event listeners attached to this Component. __Do not modify.__ Use
    * {@link Component#on} and {@link Component#off} instead.
@@ -3282,22 +3282,22 @@ var Query$1 = Component$1.extend({
     '<=': function _(value, predicate) {
       return value <= predicate;
     },
-    isectEmpty: function isectEmpty(value, predicate) {
+    'isectEmpty': function isectEmpty(value, predicate) {
       return !utils.intersection(value || [], predicate || []).length;
     },
-    isectNotEmpty: function isectNotEmpty(value, predicate) {
+    'isectNotEmpty': function isectNotEmpty(value, predicate) {
       return utils.intersection(value || [], predicate || []).length;
     },
-    in: function _in(value, predicate) {
+    'in': function _in(value, predicate) {
       return predicate.indexOf(value) !== -1;
     },
-    notIn: function notIn(value, predicate) {
+    'notIn': function notIn(value, predicate) {
       return predicate.indexOf(value) === -1;
     },
-    contains: function contains(value, predicate) {
+    'contains': function contains(value, predicate) {
       return (value || []).indexOf(predicate) !== -1;
     },
-    notContains: function notContains(value, predicate) {
+    'notContains': function notContains(value, predicate) {
       return (value || []).indexOf(predicate) === -1;
     }
   }
@@ -3670,7 +3670,7 @@ var HasManyRelation = Relation.extend({
   findExistingLinksByLocalKeys: function findExistingLinksByLocalKeys(ids) {
     return this.relatedCollection.filter({
       where: _defineProperty({}, this.relatedCollection.mapper.idAttribute, {
-        in: ids
+        'in': ids
       })
     });
   },
@@ -3678,7 +3678,7 @@ var HasManyRelation = Relation.extend({
   findExistingLinksByForeignKeys: function findExistingLinksByForeignKeys(id) {
     return this.relatedCollection.filter({
       where: _defineProperty({}, this.foreignKeys, {
-        contains: id
+        'contains': id
       })
     });
   },
@@ -4335,13 +4335,13 @@ var Record$1 = Component$1.extend({
           } else if (def.localKeys) {
             task = superMethod(relatedMapper, 'findAll')({
               where: _defineProperty({}, relatedMapper.idAttribute, {
-                in: utils.get(_this3, def.localKeys)
+                'in': utils.get(_this3, def.localKeys)
               })
             });
           } else if (def.foreignKeys) {
             task = superMethod(relatedMapper, 'findAll')({
               where: _defineProperty({}, def.foreignKeys, {
-                contains: utils.get(_this3, mapper.idAttribute)
+                'contains': utils.get(_this3, mapper.idAttribute)
               })
             }, opts);
           }
@@ -4435,7 +4435,7 @@ var Record$1 = Component$1.extend({
     opts || (opts = {});
     opts.preserve || (opts.preserve = []);
     utils.forOwn(this, function (value, key) {
-      if (key !== _this4._mapper().idAttribute && !Object.hasOwnProperty.apply(previous, key) && Object.hasOwnProperty.apply(_this4, key) && opts.preserve.indexOf(key) === -1) {
+      if (key !== _this4._mapper().idAttribute && !previous.hasOwnProperty(key) && _this4.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
         delete _this4[key];
       }
     });
@@ -6148,7 +6148,7 @@ var types = {
   array: utils.isArray,
   boolean: utils.isBoolean,
   integer: utils.isInteger,
-  null: utils.isNull,
+  'null': utils.isNull,
   number: utils.isNumber,
   object: utils.isObject,
   string: utils.isString
@@ -6319,7 +6319,7 @@ var validationKeywords = {
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   enum: function _enum(value, schema, opts) {
-    var possibleValues = schema.enum;
+    var possibleValues = schema['enum'];
 
     if (utils.findIndex(possibleValues, function (item) {
       return utils.deepEqual(item, value);
@@ -6918,13 +6918,13 @@ var _validate = function validate(value, schema, opts) {
   } // Validate against parent schema
 
 
-  if (schema.extends) {
+  if (schema['extends']) {
     // opts.path = path
     // opts.prop = prop
-    if (utils.isFunction(schema.extends.validate)) {
-      errors = errors.concat(schema.extends.validate(value, opts) || []);
+    if (utils.isFunction(schema['extends'].validate)) {
+      errors = errors.concat(schema['extends'].validate(value, opts) || []);
     } else {
-      errors = errors.concat(_validate(value, schema.extends, opts) || []);
+      errors = errors.concat(_validate(value, schema['extends'], opts) || []);
     }
   }
 
@@ -7186,13 +7186,13 @@ var Schema$1 = Component$1.extend({
     var properties = this.properties || {};
     var hasSet = utils.isFunction(target.set) || utils.isFunction(target._set);
     utils.forOwn(properties, function (schema, prop) {
-      if (Object.hasOwnProperty.apply(schema, 'default') && utils.get(target, prop) === undefined) {
+      if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
         if (hasSet) {
-          target.set(prop, utils.plainCopy(schema.default), {
+          target.set(prop, utils.plainCopy(schema['default']), {
             silent: true
           });
         } else {
-          utils.set(target, prop, utils.plainCopy(schema.default));
+          utils.set(target, prop, utils.plainCopy(schema['default']));
         }
       }
 
@@ -8007,7 +8007,7 @@ function Mapper(opts) {
     // class extends Record
 
 
-    if (Object.prototype.isPrototypeOf.call(Record$1, Object.create(this.recordClass.prototype)) && this.schema && this.schema.apply && this.applySchema) {
+    if (Record$1.prototype.isPrototypeOf(Object.create(this.recordClass.prototype)) && this.schema && this.schema.apply && this.applySchema) {
       this.schema.apply(this.recordClass.prototype);
     }
   }
@@ -8952,7 +8952,7 @@ var Mapper$1 = Component$1.extend({
     var upper = "".concat(method.charAt(0).toUpperCase()).concat(method.substr(1));
     var before = "before".concat(upper);
     var after = "after".concat(upper);
-    var op; // Default values for arguments
+    var op, adapter; // Default values for arguments
 
     config.defaults.forEach(function (value, i) {
       if (args[i] === undefined) {
@@ -8963,7 +8963,7 @@ var Mapper$1 = Component$1.extend({
 
     utils._(opts, this);
 
-    var adapter = opts.adapter = this.getAdapterName(opts); // before lifecycle hook
+    adapter = opts.adapter = this.getAdapterName(opts); // before lifecycle hook
 
     op = opts.op = before;
     return utils.resolve(this[op].apply(this, _toConsumableArray(args))).then(function (_value) {
@@ -13198,13 +13198,13 @@ var props$1 = {
         } else if (def.type === hasManyType && def.localKeys) {
           query = {
             where: _defineProperty({}, def.getRelation().idAttribute, {
-              in: utils.get(record, def.localKeys)
+              'in': utils.get(record, def.localKeys)
             })
           };
         } else if (def.type === hasManyType && def.foreignKeys) {
           query = {
             where: _defineProperty({}, def.foreignKeys, {
-              contains: def.getForeignKey(record)
+              'contains': def.getForeignKey(record)
             })
           };
         } else if (def.type === belongsToType) {

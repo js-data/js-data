@@ -7,7 +7,7 @@ describe('Query#skip', function () {
     const p3 = this.data.p3
     const p4 = this.data.p4
     this.store.add('post', [p1, p2, p3, p4])
-    const params = {
+    let params = {
       skip: 1
     }
 

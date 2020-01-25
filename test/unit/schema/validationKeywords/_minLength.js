@@ -1,27 +1,27 @@
 export const minLengthTests = [
   {
-    description: 'minLength validation',
-    schema: { minLength: 2 },
-    tests: [
+    'description': 'minLength validation',
+    'schema': { 'minLength': 2 },
+    'tests': [
       {
-        description: 'longer is valid',
-        data: 'foo',
-        valid: true
+        'description': 'longer is valid',
+        'data': 'foo',
+        'valid': true
       },
       {
-        description: 'exact length is valid',
-        data: 'fo',
-        valid: true
+        'description': 'exact length is valid',
+        'data': 'fo',
+        'valid': true
       },
       {
-        description: 'too short is invalid',
-        data: 'f',
-        valid: false
+        'description': 'too short is invalid',
+        'data': 'f',
+        'valid': false
       },
       {
-        description: 'ignores non-strings',
-        data: 1,
-        valid: true
+        'description': 'ignores non-strings',
+        'data': 1,
+        'valid': true
       }
       // TODO make work,
       // {

@@ -497,7 +497,7 @@ function Mapper (opts) {
 
     // We can only apply the schema to the prototype of this.recordClass if the
     // class extends Record
-    if (Object.prototype.isPrototypeOf.call(Record, Object.create(this.recordClass.prototype)) && this.schema && this.schema.apply && this.applySchema) {
+    if (Record.prototype.isPrototypeOf(Object.create(this.recordClass.prototype)) && this.schema && this.schema.apply && this.applySchema) {
       this.schema.apply(this.recordClass.prototype)
     }
   }
@@ -1406,7 +1406,7 @@ export default Component.extend({
     const before = `before${upper}`
     const after = `after${upper}`
 
-    let op
+    let op, adapter
 
     // Default values for arguments
     config.defaults.forEach((value, i) => {
@@ -1419,7 +1419,7 @@ export default Component.extend({
 
     // Fill in "opts" with the Mapper's configuration
     utils._(opts, this)
-    const adapter = opts.adapter = this.getAdapterName(opts)
+    adapter = opts.adapter = this.getAdapterName(opts)
 
     // before lifecycle hook
     op = opts.op = before

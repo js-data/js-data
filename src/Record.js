@@ -495,7 +495,7 @@ export default Component.extend({
       // Now delegate to the adapter
       op = opts.op = 'loadRelations'
       mapper.dbg(op, this, relations, opts)
-      const tasks = []
+      let tasks = []
       let task
       utils.forEachRelation(mapper, opts, (def, optsCopy) => {
         const relatedMapper = def.getRelation()
@@ -516,7 +516,7 @@ export default Component.extend({
             task = superMethod(relatedMapper, 'findAll')({
               where: {
                 [relatedMapper.idAttribute]: {
-                  in: utils.get(this, def.localKeys)
+                  'in': utils.get(this, def.localKeys)
                 }
               }
             })
@@ -524,7 +524,7 @@ export default Component.extend({
             task = superMethod(relatedMapper, 'findAll')({
               where: {
                 [def.foreignKeys]: {
-                  contains: utils.get(this, mapper.idAttribute)
+                  'contains': utils.get(this, mapper.idAttribute)
                 }
               }
             }, opts)
@@ -611,7 +611,7 @@ export default Component.extend({
     opts || (opts = {})
     opts.preserve || (opts.preserve = [])
     utils.forOwn(this, (value, key) => {
-      if (key !== this._mapper().idAttribute && !Object.hasOwnProperty.apply(previous, key) && Object.hasOwnProperty.apply(this, key) && opts.preserve.indexOf(key) === -1) {
+      if (key !== this._mapper().idAttribute && !previous.hasOwnProperty(key) && this.hasOwnProperty(key) && opts.preserve.indexOf(key) === -1) {
         delete this[key]
       }
     })

@@ -119,10 +119,10 @@ describe('Query#filter', function () {
 
     params.where = {
       age: {
-        in: [30, 33]
+        'in': [30, 33]
       },
       author: {
-        in: ['John', 'Sally', 'Adam']
+        'in': ['John', 'Sally', 'Adam']
       }
     }
 
@@ -130,7 +130,7 @@ describe('Query#filter', function () {
 
     params.where = {
       author: {
-        in: 'John'
+        'in': 'John'
       }
     }
 
@@ -138,7 +138,7 @@ describe('Query#filter', function () {
 
     params.where = {
       author: {
-        notIn: 'John'
+        'notIn': 'John'
       }
     }
 
@@ -157,7 +157,7 @@ describe('Query#filter', function () {
 
     params.where = {
       id: {
-        notIn: [8]
+        'notIn': [8]
       }
     }
 
@@ -207,7 +207,7 @@ describe('Query#filter', function () {
       where: [
         {
           roles: {
-            contains: 'admin'
+            'contains': 'admin'
           }
         },
         'or',
@@ -224,7 +224,7 @@ describe('Query#filter', function () {
       where: [
         {
           roles: {
-            contains: 'admin'
+            'contains': 'admin'
           },
           age: {
             '=': 30
@@ -233,7 +233,7 @@ describe('Query#filter', function () {
         'or',
         {
           roles: {
-            contains: 'owner'
+            'contains': 'owner'
           }
         }
       ]
@@ -245,7 +245,7 @@ describe('Query#filter', function () {
         [
           {
             roles: {
-              contains: 'admin'
+              'contains': 'admin'
             },
             age: {
               '=': 30
@@ -261,7 +261,7 @@ describe('Query#filter', function () {
         'or',
         {
           roles: {
-            contains: 'owner'
+            'contains': 'owner'
           },
           age: {
             '=': 33
@@ -285,7 +285,7 @@ describe('Query#filter', function () {
   it('should filter by nested keys', function () {
     const store = new JSData.DataStore()
     store.defineMapper('thing')
-    const things = [
+    let things = [
       {
         id: 1,
         foo: {
@@ -314,7 +314,7 @@ describe('Query#filter', function () {
 
     store.add('thing', things)
 
-    const params = {
+    let params = {
       where: {
         'foo.bar': {
           '>': 2

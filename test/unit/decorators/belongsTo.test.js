@@ -67,8 +67,8 @@ describe('JSData.belongsTo', function () {
       const Foo = store.getMapper('foo').recordClass
       const Bar = store.getMapper('bar').recordClass
 
-      assert.isTrue(Object.hasOwnProperty.apply(Foo, 'bars'))
-      assert.isTrue(Object.hasOwnProperty.apply(Bar, 'foo'))
+      assert.isTrue(Foo.prototype.hasOwnProperty('bars'))
+      assert.isTrue(Bar.prototype.hasOwnProperty('foo'))
     })
 
     it('should automatically map relations when record is added to store', function () {
