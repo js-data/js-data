@@ -14,7 +14,7 @@
   "templates": {
     "theme": "jsdata",
     "systemName": "js-data",
-    "copyright": "js-data Copyright © 2014-2017 js-data project authors",
+    "copyright": "js-data Copyright © 2014-2020 js-data project authors",
     "outputSourceFiles": true,
     "linenums": true,
     "logoFile": "https://raw.githubusercontent.com/js-data/js-data/master/js-data-64.png",
