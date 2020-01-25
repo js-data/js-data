@@ -12,7 +12,7 @@ describe('LinkedCollection', function () {
         }
       }
     })
-    let collection = store.getCollection('user')
+    const collection = store.getCollection('user')
     assert(collection instanceof JSData.LinkedCollection, 'collection should be an instance')
     assert.equal(collection.recordId(), 'id', 'collection should get initialization properties')
 
@@ -28,7 +28,7 @@ describe('LinkedCollection', function () {
       new JSData.LinkedCollection(null, { // eslint-disable-line
         mapper: mapper
       })
-    }, Error, `[new LinkedCollection:opts.datastore] expected: DataStore, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400`)
+    }, Error, '[new LinkedCollection:opts.datastore] expected: DataStore, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
 
     const stub = sinon.stub()
     collection.on('all', stub)

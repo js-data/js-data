@@ -50,7 +50,7 @@ describe('Mapper#count', function () {
         })
       }
     })
-    let data = await User.count(query)
+    const data = await User.count(query)
     assert(countCalled, 'Adapter#count should have been called')
     assert.equal(data.data, 1, 'count should be 1')
     assert.equal(data.adapter, 'mock', 'should have adapter name in response')

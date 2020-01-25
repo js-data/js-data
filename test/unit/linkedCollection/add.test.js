@@ -4,7 +4,7 @@ describe('LinkedCollection#add', function () {
   it('should add', function () {
     const store = new JSData.DataStore()
     const mapper = store.defineMapper('user') // eslint-disable-line
-    let collection = store.getCollection('user')
+    const collection = store.getCollection('user')
     const user = collection.add({ id: 1 })
     assert.equal(user.id, 1)
   })
@@ -363,7 +363,7 @@ describe('LinkedCollection#add', function () {
     assert.equal(store.getAll('bar').length, 3)
   })
   it('should inject 1,000 items', function () {
-    let users = []
+    const users = []
     for (var i = 0; i < 1000; i++) {
       users.push({
         id: i,
@@ -382,7 +382,7 @@ describe('LinkedCollection#add', function () {
     collection.createIndex('age')
     collection.createIndex('created')
     collection.createIndex('updated')
-    let users = []
+    const users = []
     for (var i = 0; i < 1000; i++) {
       users.push({
         id: i,

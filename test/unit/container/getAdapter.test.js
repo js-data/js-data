@@ -12,6 +12,6 @@ describe('Container#getAdapter', function () {
     assert.equal(store.getAdapter('foo') === adapter, true)
     assert.throws(() => {
       store.getAdapter()
-    }, Error, `[Container#getAdapter:name] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400`)
+    }, Error, '[Container#getAdapter:name] expected: string, found: undefined\nhttp://www.js-data.io/v3.0/docs/errors#400')
   })
 })

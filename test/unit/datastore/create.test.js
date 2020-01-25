@@ -14,7 +14,7 @@ describe('DataStore#create', function () {
         props.id = 1
         return JSData.utils.resolve(props)
       }
-    }, { 'default': true })
+    }, { default: true })
     const user = await this.store.create('user', props)
     assert(user[this.store.getMapper('user').idAttribute], 'new user has an id')
     assert(user instanceof this.store.getMapper('user').recordClass, 'user is a record')

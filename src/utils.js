@@ -143,7 +143,7 @@ const utils = {
     } else if (!containedName) {
       return
     }
-    let optsCopy = {}
+    const optsCopy = {}
     utils.fillIn(optsCopy, def.getRelation())
     utils.fillIn(optsCopy, opts)
     optsCopy.with = opts.with.slice()
@@ -333,7 +333,7 @@ const utils = {
       stackTo = stackTo || []
 
       if (utils.isObject(from)) {
-        let index = stackFrom.indexOf(from)
+        const index = stackFrom.indexOf(from)
         if (index !== -1) {
           return stackTo[index]
         }
@@ -370,7 +370,7 @@ const utils = {
           })
         }
         for (var key in from) {
-          if (from.hasOwnProperty(key)) {
+          if (Object.hasOwnProperty.apply(from, key)) {
             if (utils.isBlacklisted(key, blacklist)) {
               continue
             }
@@ -418,7 +418,7 @@ const utils = {
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepFillIn(existing, value)
-        } else if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
+        } else if (!Object.hasOwnProperty.apply(dest, key) || dest[key] === undefined) {
           dest[key] = value
         }
       })
@@ -483,7 +483,7 @@ const utils = {
   diffObjects (newObject, oldObject, opts) {
     opts || (opts = {})
     let equalsFn = opts.equalsFn
-    let blacklist = opts.ignore
+    const blacklist = opts.ignore
     const diff = {
       added: {},
       changed: {},
@@ -687,7 +687,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     props || (props = {})
     classProps || (classProps = {})
 
-    if (props.hasOwnProperty('constructor')) {
+    if (Object.hasOwnProperty.apply(props, 'constructor')) {
       subClass = props.constructor
       delete props.constructor
     } else {
@@ -718,7 +718,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
         subClass[key] = value
       })
     }
-    if (!subClass.hasOwnProperty('__super__')) {
+    if (!Object.hasOwnProperty.apply(subClass, '__super__')) {
       Object.defineProperty(subClass, '__super__', {
         configurable: true,
         value: superClass
@@ -751,7 +751,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    */
   fillIn (dest, src) {
     utils.forOwn(src, function (value, key) {
-      if (!dest.hasOwnProperty(key) || dest[key] === undefined) {
+      if (!Object.hasOwnProperty.apply(dest, key) || dest[key] === undefined) {
         dest[key] = value
       }
     })
@@ -927,7 +927,7 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
    */
   getSuper (instance, isCtor) {
     const ctor = isCtor ? instance : instance.constructor
-    if (ctor.hasOwnProperty('__super__')) {
+    if (Object.hasOwnProperty.apply(ctor, '__super__')) {
       return ctor.__super__
     }
     return Object.getPrototypeOf(ctor) || ctor.__proto__ // eslint-disable-line

@@ -52,7 +52,7 @@ describe('Mapper#sum', function () {
         })
       }
     })
-    let data = await User.sum('age', query)
+    const data = await User.sum('age', query)
     assert(sumCalled, 'Adapter#sum should have been called')
     assert.objectsEqual(data.data, 30, 'sum should be 30')
     assert.equal(data.adapter, 'mock', 'should have adapter name in response')

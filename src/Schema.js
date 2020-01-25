@@ -18,7 +18,7 @@ const types = {
   array: utils.isArray,
   boolean: utils.isBoolean,
   integer: utils.isInteger,
-  'null': utils.isNull,
+  null: utils.isNull,
   number: utils.isNumber,
   object: utils.isObject,
   string: utils.isString
@@ -179,7 +179,7 @@ const validationKeywords = {
    * @returns {(array|undefined)} Array of errors or `undefined` if valid.
    */
   enum (value, schema, opts) {
-    const possibleValues = schema['enum']
+    const possibleValues = schema.enum
     if (utils.findIndex(possibleValues, (item) => utils.deepEqual(item, value)) === -1) {
       return makeError(value, `one of (${possibleValues.join(', ')})`, opts)
     }
@@ -552,7 +552,7 @@ const validationKeywords = {
   required (value, schema, opts) {
     opts || (opts = {})
     const required = schema.required
-    let errors = []
+    const errors = []
     if (!opts.existingOnly) {
       required.forEach(function (prop) {
         if (utils.get(value, prop) === undefined) {
@@ -738,7 +738,7 @@ const validate = function (value, schema, opts) {
   opts || (opts = {})
   opts.ctx || (opts.ctx = { value, schema })
   let shouldPop
-  let prevProp = opts.prop
+  const prevProp = opts.prop
   if (schema === undefined) {
     return
   }
@@ -755,13 +755,13 @@ const validate = function (value, schema, opts) {
     opts.prop = undefined
   }
   // Validate against parent schema
-  if (schema['extends']) {
+  if (schema.extends) {
     // opts.path = path
     // opts.prop = prop
-    if (utils.isFunction(schema['extends'].validate)) {
-      errors = errors.concat(schema['extends'].validate(value, opts) || [])
+    if (utils.isFunction(schema.extends.validate)) {
+      errors = errors.concat(schema.extends.validate(value, opts) || [])
     } else {
-      errors = errors.concat(validate(value, schema['extends'], opts) || [])
+      errors = errors.concat(validate(value, schema.extends, opts) || [])
     }
   }
   if (value === undefined) {
@@ -1015,11 +1015,11 @@ export default Component.extend({
     const properties = this.properties || {}
     const hasSet = utils.isFunction(target.set) || utils.isFunction(target._set)
     utils.forOwn(properties, function (schema, prop) {
-      if (schema.hasOwnProperty('default') && utils.get(target, prop) === undefined) {
+      if (Object.hasOwnProperty.apply(schema, 'default') && utils.get(target, prop) === undefined) {
         if (hasSet) {
-          target.set(prop, utils.plainCopy(schema['default']), { silent: true })
+          target.set(prop, utils.plainCopy(schema.default), { silent: true })
         } else {
-          utils.set(target, prop, utils.plainCopy(schema['default']))
+          utils.set(target, prop, utils.plainCopy(schema.default))
         }
       }
       if (schema.type === 'object' && schema.properties) {
@@ -1194,7 +1194,7 @@ export default Component.extend({
       return
     }
     if (this.type === 'object') {
-      let copy = {}
+      const copy = {}
       const properties = this.properties
       if (properties) {
         utils.forOwn(properties, (_definition, prop) => {

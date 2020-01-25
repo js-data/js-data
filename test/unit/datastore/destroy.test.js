@@ -18,7 +18,7 @@ describe('DataStore#destroy', function () {
         destroyCalled = true
         return JSData.utils.resolve()
       }
-    }, { 'default': true })
+    }, { default: true })
     const result = await this.store.destroy('user', id)
     assert(destroyCalled, 'Adapter#destroy should have been called')
     assert(!this.store._pendingQueries.user[id])
@@ -39,7 +39,7 @@ describe('DataStore#destroy', function () {
           deleted: 1
         })
       }
-    }, { 'default': true })
+    }, { default: true })
     const result = await this.store.destroy('user', id, { raw: true })
     assert(destroyCalled, 'Adapter#destroy should have been called')
     assert(!this.store._pendingQueries.user[id])
@@ -59,7 +59,7 @@ describe('DataStore#destroy', function () {
         destroyCalled = true
         return JSData.utils.resolve()
       }
-    }, { 'default': true })
+    }, { default: true })
 
     const user = this.store.add('user', this.data.user10)
     assert.strictEqual(this.store.get('profile', this.data.profile15.id).user, user)

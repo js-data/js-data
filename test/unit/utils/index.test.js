@@ -8,7 +8,7 @@ describe('utils', function () {
 })
 describe('utils.get', function () {
   it('should be a static method', function () {
-    assert.equal(typeof utils['get'], 'function', 'has the [\'get\'] method')
+    assert.equal(typeof utils.get, 'function', 'has the [\'get\'] method')
   })
 
   it('returns a given property by name or path', function () {
@@ -76,7 +76,7 @@ describe('utils.noDupeAdd', function () {
 })
 describe('utils.get', function () {
   it('should be a static method', function () {
-    assert.equal(typeof utils['get'], 'function', 'has the [\'get\'] method')
+    assert.equal(typeof utils.get, 'function', 'has the [\'get\'] method')
   })
 
   it('returns a given property by name or path', function () {

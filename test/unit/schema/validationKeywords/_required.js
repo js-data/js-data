@@ -1,38 +1,38 @@
 export const requiredTests = [
   {
-    'description': 'required validation',
-    'schema': {
-      'properties': {
-        'foo': {},
-        'bar': {}
+    description: 'required validation',
+    schema: {
+      properties: {
+        foo: {},
+        bar: {}
       },
-      'required': ['foo']
+      required: ['foo']
     },
-    'tests': [
+    tests: [
       {
-        'description': 'present required property is valid',
-        'data': { 'foo': 1 },
-        'valid': true
+        description: 'present required property is valid',
+        data: { foo: 1 },
+        valid: true
       },
       {
-        'description': 'non-present required property is invalid',
-        'data': { 'bar': 1 },
-        'valid': false
+        description: 'non-present required property is invalid',
+        data: { bar: 1 },
+        valid: false
       }
     ]
   },
   {
-    'description': 'required default validation',
-    'schema': {
-      'properties': {
-        'foo': {}
+    description: 'required default validation',
+    schema: {
+      properties: {
+        foo: {}
       }
     },
-    'tests': [
+    tests: [
       {
-        'description': 'not required by default',
-        'data': {},
-        'valid': true
+        description: 'not required by default',
+        data: {},
+        valid: true
       }
     ]
   }

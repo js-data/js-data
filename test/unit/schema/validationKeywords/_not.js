@@ -1,95 +1,95 @@
 export const notTests = [
   {
-    'description': 'not',
-    'schema': {
-      'not': { 'type': 'integer' }
+    description: 'not',
+    schema: {
+      not: { type: 'integer' }
     },
-    'tests': [
+    tests: [
       {
-        'description': 'allowed',
-        'data': 'foo',
-        'valid': true
+        description: 'allowed',
+        data: 'foo',
+        valid: true
       },
       {
-        'description': 'disallowed',
-        'data': 1,
-        'valid': false
+        description: 'disallowed',
+        data: 1,
+        valid: false
       }
     ]
   },
   {
-    'description': 'not multiple types',
-    'schema': {
-      'not': { 'type': ['integer', 'boolean'] }
+    description: 'not multiple types',
+    schema: {
+      not: { type: ['integer', 'boolean'] }
     },
-    'tests': [
+    tests: [
       {
-        'description': 'valid',
-        'data': 'foo',
-        'valid': true
+        description: 'valid',
+        data: 'foo',
+        valid: true
       },
       {
-        'description': 'mismatch',
-        'data': 1,
-        'valid': false
+        description: 'mismatch',
+        data: 1,
+        valid: false
       },
       {
-        'description': 'other mismatch',
-        'data': true,
-        'valid': false
+        description: 'other mismatch',
+        data: true,
+        valid: false
       }
     ]
   },
   {
-    'description': 'not more complex schema',
-    'schema': {
-      'not': {
-        'type': 'object',
-        'properties': {
-          'foo': {
-            'type': 'string'
+    description: 'not more complex schema',
+    schema: {
+      not: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string'
           }
         }
       }
     },
-    'tests': [
+    tests: [
       {
-        'description': 'match',
-        'data': 1,
-        'valid': true
+        description: 'match',
+        data: 1,
+        valid: true
       },
       {
-        'description': 'other match',
-        'data': { 'foo': 1 },
-        'valid': true
+        description: 'other match',
+        data: { foo: 1 },
+        valid: true
       },
       {
-        'description': 'mismatch',
-        'data': { 'foo': 'bar' },
-        'valid': false
+        description: 'mismatch',
+        data: { foo: 'bar' },
+        valid: false
       }
     ]
   },
   {
-    'description': 'forbidden property',
-    'schema': {
-      'type': 'object',
-      'properties': {
-        'foo': {
-          'not': {}
+    description: 'forbidden property',
+    schema: {
+      type: 'object',
+      properties: {
+        foo: {
+          not: {}
         }
       }
     },
-    'tests': [
+    tests: [
       {
-        'description': 'property present',
-        'data': { 'foo': 1, 'bar': 2 },
-        'valid': false
+        description: 'property present',
+        data: { foo: 1, bar: 2 },
+        valid: false
       },
       {
-        'description': 'property absent',
-        'data': { 'bar': 1, 'baz': 2 },
-        'valid': true
+        description: 'property absent',
+        data: { bar: 1, baz: 2 },
+        valid: true
       }
     ]
   }

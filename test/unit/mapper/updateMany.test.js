@@ -56,7 +56,7 @@ describe('Mapper#updateMany', function () {
         })
       }
     })
-    let data = await User.updateMany(props)
+    const data = await User.updateMany(props)
     assert(updateManyCalled, 'Adapter#update should have been called')
     assert.equal(data.data[0].foo, 'bar', 'user has a new field')
     assert(data.data[0] instanceof User.recordClass, 'user is a record')

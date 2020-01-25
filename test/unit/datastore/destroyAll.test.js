@@ -18,7 +18,7 @@ describe('DataStore#destroyAll', function () {
         destroyCalled = true
         return JSData.utils.resolve()
       }
-    }, { 'default': true })
+    }, { default: true })
     const result = await this.store.destroyAll('user', query)
     assert(destroyCalled, 'Adapter#destroyAll should have been called')
     assert.objectsEqual(result, users, 'returned data')
@@ -36,7 +36,7 @@ describe('DataStore#destroyAll', function () {
           deleted: 1
         })
       }
-    }, { 'default': true })
+    }, { default: true })
     const result = await this.store.destroyAll('user', query, { raw: true })
     assert(destroyCalled, 'Adapter#destroyAll should have been called')
     assert(!this.store._pendingQueries.user[this.store.hashQuery('user', query)])

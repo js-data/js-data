@@ -41,7 +41,7 @@ describe('DataStore#defineMapper', function () {
   })
   it('can get a scoped reference', function () {
     const DataStore = JSData.DataStore
-    let store = new DataStore()
+    const store = new DataStore()
     const fooMapper = store.defineMapper('foo')
     const fooStore = store.as('foo')
 
