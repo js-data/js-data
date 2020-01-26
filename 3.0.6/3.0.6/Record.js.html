@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Record.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav class="wrap">
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Collection.html">Collection</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Collection.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Collection.html#add">add</a></li><li data-type='method' style='display: none;'><a href="Collection.html#afterRemove">afterRemove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#afterRemoveAll">afterRemoveAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeAdd">beforeAdd</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeRemove">beforeRemove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeRemoveAll">beforeRemoveAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#between">between</a></li><li data-type='method' style='display: none;'><a href="Collection.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Collection.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Collection.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="Collection.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="Collection.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Collection.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#getIndex">getIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="Collection.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Collection.html#map">map</a></li><li data-type='method' style='display: none;'><a href="Collection.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="Collection.html#method">method</a></li><li data-type='method' style='display: none;'><a href="Collection.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Collection.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Collection.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="Collection.html#query">query</a></li><li data-type='method' style='display: none;'><a href="Collection.html#recordId">recordId</a></li><li data-type='method' style='display: none;'><a href="Collection.html#reduce">reduce</a></li><li data-type='method' style='display: none;'><a href="Collection.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#skip">skip</a></li><li data-type='method' style='display: none;'><a href="Collection.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Collection.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="Collection.html#updateIndex">updateIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#updateIndexes">updateIndexes</a></li></ul></li><li><a href="Component.html">Component</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Component.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Component.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Component.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Component.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Component.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Component.html#on">on</a></li></ul></li><li><a href="Container.html">Container</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Container.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Container.html#as">as</a></li><li data-type='method' style='display: none;'><a href="Container.html#count">count</a></li><li data-type='method' style='display: none;'><a href="Container.html#create">create</a></li><li data-type='method' style='display: none;'><a href="Container.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="Container.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="Container.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Container.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="Container.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Container.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Container.html#find">find</a></li><li data-type='method' style='display: none;'><a href="Container.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="Container.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="Container.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="Container.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="Container.html#is">is</a></li><li data-type='method' style='display: none;'><a href="Container.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Container.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Container.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Container.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="Container.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="Container.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Container.html#update">update</a></li><li data-type='method' style='display: none;'><a href="Container.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="Container.html#validate">validate</a></li></ul></li><li><a href="DataStore.html">DataStore</a><ul class='methods'><li data-type='method' style='display: none;'><a href="DataStore.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#add">add</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#addToCache">addToCache</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#as">as</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#between">between</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cachedFind">cachedFind</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cachedFindAll">cachedFindAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cacheFind">cacheFind</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cacheFindAll">cacheFindAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#clear">clear</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#count">count</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#create">create</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#find">find</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#get">get</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getCollection">getCollection</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#hashQuery">hashQuery</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#is">is</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#log">log</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#off">off</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#on">on</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#query">query</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#removeRelated">removeRelated</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#update">update</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#validate">validate</a></li></ul></li><li><a href="LinkedCollection.html">LinkedCollection</a><ul class='methods'><li data-type='method' style='display: none;'><a href="LinkedCollection.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#add">add</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#afterRemove">afterRemove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#afterRemoveAll">afterRemoveAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeAdd">beforeAdd</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeRemove">beforeRemove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeRemoveAll">beforeRemoveAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#between">between</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#get">get</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#getIndex">getIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#log">log</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#map">map</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#method">method</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#off">off</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#on">on</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#query">query</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#recordId">recordId</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#reduce">reduce</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#skip">skip</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#updateIndex">updateIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#updateIndexes">updateIndexes</a></li></ul></li><li><a href="Mapper.html">Mapper</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Mapper.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCount">afterCount</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCreate">afterCreate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCreateMany">afterCreateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterDestroy">afterDestroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterDestroyAll">afterDestroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterFind">afterFind</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterFindAll">afterFindAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterSum">afterSum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdate">afterUpdate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdateAll">afterUpdateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdateMany">afterUpdateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCount">beforeCount</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCreate">beforeCreate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCreateMany">beforeCreateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeDestroy">beforeDestroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeDestroyAll">beforeDestroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeFind">beforeFind</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeFindAll">beforeFindAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeSum">beforeSum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdate">beforeUpdate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdateAll">beforeUpdateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdateMany">beforeUpdateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#belongsTo">belongsTo</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#count">count</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#create">create</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createInstance">createInstance</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#crud">crud</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#find">find</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#hasMany">hasMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#hasOne">hasOne</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#is">is</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#update">update</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#validate">validate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#wrap">wrap</a></li></ul></li><li><a href="Query.html">Query</a><ul class='members'><li data-type='member' style='display: none;'><a href="Query.html#.ops">ops</a></li><li data-type='member' style='display: none;'><a href="Query.html#collection">collection</a></li><li data-type='member' style='display: none;'><a href="Query.html#data">data</a></li><li data-type='member' style='display: none;'><a href="Query.html#debug">debug</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="Query.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Query.html#between">between</a></li><li data-type='method' style='display: none;'><a href="Query.html#compare">compare</a></li><li data-type='method' style='display: none;'><a href="Query.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Query.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Query.html#evaluate">evaluate</a></li><li data-type='method' style='display: none;'><a href="Query.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="Query.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="Query.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Query.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="Query.html#getData">getData</a></li><li data-type='method' style='display: none;'><a href="Query.html#like">like</a></li><li data-type='method' style='display: none;'><a href="Query.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="Query.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Query.html#map">map</a></li><li data-type='method' style='display: none;'><a href="Query.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="Query.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Query.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Query.html#run">run</a></li><li data-type='method' style='display: none;'><a href="Query.html#skip">skip</a></li></ul></li><li><a href="Record.html">Record</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Record.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Record.html#_mapper">_mapper</a></li><li data-type='method' style='display: none;'><a href="Record.html#afterLoadRelations">afterLoadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#beforeLoadRelations">beforeLoadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#changeHistory">changeHistory</a></li><li data-type='method' style='display: none;'><a href="Record.html#changes">changes</a></li><li data-type='method' style='display: none;'><a href="Record.html#commit">commit</a></li><li data-type='method' style='display: none;'><a href="Record.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Record.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Record.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Record.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Record.html#hasChanges">hasChanges</a></li><li data-type='method' style='display: none;'><a href="Record.html#isNew">isNew</a></li><li data-type='method' style='display: none;'><a href="Record.html#isValid">isValid</a></li><li data-type='method' style='display: none;'><a href="Record.html#loadRelations">loadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Record.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Record.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Record.html#previous">previous</a></li><li data-type='method' style='display: none;'><a href="Record.html#revert">revert</a></li><li data-type='method' style='display: none;'><a href="Record.html#save">save</a></li><li data-type='method' style='display: none;'><a href="Record.html#set">set</a></li><li data-type='method' style='display: none;'><a href="Record.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Record.html#unset">unset</a></li><li data-type='method' style='display: none;'><a href="Record.html#validate">validate</a></li></ul></li><li><a href="Schema.html">Schema</a><ul class='members'><li data-type='member' style='display: none;'><a href="Schema.html#.ANY_OPS">ANY_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.ARRAY_OPS">ARRAY_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.NUMERIC_OPS">NUMERIC_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.OBJECT_OPS">OBJECT_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.STRING_OPS">STRING_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.typeGroupValidators">typeGroupValidators</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.types">types</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.validationKeywords">validationKeywords</a></li><li data-type='member' style='display: none;'><a href="Schema.html#debug">debug</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="Schema.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Schema.html#.validate">validate</a></li><li data-type='method' style='display: none;'><a href="Schema.html#apply">apply</a></li><li data-type='method' style='display: none;'><a href="Schema.html#applyDefaults">applyDefaults</a></li><li data-type='method' style='display: none;'><a href="Schema.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Schema.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Schema.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Schema.html#makeDescriptor">makeDescriptor</a></li><li data-type='method' style='display: none;'><a href="Schema.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Schema.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Schema.html#pick">pick</a></li><li data-type='method' style='display: none;'><a href="Schema.html#validate">validate</a></li></ul></li><li><a href="Settable.html">Settable</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Settable.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Settable.html#_get">_get</a></li></ul></li><li><a href="SimpleStore.html">SimpleStore</a><ul class='methods'><li data-type='method' style='display: none;'><a href="SimpleStore.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#add">add</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#addToCache">addToCache</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#as">as</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#between">between</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cachedFind">cachedFind</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cachedFindAll">cachedFindAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cacheFind">cacheFind</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cacheFindAll">cacheFindAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#clear">clear</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#count">count</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#create">create</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#find">find</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#get">get</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getCollection">getCollection</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#hashQuery">hashQuery</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#is">is</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#log">log</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#off">off</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#on">on</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#query">query</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#removeRelated">removeRelated</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#update">update</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#validate">validate</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-js-data.html">js-data</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-js-data.html#.Collection">Collection</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Component">Component</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Container">Container</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.DataStore">DataStore</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Index">Index</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.LinkedCollection">LinkedCollection</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Mapper">Mapper</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Query">Query</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Record">Record</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Schema">Schema</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Settable">Settable</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.SimpleStore">SimpleStore</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.utils">utils</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.version">version</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="module-js-data.html#.belongsTo">belongsTo</a></li><li data-type='method' style='display: none;'><a href="module-js-data.html#.hasMany">hasMany</a></li><li data-type='method' style='display: none;'><a href="module-js-data.html#.hasOne">hasOne</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Collection.html#event:add">add</a></li><li><a href="Collection.html#event:change">change</a></li><li><a href="Collection.html#event:remove">remove</a></li><li><a href="Container.html#event:afterCreate">afterCreate</a></li><li><a href="Container.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="Container.html#event:afterDestroy">afterDestroy</a></li><li><a href="Container.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="Container.html#event:afterFind">afterFind</a></li><li><a href="Container.html#event:afterFindAll">afterFindAll</a></li><li><a href="Container.html#event:afterUpdate">afterUpdate</a></li><li><a href="Container.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="Container.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="Container.html#event:beforeCreate">beforeCreate</a></li><li><a href="Container.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="Container.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="Container.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="Container.html#event:beforeFind">beforeFind</a></li><li><a href="Container.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="Container.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="Container.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="Container.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="DataStore.html#event:add">add</a></li><li><a href="DataStore.html#event:afterCreate">afterCreate</a></li><li><a href="DataStore.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="DataStore.html#event:afterDestroy">afterDestroy</a></li><li><a href="DataStore.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="DataStore.html#event:afterFind">afterFind</a></li><li><a href="DataStore.html#event:afterFindAll">afterFindAll</a></li><li><a href="DataStore.html#event:afterUpdate">afterUpdate</a></li><li><a href="DataStore.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="DataStore.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="DataStore.html#event:beforeCreate">beforeCreate</a></li><li><a href="DataStore.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="DataStore.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="DataStore.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="DataStore.html#event:beforeFind">beforeFind</a></li><li><a href="DataStore.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="DataStore.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="DataStore.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="DataStore.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="DataStore.html#event:change">change</a></li><li><a href="DataStore.html#event:remove">remove</a></li><li><a href="LinkedCollection.html#event:add">add</a></li><li><a href="LinkedCollection.html#event:change">change</a></li><li><a href="LinkedCollection.html#event:remove">remove</a></li><li><a href="Mapper.html#event:afterCreate">afterCreate</a></li><li><a href="Mapper.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="Mapper.html#event:afterDestroy">afterDestroy</a></li><li><a href="Mapper.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="Mapper.html#event:afterFind">afterFind</a></li><li><a href="Mapper.html#event:afterFindAll">afterFindAll</a></li><li><a href="Mapper.html#event:afterUpdate">afterUpdate</a></li><li><a href="Mapper.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="Mapper.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="Mapper.html#event:beforeCreate">beforeCreate</a></li><li><a href="Mapper.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="Mapper.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="Mapper.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="Mapper.html#event:beforeFind">beforeFind</a></li><li><a href="Mapper.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="Mapper.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="Mapper.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="Mapper.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="Record.html#event:change">change</a></li><li><a href="SimpleStore.html#event:add">add</a></li><li><a href="SimpleStore.html#event:afterCreate">afterCreate</a></li><li><a href="SimpleStore.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="SimpleStore.html#event:afterDestroy">afterDestroy</a></li><li><a href="SimpleStore.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="SimpleStore.html#event:afterFind">afterFind</a></li><li><a href="SimpleStore.html#event:afterFindAll">afterFindAll</a></li><li><a href="SimpleStore.html#event:afterUpdate">afterUpdate</a></li><li><a href="SimpleStore.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="SimpleStore.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="SimpleStore.html#event:beforeCreate">beforeCreate</a></li><li><a href="SimpleStore.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="SimpleStore.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="SimpleStore.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="SimpleStore.html#event:beforeFind">beforeFind</a></li><li><a href="SimpleStore.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="SimpleStore.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="SimpleStore.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="SimpleStore.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="SimpleStore.html#event:change">change</a></li><li><a href="SimpleStore.html#event:remove">remove</a></li></ul><h3>Namespaces</h3><ul><li><a href="query_.html">query</a><ul class='members'><li data-type='member' style='display: none;'><a href="query_.html#.limit">limit</a></li><li data-type='member' style='display: none;'><a href="query_.html#.offset">offset</a></li><li data-type='member' style='display: none;'><a href="query_.html#.orderBy">orderBy</a></li><li data-type='member' style='display: none;'><a href="query_.html#.where">where</a></li></ul></li><li><a href="utils.html">utils</a><ul class='members'><li data-type='member' style='display: none;'><a href="utils.html#.Promise">Promise</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="utils.html#.addHiddenPropsToTarget">addHiddenPropsToTarget</a></li><li data-type='method' style='display: none;'><a href="utils.html#.areDifferent">areDifferent</a></li><li data-type='method' style='display: none;'><a href="utils.html#.classCallCheck">classCallCheck</a></li><li data-type='method' style='display: none;'><a href="utils.html#.copy">copy</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepEqual">deepEqual</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepFillIn">deepFillIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepMixIn">deepMixIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.diffObjects">diffObjects</a></li><li data-type='method' style='display: none;'><a href="utils.html#.equal">equal</a></li><li data-type='method' style='display: none;'><a href="utils.html#.err">err</a></li><li data-type='method' style='display: none;'><a href="utils.html#.eventify">eventify</a></li><li data-type='method' style='display: none;'><a href="utils.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="utils.html#.fillIn">fillIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.findIndex">findIndex</a></li><li data-type='method' style='display: none;'><a href="utils.html#.forEachRelation">forEachRelation</a></li><li data-type='method' style='display: none;'><a href="utils.html#.forOwn">forOwn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.fromJson">fromJson</a></li><li data-type='method' style='display: none;'><a href="utils.html#.get">get</a></li><li data-type='method' style='display: none;'><a href="utils.html#.getSuper">getSuper</a></li><li data-type='method' style='display: none;'><a href="utils.html#.intersection">intersection</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isArray">isArray</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isBlacklisted">isBlacklisted</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isBoolean">isBoolean</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isDate">isDate</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isFunction">isFunction</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isInteger">isInteger</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isNull">isNull</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isNumber">isNumber</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isObject">isObject</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isRegExp">isRegExp</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isSorN">isSorN</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isString">isString</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isUndefined">isUndefined</a></li><li data-type='method' style='display: none;'><a href="utils.html#.logify">logify</a></li><li data-type='method' style='display: none;'><a href="utils.html#.noDupeAdd">noDupeAdd</a></li><li data-type='method' style='display: none;'><a href="utils.html#.omit">omit</a></li><li data-type='method' style='display: none;'><a href="utils.html#.pick">pick</a></li><li data-type='method' style='display: none;'><a href="utils.html#.plainCopy">plainCopy</a></li><li data-type='method' style='display: none;'><a href="utils.html#.reject">reject</a></li><li data-type='method' style='display: none;'><a href="utils.html#.remove">remove</a></li><li data-type='method' style='display: none;'><a href="utils.html#.resolve">resolve</a></li><li data-type='method' style='display: none;'><a href="utils.html#.set">set</a></li><li data-type='method' style='display: none;'><a href="utils.html#.toJson">toJson</a></li><li data-type='method' style='display: none;'><a href="utils.html#.unset">unset</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#_createOrAssignChildRecordIfRequired">_createOrAssignChildRecordIfRequired</a></li><li><a href="global.html#_createParentRecordIfRequired">_createParentRecordIfRequired</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Record.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import utils, { safeSetLink } from './utils'
+import Component from './Component'
+import Settable from './Settable'
+import {
+  hasManyType,
+  hasOneType
+} from './decorators'
+
+const DOMAIN = 'Record'
+
+const superMethod = function (mapper, name) {
+  const store = mapper.datastore
+  if (store &amp;&amp; store[name]) {
+    return function (...args) {
+      return store[name](mapper.name, ...args)
+    }
+  }
+  return mapper[name].bind(mapper)
+}
+
+// Cache these strings
+const creatingPath = 'creating'
+const noValidatePath = 'noValidate'
+const keepChangeHistoryPath = 'keepChangeHistory'
+const previousPath = 'previous'
+
+/**
+ * js-data's Record class. An instance of `Record` corresponds to an in-memory
+ * representation of a single row or document in a database, Firebase,
+ * localstorage, etc. Basically, a `Record` instance represents whatever kind of
+ * entity in your persistence layer that has a primary key.
+ *
+ * ```javascript
+ * import {Record} from 'js-data'
+ * ```
+ *
+ * @example &lt;caption>Record#constructor&lt;/caption>
+ * const JSData = require('js-data');
+ * const { Record } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * // Instantiate a plain record
+ * let record = new Record();
+ * console.log('record: ' + JSON.stringify(record));
+ *
+ * // You can supply properties on instantiation
+ * record = new Record({ name: 'John' });
+ * console.log('record: ' + JSON.stringify(record));
+ *
+ * @example &lt;caption>Record#constructor2&lt;/caption>
+ * const JSData = require('js-data');
+ * const { Mapper } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * // Instantiate a record that's associated with a Mapper:
+ * const UserMapper = new Mapper({ name: 'user' });
+ * const User = UserMapper.recordClass;
+ * const user = UserMapper.createRecord({ name: 'John' });
+ * const user2 = new User({ name: 'Sally' });
+ * console.log('user: ' + JSON.stringify(user));
+ * console.log('user2: ' + JSON.stringify(user2));
+ *
+ * @example &lt;caption>Record#constructor3&lt;/caption>
+ * const JSData = require('js-data');
+ * const { Container } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * const store = new Container();
+ * store.defineMapper('user');
+ *
+ * // Instantiate a record that's associated with a store's Mapper
+ * const user = store.createRecord('user', { name: 'John' });
+ * console.log('user: ' + JSON.stringify(user));
+ *
+ * @example &lt;caption>Record#constructor4&lt;/caption>
+ * const JSData = require('js-data');
+ * const { Container } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * const store = new Container();
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * });
+ *
+ * // Validate on instantiation
+ * const user = store.createRecord('user', { name: 1234 });
+ * console.log('user: ' + JSON.stringify(user));
+ *
+ * @example &lt;caption>Record#constructor5&lt;/caption>
+ * const JSData = require('js-data');
+ * const { Container } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * const store = new Container();
+ * store.defineMapper('user', {
+ *   schema: {
+ *     properties: {
+ *       name: { type: 'string' }
+ *     }
+ *   }
+ * });
+ *
+ * // Skip validation on instantiation
+ * const user = store.createRecord('user', { name: 1234 }, { noValidate: true });
+ * console.log('user: ' + JSON.stringify(user));
+ * console.log('user.isValid(): ' + user.isValid());
+ *
+ * @class Record
+ * @extends Component
+ * @param {object} [props] The initial properties of the new Record instance.
+ * @param {object} [opts] Configuration options.
+ * @param {boolean} [opts.noValidate=false] Whether to skip validation on the
+ * initial properties.
+ * @param {boolean} [opts.validateOnSet=true] Whether to enable setter
+ * validation on properties after the Record has been initialized.
+ * @since 3.0.0
+ */
+function Record (props, opts) {
+  utils.classCallCheck(this, Record)
+  Settable.call(this)
+  props || (props = {})
+  opts || (opts = {})
+  const _set = this._set
+  const mapper = this.constructor.mapper
+
+  _set(creatingPath, true)
+  _set(noValidatePath, !!opts.noValidate)
+  _set(keepChangeHistoryPath, opts.keepChangeHistory === undefined ? (mapper ? mapper.keepChangeHistory : true) : opts.keepChangeHistory)
+
+  // Set the idAttribute value first, if it exists.
+  const id = mapper ? utils.get(props, mapper.idAttribute) : undefined
+  if (id !== undefined) {
+    utils.set(this, mapper.idAttribute, id)
+  }
+
+  utils.fillIn(this, props)
+  _set(creatingPath, false)
+  if (opts.validateOnSet !== undefined) {
+    _set(noValidatePath, !opts.validateOnSet)
+  } else if (mapper &amp;&amp; mapper.validateOnSet !== undefined) {
+    _set(noValidatePath, !mapper.validateOnSet)
+  } else {
+    _set(noValidatePath, false)
+  }
+  _set(previousPath, mapper ? mapper.toJSON(props) : utils.plainCopy(props))
+}
+
+export default Component.extend({
+  constructor: Record,
+
+  /**
+   * Returns the {@link Mapper} paired with this record's class, if any.
+   *
+   * @method Record#_mapper
+   * @returns {Mapper} The {@link Mapper} paired with this record's class, if any.
+   * @since 3.0.0
+   */
+  _mapper () {
+    const mapper = this.constructor.mapper
+    if (!mapper) {
+      throw utils.err(`${DOMAIN}#_mapper`, '')(404, 'mapper')
+    }
+    return mapper
+  },
+
+  /**
+   * Lifecycle hook.
+   *
+   * @method Record#afterLoadRelations
+   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+   * @param {object} opts The `opts` argument passed to {@link Record#loadRelations}.
+   * @since 3.0.0
+   */
+  afterLoadRelations () {},
+
+  /**
+   * Lifecycle hook.
+   *
+   * @method Record#beforeLoadRelations
+   * @param {string[]} relations The `relations` argument passed to {@link Record#loadRelations}.
+   * @param {object} opts The `opts` argument passed to {@link Record#loadRelations}.
+   * @since 3.0.0
+   */
+  beforeLoadRelations () {},
+
+  /**
+   * Return the change history of this record since it was instantiated or
+   * {@link Record#commit} was called.
+   *
+   * @method Record#changeHistory
+   * @since 3.0.0
+   */
+  changeHistory () {
+    return (this._get('history') || []).slice()
+  },
+
+  /**
+   * Return changes to this record since it was instantiated or
+   * {@link Record#commit} was called.
+   *
+   * @example &lt;caption>Record#changes&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new Container();
+   * store.defineMapper('user');
+   * const user = store.createRecord('user');
+   * console.log('user changes: ' + JSON.stringify(user.changes()));
+   * user.name = 'John';
+   * console.log('user changes: ' + JSON.stringify(user.changes()));
+   *
+   * @method Record#changes
+   * @param [opts] Configuration options.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {Object} Object describing the changes to this record since it was
+   * instantiated or its {@link Record#commit} method was last called.
+   * @since 3.0.0
+   */
+  changes (opts) {
+    opts || (opts = {})
+    return utils.diffObjects(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts)
+  },
+
+  /**
+   * Make the record's current in-memory state it's only state, with any
+   * previous property values being set to current values.
+   *
+   * @example &lt;caption>Record#commit&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new Container();
+   * store.defineMapper('user');
+   * const user = store.createRecord('user');
+   * console.log('user hasChanges: ' + user.hasChanges());
+   * user.name = 'John';
+   * console.log('user hasChanges: ' + user.hasChanges());
+   * user.commit();
+   * console.log('user hasChanges: ' + user.hasChanges());
+   *
+   * @method Record#commit
+   * @param {object} [opts] Configuration options. Passed to {@link Record#toJSON}.
+   * @since 3.0.0
+   */
+  commit (opts) {
+    this._set('changed') // unset
+    this._set('changing', false)
+    this._set('history', []) // clear history
+    this._set('previous', this.toJSON(opts))
+  },
+
+  /**
+   * Call {@link Mapper#destroy} using this record's primary key.
+   *
+   * @example
+   * import { Container } from 'js-data';
+   * import { RethinkDBAdapter } from 'js-data-rethinkdb';
+   *
+   * const store = new Container();
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('user');
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id); // 1234
+   *
+   *   // Destroy this user from the database
+   *   return user.destroy();
+   * });
+   *
+   * @method Record#destroy
+   * @param {object} [opts] Configuration options passed to {@link Mapper#destroy}.
+   * @returns {Promise} The result of calling {@link Mapper#destroy} with the
+   * primary key of this record.
+   * @since 3.0.0
+   */
+  destroy (opts) {
+    opts || (opts = {})
+    const mapper = this._mapper()
+    return superMethod(mapper, 'destroy')(utils.get(this, mapper.idAttribute), opts)
+  },
+
+  /**
+   * Return the value at the given path for this instance.
+   *
+   * @example &lt;caption>Record#get&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user');
+   *
+   * const user = store.createRecord('user', { name: 'Bob' });
+   * console.log('user.get("name"): ' + user.get('name'));
+   *
+   * @method Record#get
+   * @param {string} key Path of value to retrieve.
+   * @returns {*} Value at path.
+   * @since 3.0.0
+   */
+  'get' (key) {
+    return utils.get(this, key)
+  },
+
+  /**
+   * Return whether this record has changed since it was instantiated or
+   * {@link Record#commit} was called.
+   *
+   * @example &lt;caption>Record#hasChanges&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user');
+   * const user = store.createRecord('user');
+   * console.log('user hasChanges: ' + user.hasChanges());
+   * user.name = 'John';
+   * console.log('user hasChanges: ' + user.hasChanges());
+   * user.commit();
+   * console.log('user hasChanges: ' + user.hasChanges());
+   *
+   * @method Record#hasChanges
+   * @param [opts] Configuration options.
+   * @param {Function} [opts.equalsFn={@link utils.deepEqual}] Equality function.
+   * @param {array} [opts.ignore=[]] Array of strings or RegExp of fields to ignore.
+   * @returns {boolean} Return whether the record has changed since it was
+   * instantiated or since its {@link Record#commit} method was called.
+   * @since 3.0.0
+   */
+  hasChanges (opts) {
+    const quickHasChanges = !!(this._get('changed') || []).length
+    return quickHasChanges || utils.areDifferent(typeof this.toJSON === 'function' ? this.toJSON(opts) : this, this._get('previous'), opts)
+  },
+
+  /**
+   * Return whether the record is unsaved. Records that have primary keys are
+   * considered "saved". Records without primary keys are considered "unsaved".
+   *
+   * @example &lt;caption>Record#isNew&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user');
+   * const user = store.createRecord('user', {
+   *   id: 1234
+   * });
+   * const user2 = store.createRecord('user');
+   * console.log('user isNew: ' + user.isNew()); // false
+   * console.log('user2 isNew: ' + user2.isNew()); // true
+   *
+   * @method Record#isNew
+   * @returns {boolean} Whether the record is unsaved.
+   * @since 3.0.0
+   */
+  isNew (opts) {
+    return utils.get(this, this._mapper().idAttribute) === undefined
+  },
+
+  /**
+   * Return whether the record in its current state passes validation.
+   *
+   * @example &lt;caption>Record#isValid&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * });
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * });
+   * console.log('user isValid: ' + user.isValid());
+   * user.name = 'John';
+   * console.log('user isValid: ' + user.isValid());
+   *
+   * @method Record#isValid
+   * @param {object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+   * @returns {boolean} Whether the record in its current state passes
+   * validation.
+   * @since 3.0.0
+   */
+  isValid (opts) {
+    return !this._mapper().validate(this, opts)
+  },
+
+  removeInverseRelation (currentParent, id, inverseDef, idAttribute) {
+    if (inverseDef.type === hasOneType) {
+      safeSetLink(currentParent, inverseDef.localField, undefined)
+    } else if (inverseDef.type === hasManyType) {
+      // e.g. remove comment from otherPost.comments
+      const children = utils.get(currentParent, inverseDef.localField)
+      if (id === undefined) {
+        utils.remove(children, (child) => child === this)
+      } else {
+        utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
+      }
+    }
+  },
+
+  setupInverseRelation (record, id, inverseDef, idAttribute) {
+    // Update (set) inverse relation
+    if (inverseDef.type === hasOneType) {
+      // e.g. someUser.profile = profile
+      safeSetLink(record, inverseDef.localField, this)
+    } else if (inverseDef.type === hasManyType) {
+      // e.g. add comment to somePost.comments
+      const children = utils.get(record, inverseDef.localField)
+      if (id === undefined) {
+        utils.noDupeAdd(children, this, (child) => child === this)
+      } else {
+        utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
+      }
+    }
+  },
+
+  /**
+   * Lazy load relations of this record, to be attached to the record once their
+   * loaded.
+   *
+   * @example
+   * import { Container } from 'js-data';
+   * import { RethinkDBAdapter } from 'js-data-rethinkdb';
+   *
+   * const store = new Container();
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('user', {
+   *   relations: {
+   *     hasMany: {
+   *       post: {
+   *         localField: 'posts',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * });
+   * store.defineMapper('post', {
+   *   relations: {
+   *     belongsTo: {
+   *       user: {
+   *         localField: 'user',
+   *         foreignKey: 'user_id'
+   *       }
+   *     }
+   *   }
+   * });
+   * store.find('user', 1234).then((user) => {
+   *   console.log(user.id); // 1234
+   *
+   *   // Load the user's post relations
+   *   return user.loadRelations(['post']);
+   * }).then((user) => {
+   *   console.log(user.posts); // [{...}, {...}, ...]
+   * });
+   *
+   * @method Record#loadRelations
+   * @param {string[]} [relations] List of relations to load. Can use localField
+   * names or Mapper names to pick relations.
+   * @param {object} [opts] Configuration options.
+   * @returns {Promise} Resolves with the record, with the loaded relations now
+   * attached.
+   * @since 3.0.0
+   */
+  loadRelations (relations, opts) {
+    let op
+    const mapper = this._mapper()
+
+    // Default values for arguments
+    relations || (relations = [])
+    if (utils.isString(relations)) {
+      relations = [relations]
+    }
+    opts || (opts = {})
+    opts.with = relations
+
+    // Fill in "opts" with the Model's configuration
+    utils._(opts, mapper)
+    opts.adapter = mapper.getAdapterName(opts)
+
+    // beforeLoadRelations lifecycle hook
+    op = opts.op = 'beforeLoadRelations'
+    return utils.resolve(this[op](relations, opts)).then(() => {
+      // Now delegate to the adapter
+      op = opts.op = 'loadRelations'
+      mapper.dbg(op, this, relations, opts)
+      const tasks = []
+      let task
+      utils.forEachRelation(mapper, opts, (def, optsCopy) => {
+        const relatedMapper = def.getRelation()
+        optsCopy.raw = false
+        if (utils.isFunction(def.load)) {
+          task = def.load(mapper, def, this, opts)
+        } else if (def.type === 'hasMany' || def.type === 'hasOne') {
+          if (def.foreignKey) {
+            task = superMethod(relatedMapper, 'findAll')({
+              [def.foreignKey]: utils.get(this, mapper.idAttribute)
+            }, optsCopy).then(function (relatedData) {
+              if (def.type === 'hasOne') {
+                return relatedData.length ? relatedData[0] : undefined
+              }
+              return relatedData
+            })
+          } else if (def.localKeys) {
+            task = superMethod(relatedMapper, 'findAll')({
+              where: {
+                [relatedMapper.idAttribute]: {
+                  in: utils.get(this, def.localKeys)
+                }
+              }
+            })
+          } else if (def.foreignKeys) {
+            task = superMethod(relatedMapper, 'findAll')({
+              where: {
+                [def.foreignKeys]: {
+                  contains: utils.get(this, mapper.idAttribute)
+                }
+              }
+            }, opts)
+          }
+        } else if (def.type === 'belongsTo') {
+          const key = utils.get(this, def.foreignKey)
+          if (utils.isSorN(key)) {
+            task = superMethod(relatedMapper, 'find')(key, optsCopy)
+          }
+        }
+        if (task) {
+          task = task.then((relatedData) => {
+            def.setLocalField(this, relatedData)
+          })
+          tasks.push(task)
+        }
+      })
+      return Promise.all(tasks)
+    }).then(() => {
+      // afterLoadRelations lifecycle hook
+      op = opts.op = 'afterLoadRelations'
+      return utils.resolve(this[op](relations, opts)).then(() => this)
+    })
+  },
+
+  /**
+   * Return the properties with which this record was instantiated.
+   *
+   * @example &lt;caption>Record#previous&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user');
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * });
+   * console.log('user previous: ' + JSON.stringify(user.previous()));
+   * user.name = 'Bob';
+   * console.log('user previous: ' + JSON.stringify(user.previous()));
+   * user.commit();
+   * console.log('user previous: ' + JSON.stringify(user.previous()));
+   *
+   * @method Record#previous
+   * @param {string} [key] If specified, return just the initial value of the
+   * given key.
+   * @returns {Object} The initial properties of this record.
+   * @since 3.0.0
+   */
+  previous (key) {
+    if (key) {
+      return this._get(`previous.${key}`)
+    }
+    return this._get('previous')
+  },
+
+  /**
+   * Revert changes to this record back to the properties it had when it was
+   * instantiated.
+   *
+   * @example &lt;caption>Record#revert&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user');
+   * const user = store.createRecord('user', {
+   *   name: 'William'
+   * });
+   * console.log('user: ' + JSON.stringify(user));
+   * user.name = 'Bob';
+   * console.log('user: ' + JSON.stringify(user));
+   * user.revert();
+   * console.log('user: ' + JSON.stringify(user));
+   *
+   * @method Record#revert
+   * @param {object} [opts] Configuration options.
+   * @param {string[]} [opts.preserve] Array of strings or Regular Expressions
+   * denoting properties that should not be reverted.
+   * @since 3.0.0
+   */
+  revert (opts) {
+    const previous = this._get('previous')
+    opts || (opts = {})
+    opts.preserve || (opts.preserve = [])
+    utils.forOwn(this, (value, key) => {
+      if (key !== this._mapper().idAttribute &amp;&amp; !Object.hasOwnProperty.call(previous, key) &amp;&amp; Object.hasOwnProperty.call(this, key) &amp;&amp; opts.preserve.indexOf(key) === -1) {
+        delete this[key]
+      }
+    })
+    utils.forOwn(previous, (value, key) => {
+      if (opts.preserve.indexOf(key) === -1) {
+        this[key] = value
+      }
+    })
+    this.commit()
+  },
+
+  /**
+   * Delegates to {@link Mapper#create} or {@link Mapper#update}.
+   *
+   * @example
+   * import { Container } from 'js-data';
+   * import { RethinkDBAdapter } from 'js-data-rethinkdb';
+   *
+   * const store = new Container();
+   * store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true });
+   * store.defineMapper('session');
+   * const session = store.createRecord('session', { topic: 'Node.js' });
+   *
+   * // Create a new record in the database
+   * session.save().then(() => {
+   *   console.log(session.id); // 1234
+   *
+   *   session.skill_level = 'beginner';
+   *
+   *   // Update the record in the database
+   *   return session.save();
+   * });
+   *
+   * @method Record#save
+   * @param {object} [opts] Configuration options. See {@link Mapper#create} and
+   * {@link Mapper#update}.
+   * @param {boolean} [opts.changesOnly] Equality function. Default uses `===`.
+   * @param {Function} [opts.equalsFn] Passed to {@link Record#changes} when
+   * `opts.changesOnly` is `true`.
+   * @param {array} [opts.ignore] Passed to {@link Record#changes} when
+   * `opts.changesOnly` is `true`.
+   * @returns {Promise} The result of calling {@link Mapper#create} or
+   * {@link Mapper#update}.
+   * @since 3.0.0
+   */
+  save (opts) {
+    opts || (opts = {})
+    const mapper = this._mapper()
+    const id = utils.get(this, mapper.idAttribute)
+    let props = this
+
+    const postProcess = (result) => {
+      const record = opts.raw ? result.data : result
+      if (record) {
+        utils.deepMixIn(this, record)
+        this.commit()
+      }
+      return result
+    }
+
+    if (id === undefined) {
+      return superMethod(mapper, 'create')(props, opts).then(postProcess)
+    }
+    if (opts.changesOnly) {
+      const changes = this.changes(opts)
+      props = {}
+      utils.fillIn(props, changes.added)
+      utils.fillIn(props, changes.changed)
+    }
+    return superMethod(mapper, 'update')(id, props, opts).then(postProcess)
+  },
+
+  /**
+   * Set the value for a given key, or the values for the given keys if "key" is
+   * an object. Triggers change events on those properties that have `track: true`
+   * in {@link Mapper#schema}.
+   *
+   * @example &lt;caption>Record#set&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user');
+   *
+   * const user = store.createRecord('user');
+   * console.log('user: ' + JSON.stringify(user));
+   *
+   * user.set('name', 'Bob');
+   * console.log('user: ' + JSON.stringify(user));
+   *
+   * user.set({ age: 30, role: 'admin' });
+   * console.log('user: ' + JSON.stringify(user));
+   *
+   * @fires Record#change
+   * @method Record#set
+   * @param {(string|Object)} key Key to set or hash of key-value pairs to set.
+   * @param {*} [value] Value to set for the given key.
+   * @param {object} [opts] Configuration options.
+   * @param {boolean} [opts.silent=false] Whether to trigger change events.
+   * @since 3.0.0
+   */
+  'set' (key, value, opts) {
+    if (utils.isObject(key)) {
+      opts = value
+    }
+    opts || (opts = {})
+    if (opts.silent) {
+      this._set('silent', true)
+    }
+    utils.set(this, key, value)
+    if (!this._get('eventId')) {
+      this._set('silent') // unset
+    }
+  },
+
+  /**
+   * Return a plain object representation of this record. If the class from
+   * which this record was created has a Mapper, then {@link Mapper#toJSON} will
+   * be called with this record instead.
+   *
+   * @example &lt;caption>Record#toJSON&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * });
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John',
+   *   $$hashKey: '1234'
+   * });
+   * console.log('user: ' + JSON.stringify(user.toJSON()));
+   *
+   * @method Record#toJSON
+   * @param {object} [opts] Configuration options.
+   * @param {string[]} [opts.with] Array of relation names or relation fields
+   * to include in the representation. Only available as an option if the class
+   * from which this record was created has a Mapper and this record resides in
+   * an instance of {@link DataStore}.
+   * @returns {Object} Plain object representation of this record.
+   * @since 3.0.0
+   */
+  toJSON (opts) {
+    const mapper = this.constructor.mapper
+    if (mapper) {
+      return mapper.toJSON(this, opts)
+    } else {
+      const json = {}
+      utils.forOwn(this, (prop, key) => {
+        json[key] = utils.plainCopy(prop)
+      })
+      return json
+    }
+  },
+
+  /**
+   * Unset the value for a given key. Triggers change events on those properties
+   * that have `track: true` in {@link Mapper#schema}.
+   *
+   * @example &lt;caption>Record#unset&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user');
+   *
+   * const user = store.createRecord('user', {
+   *   name: 'John'
+   * });
+   * console.log('user: ' + JSON.stringify(user));
+   *
+   * user.unset('name');
+   * console.log('user: ' + JSON.stringify(user));
+   *
+   * @method Record#unset
+   * @param {string} key Key to unset.
+   * @param {object} [opts] Configuration options.
+   * @param {boolean} [opts.silent=false] Whether to trigger change events.
+   * @since 3.0.0
+   */
+  unset (key, opts) {
+    this.set(key, undefined, opts)
+  },
+
+  /**
+   * Validate this record based on its current properties.
+   *
+   * @example &lt;caption>Record#validate&lt;/caption>
+   * const JSData = require('js-data');
+   * const { Container } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   * const store = new Container();
+   * store.defineMapper('user', {
+   *   schema: {
+   *     properties: {
+   *       name: { type: 'string' }
+   *     }
+   *   }
+   * });
+   * const user = store.createRecord('user', {
+   *   name: 1234
+   * }, {
+   *   noValidate: true // this allows us to put the record into an invalid state
+   * });
+   * console.log('user validation: ' + JSON.stringify(user.validate()));
+   * user.name = 'John';
+   * console.log('user validation: ' + user.validate());
+   *
+   * @method Record#validate
+   * @param {object} [opts] Configuration options. Passed to {@link Mapper#validate}.
+   * @returns {*} Array of errors or `undefined` if no errors.
+   * @since 3.0.0
+   */
+  validate (opts) {
+    return this._mapper().validate(this, opts)
+  }
+}, {
+  creatingPath,
+  noValidatePath,
+  keepChangeHistoryPath,
+  previousPath
+})
+
+/**
+ * Allow records to emit events.
+ *
+ * An record's registered listeners are stored in the record's private data.
+ */
+utils.eventify(
+  Record.prototype,
+  function () {
+    return this._get('events')
+  },
+  function (value) {
+    this._set('events', value)
+  }
+)
+
+/**
+ * Fired when a record changes. Only works for records that have tracked fields.
+ * See {@link Record~changeListener} on how to listen for this event.
+ *
+ * @event Record#change
+ * @see Record~changeListener
+ */
+
+/**
+ * Callback signature for the {@link Record#event:change} event.
+ *
+ * @example
+ * function onChange (record, changes) {
+ *   // do something
+ * }
+ * record.on('change', onChange);
+ *
+ * @callback Record~changeListener
+ * @param {Record} The Record that changed.
+ * @param {object} The changes.
+ * @see Record#event:change
+ * @since 3.0.0
+ */
+
+/**
+ * Create a subclass of this Record:
+ * @example &lt;caption>Record.extend&lt;/caption>
+ * const JSData = require('js-data');
+ * const { Record } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomRecordClass extends Record {
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
+ * }
+ * const customRecord = new CustomRecordClass();
+ * console.log(customRecord.foo());
+ * console.log(CustomRecordClass.beep());
+ *
+ * // Extend the class using alternate method.
+ * const OtherRecordClass = Record.extend({
+ *   foo () { return 'bar'; }
+ * }, {
+ *   beep () { return 'boop'; }
+ * });
+ * const otherRecord = new OtherRecordClass();
+ * console.log(otherRecord.foo());
+ * console.log(OtherRecordClass.beep());
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherRecordClass () {
+ *   Record.call(this);
+ *   this.created_at = new Date().getTime();
+ * }
+ * Record.extend({
+ *   constructor: AnotherRecordClass,
+ *   foo () { return 'bar'; }
+ * }, {
+ *   beep () { return 'boop'; }
+ * });
+ * const anotherRecord = new AnotherRecordClass();
+ * console.log(anotherRecord.created_at);
+ * console.log(anotherRecord.foo());
+ * console.log(AnotherRecordClass.beep());
+ *
+ * @method Record.extend
+ * @param {object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this Record class.
+ * @since 3.0.0
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jan 25 2020 22:32:20 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>
