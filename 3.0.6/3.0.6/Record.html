@@ -1,0 +1,6249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Record - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav class="wrap">
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Collection.html">Collection</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Collection.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Collection.html#add">add</a></li><li data-type='method' style='display: none;'><a href="Collection.html#afterRemove">afterRemove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#afterRemoveAll">afterRemoveAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeAdd">beforeAdd</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeRemove">beforeRemove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeRemoveAll">beforeRemoveAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#between">between</a></li><li data-type='method' style='display: none;'><a href="Collection.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Collection.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Collection.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="Collection.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="Collection.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Collection.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#getIndex">getIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="Collection.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Collection.html#map">map</a></li><li data-type='method' style='display: none;'><a href="Collection.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="Collection.html#method">method</a></li><li data-type='method' style='display: none;'><a href="Collection.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Collection.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Collection.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="Collection.html#query">query</a></li><li data-type='method' style='display: none;'><a href="Collection.html#recordId">recordId</a></li><li data-type='method' style='display: none;'><a href="Collection.html#reduce">reduce</a></li><li data-type='method' style='display: none;'><a href="Collection.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#skip">skip</a></li><li data-type='method' style='display: none;'><a href="Collection.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Collection.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="Collection.html#updateIndex">updateIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#updateIndexes">updateIndexes</a></li></ul></li><li><a href="Component.html">Component</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Component.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Component.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Component.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Component.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Component.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Component.html#on">on</a></li></ul></li><li><a href="Container.html">Container</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Container.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Container.html#as">as</a></li><li data-type='method' style='display: none;'><a href="Container.html#count">count</a></li><li data-type='method' style='display: none;'><a href="Container.html#create">create</a></li><li data-type='method' style='display: none;'><a href="Container.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="Container.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="Container.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Container.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="Container.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Container.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Container.html#find">find</a></li><li data-type='method' style='display: none;'><a href="Container.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="Container.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="Container.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="Container.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="Container.html#is">is</a></li><li data-type='method' style='display: none;'><a href="Container.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Container.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Container.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Container.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="Container.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="Container.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Container.html#update">update</a></li><li data-type='method' style='display: none;'><a href="Container.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="Container.html#validate">validate</a></li></ul></li><li><a href="DataStore.html">DataStore</a><ul class='methods'><li data-type='method' style='display: none;'><a href="DataStore.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#add">add</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#addToCache">addToCache</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#as">as</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#between">between</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cachedFind">cachedFind</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cachedFindAll">cachedFindAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cacheFind">cacheFind</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cacheFindAll">cacheFindAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#clear">clear</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#count">count</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#create">create</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#find">find</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#get">get</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getCollection">getCollection</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#hashQuery">hashQuery</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#is">is</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#log">log</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#off">off</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#on">on</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#query">query</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#removeRelated">removeRelated</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#update">update</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#validate">validate</a></li></ul></li><li><a href="LinkedCollection.html">LinkedCollection</a><ul class='methods'><li data-type='method' style='display: none;'><a href="LinkedCollection.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#add">add</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#afterRemove">afterRemove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#afterRemoveAll">afterRemoveAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeAdd">beforeAdd</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeRemove">beforeRemove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeRemoveAll">beforeRemoveAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#between">between</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#get">get</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#getIndex">getIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#log">log</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#map">map</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#method">method</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#off">off</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#on">on</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#query">query</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#recordId">recordId</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#reduce">reduce</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#skip">skip</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#updateIndex">updateIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#updateIndexes">updateIndexes</a></li></ul></li><li><a href="Mapper.html">Mapper</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Mapper.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCount">afterCount</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCreate">afterCreate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCreateMany">afterCreateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterDestroy">afterDestroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterDestroyAll">afterDestroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterFind">afterFind</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterFindAll">afterFindAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterSum">afterSum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdate">afterUpdate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdateAll">afterUpdateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdateMany">afterUpdateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCount">beforeCount</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCreate">beforeCreate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCreateMany">beforeCreateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeDestroy">beforeDestroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeDestroyAll">beforeDestroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeFind">beforeFind</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeFindAll">beforeFindAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeSum">beforeSum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdate">beforeUpdate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdateAll">beforeUpdateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdateMany">beforeUpdateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#belongsTo">belongsTo</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#count">count</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#create">create</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createInstance">createInstance</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#crud">crud</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#find">find</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#hasMany">hasMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#hasOne">hasOne</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#is">is</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#update">update</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#validate">validate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#wrap">wrap</a></li></ul></li><li><a href="Query.html">Query</a><ul class='members'><li data-type='member' style='display: none;'><a href="Query.html#.ops">ops</a></li><li data-type='member' style='display: none;'><a href="Query.html#collection">collection</a></li><li data-type='member' style='display: none;'><a href="Query.html#data">data</a></li><li data-type='member' style='display: none;'><a href="Query.html#debug">debug</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="Query.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Query.html#between">between</a></li><li data-type='method' style='display: none;'><a href="Query.html#compare">compare</a></li><li data-type='method' style='display: none;'><a href="Query.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Query.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Query.html#evaluate">evaluate</a></li><li data-type='method' style='display: none;'><a href="Query.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="Query.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="Query.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Query.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="Query.html#getData">getData</a></li><li data-type='method' style='display: none;'><a href="Query.html#like">like</a></li><li data-type='method' style='display: none;'><a href="Query.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="Query.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Query.html#map">map</a></li><li data-type='method' style='display: none;'><a href="Query.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="Query.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Query.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Query.html#run">run</a></li><li data-type='method' style='display: none;'><a href="Query.html#skip">skip</a></li></ul></li><li><a href="Record.html">Record</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Record.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Record.html#_mapper">_mapper</a></li><li data-type='method' style='display: none;'><a href="Record.html#afterLoadRelations">afterLoadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#beforeLoadRelations">beforeLoadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#changeHistory">changeHistory</a></li><li data-type='method' style='display: none;'><a href="Record.html#changes">changes</a></li><li data-type='method' style='display: none;'><a href="Record.html#commit">commit</a></li><li data-type='method' style='display: none;'><a href="Record.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Record.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Record.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Record.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Record.html#hasChanges">hasChanges</a></li><li data-type='method' style='display: none;'><a href="Record.html#isNew">isNew</a></li><li data-type='method' style='display: none;'><a href="Record.html#isValid">isValid</a></li><li data-type='method' style='display: none;'><a href="Record.html#loadRelations">loadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Record.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Record.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Record.html#previous">previous</a></li><li data-type='method' style='display: none;'><a href="Record.html#revert">revert</a></li><li data-type='method' style='display: none;'><a href="Record.html#save">save</a></li><li data-type='method' style='display: none;'><a href="Record.html#set">set</a></li><li data-type='method' style='display: none;'><a href="Record.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Record.html#unset">unset</a></li><li data-type='method' style='display: none;'><a href="Record.html#validate">validate</a></li></ul></li><li><a href="Schema.html">Schema</a><ul class='members'><li data-type='member' style='display: none;'><a href="Schema.html#.ANY_OPS">ANY_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.ARRAY_OPS">ARRAY_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.NUMERIC_OPS">NUMERIC_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.OBJECT_OPS">OBJECT_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.STRING_OPS">STRING_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.typeGroupValidators">typeGroupValidators</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.types">types</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.validationKeywords">validationKeywords</a></li><li data-type='member' style='display: none;'><a href="Schema.html#debug">debug</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="Schema.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Schema.html#.validate">validate</a></li><li data-type='method' style='display: none;'><a href="Schema.html#apply">apply</a></li><li data-type='method' style='display: none;'><a href="Schema.html#applyDefaults">applyDefaults</a></li><li data-type='method' style='display: none;'><a href="Schema.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Schema.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Schema.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Schema.html#makeDescriptor">makeDescriptor</a></li><li data-type='method' style='display: none;'><a href="Schema.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Schema.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Schema.html#pick">pick</a></li><li data-type='method' style='display: none;'><a href="Schema.html#validate">validate</a></li></ul></li><li><a href="Settable.html">Settable</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Settable.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Settable.html#_get">_get</a></li></ul></li><li><a href="SimpleStore.html">SimpleStore</a><ul class='methods'><li data-type='method' style='display: none;'><a href="SimpleStore.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#add">add</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#addToCache">addToCache</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#as">as</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#between">between</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cachedFind">cachedFind</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cachedFindAll">cachedFindAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cacheFind">cacheFind</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cacheFindAll">cacheFindAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#clear">clear</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#count">count</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#create">create</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#find">find</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#get">get</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getCollection">getCollection</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#hashQuery">hashQuery</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#is">is</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#log">log</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#off">off</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#on">on</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#query">query</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#removeRelated">removeRelated</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#update">update</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#validate">validate</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-js-data.html">js-data</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-js-data.html#.Collection">Collection</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Component">Component</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Container">Container</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.DataStore">DataStore</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Index">Index</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.LinkedCollection">LinkedCollection</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Mapper">Mapper</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Query">Query</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Record">Record</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Schema">Schema</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Settable">Settable</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.SimpleStore">SimpleStore</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.utils">utils</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.version">version</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="module-js-data.html#.belongsTo">belongsTo</a></li><li data-type='method' style='display: none;'><a href="module-js-data.html#.hasMany">hasMany</a></li><li data-type='method' style='display: none;'><a href="module-js-data.html#.hasOne">hasOne</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Collection.html#event:add">add</a></li><li><a href="Collection.html#event:change">change</a></li><li><a href="Collection.html#event:remove">remove</a></li><li><a href="Container.html#event:afterCreate">afterCreate</a></li><li><a href="Container.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="Container.html#event:afterDestroy">afterDestroy</a></li><li><a href="Container.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="Container.html#event:afterFind">afterFind</a></li><li><a href="Container.html#event:afterFindAll">afterFindAll</a></li><li><a href="Container.html#event:afterUpdate">afterUpdate</a></li><li><a href="Container.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="Container.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="Container.html#event:beforeCreate">beforeCreate</a></li><li><a href="Container.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="Container.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="Container.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="Container.html#event:beforeFind">beforeFind</a></li><li><a href="Container.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="Container.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="Container.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="Container.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="DataStore.html#event:add">add</a></li><li><a href="DataStore.html#event:afterCreate">afterCreate</a></li><li><a href="DataStore.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="DataStore.html#event:afterDestroy">afterDestroy</a></li><li><a href="DataStore.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="DataStore.html#event:afterFind">afterFind</a></li><li><a href="DataStore.html#event:afterFindAll">afterFindAll</a></li><li><a href="DataStore.html#event:afterUpdate">afterUpdate</a></li><li><a href="DataStore.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="DataStore.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="DataStore.html#event:beforeCreate">beforeCreate</a></li><li><a href="DataStore.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="DataStore.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="DataStore.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="DataStore.html#event:beforeFind">beforeFind</a></li><li><a href="DataStore.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="DataStore.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="DataStore.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="DataStore.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="DataStore.html#event:change">change</a></li><li><a href="DataStore.html#event:remove">remove</a></li><li><a href="LinkedCollection.html#event:add">add</a></li><li><a href="LinkedCollection.html#event:change">change</a></li><li><a href="LinkedCollection.html#event:remove">remove</a></li><li><a href="Mapper.html#event:afterCreate">afterCreate</a></li><li><a href="Mapper.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="Mapper.html#event:afterDestroy">afterDestroy</a></li><li><a href="Mapper.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="Mapper.html#event:afterFind">afterFind</a></li><li><a href="Mapper.html#event:afterFindAll">afterFindAll</a></li><li><a href="Mapper.html#event:afterUpdate">afterUpdate</a></li><li><a href="Mapper.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="Mapper.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="Mapper.html#event:beforeCreate">beforeCreate</a></li><li><a href="Mapper.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="Mapper.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="Mapper.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="Mapper.html#event:beforeFind">beforeFind</a></li><li><a href="Mapper.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="Mapper.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="Mapper.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="Mapper.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="Record.html#event:change">change</a></li><li><a href="SimpleStore.html#event:add">add</a></li><li><a href="SimpleStore.html#event:afterCreate">afterCreate</a></li><li><a href="SimpleStore.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="SimpleStore.html#event:afterDestroy">afterDestroy</a></li><li><a href="SimpleStore.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="SimpleStore.html#event:afterFind">afterFind</a></li><li><a href="SimpleStore.html#event:afterFindAll">afterFindAll</a></li><li><a href="SimpleStore.html#event:afterUpdate">afterUpdate</a></li><li><a href="SimpleStore.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="SimpleStore.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="SimpleStore.html#event:beforeCreate">beforeCreate</a></li><li><a href="SimpleStore.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="SimpleStore.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="SimpleStore.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="SimpleStore.html#event:beforeFind">beforeFind</a></li><li><a href="SimpleStore.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="SimpleStore.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="SimpleStore.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="SimpleStore.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="SimpleStore.html#event:change">change</a></li><li><a href="SimpleStore.html#event:remove">remove</a></li></ul><h3>Namespaces</h3><ul><li><a href="query_.html">query</a><ul class='members'><li data-type='member' style='display: none;'><a href="query_.html#.limit">limit</a></li><li data-type='member' style='display: none;'><a href="query_.html#.offset">offset</a></li><li data-type='member' style='display: none;'><a href="query_.html#.orderBy">orderBy</a></li><li data-type='member' style='display: none;'><a href="query_.html#.where">where</a></li></ul></li><li><a href="utils.html">utils</a><ul class='members'><li data-type='member' style='display: none;'><a href="utils.html#.Promise">Promise</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="utils.html#.addHiddenPropsToTarget">addHiddenPropsToTarget</a></li><li data-type='method' style='display: none;'><a href="utils.html#.areDifferent">areDifferent</a></li><li data-type='method' style='display: none;'><a href="utils.html#.classCallCheck">classCallCheck</a></li><li data-type='method' style='display: none;'><a href="utils.html#.copy">copy</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepEqual">deepEqual</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepFillIn">deepFillIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepMixIn">deepMixIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.diffObjects">diffObjects</a></li><li data-type='method' style='display: none;'><a href="utils.html#.equal">equal</a></li><li data-type='method' style='display: none;'><a href="utils.html#.err">err</a></li><li data-type='method' style='display: none;'><a href="utils.html#.eventify">eventify</a></li><li data-type='method' style='display: none;'><a href="utils.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="utils.html#.fillIn">fillIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.findIndex">findIndex</a></li><li data-type='method' style='display: none;'><a href="utils.html#.forEachRelation">forEachRelation</a></li><li data-type='method' style='display: none;'><a href="utils.html#.forOwn">forOwn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.fromJson">fromJson</a></li><li data-type='method' style='display: none;'><a href="utils.html#.get">get</a></li><li data-type='method' style='display: none;'><a href="utils.html#.getSuper">getSuper</a></li><li data-type='method' style='display: none;'><a href="utils.html#.intersection">intersection</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isArray">isArray</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isBlacklisted">isBlacklisted</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isBoolean">isBoolean</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isDate">isDate</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isFunction">isFunction</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isInteger">isInteger</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isNull">isNull</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isNumber">isNumber</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isObject">isObject</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isRegExp">isRegExp</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isSorN">isSorN</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isString">isString</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isUndefined">isUndefined</a></li><li data-type='method' style='display: none;'><a href="utils.html#.logify">logify</a></li><li data-type='method' style='display: none;'><a href="utils.html#.noDupeAdd">noDupeAdd</a></li><li data-type='method' style='display: none;'><a href="utils.html#.omit">omit</a></li><li data-type='method' style='display: none;'><a href="utils.html#.pick">pick</a></li><li data-type='method' style='display: none;'><a href="utils.html#.plainCopy">plainCopy</a></li><li data-type='method' style='display: none;'><a href="utils.html#.reject">reject</a></li><li data-type='method' style='display: none;'><a href="utils.html#.remove">remove</a></li><li data-type='method' style='display: none;'><a href="utils.html#.resolve">resolve</a></li><li data-type='method' style='display: none;'><a href="utils.html#.set">set</a></li><li data-type='method' style='display: none;'><a href="utils.html#.toJson">toJson</a></li><li data-type='method' style='display: none;'><a href="utils.html#.unset">unset</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#_createOrAssignChildRecordIfRequired">_createOrAssignChildRecordIfRequired</a></li><li><a href="global.html#_createParentRecordIfRequired">_createParentRecordIfRequired</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Record</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        Record
+        </h2>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+    
+
+    <h4 class="name" id="Record"><span class="type-signature"></span>new Record<span class="signature">(props<span class="signature-attributes">opt</span>, opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line27">line 27</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>js-data's Record class. An instance of <code>Record</code> corresponds to an in-memory
+representation of a single row or document in a database, Firebase,
+localstorage, etc. Basically, a <code>Record</code> instance represents whatever kind of
+entity in your persistence layer that has a primary key.</p>
+<pre class="prettyprint source lang-javascript"><code>import {Record} from 'js-data'
+</code></pre>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+        <p class="code-caption">Record#constructor</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Record } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+// Instantiate a plain record
+let record = new Record();
+console.log('record: ' + JSON.stringify(record));
+
+// You can supply properties on instantiation
+record = new Record({ name: 'John' });
+console.log('record: ' + JSON.stringify(record));</code></pre>
+
+        <p class="code-caption">Record#constructor2</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Mapper } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+// Instantiate a record that's associated with a Mapper:
+const UserMapper = new Mapper({ name: 'user' });
+const User = UserMapper.recordClass;
+const user = UserMapper.createRecord({ name: 'John' });
+const user2 = new User({ name: 'Sally' });
+console.log('user: ' + JSON.stringify(user));
+console.log('user2: ' + JSON.stringify(user2));</code></pre>
+
+        <p class="code-caption">Record#constructor3</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+const store = new Container();
+store.defineMapper('user');
+
+// Instantiate a record that's associated with a store's Mapper
+const user = store.createRecord('user', { name: 'John' });
+console.log('user: ' + JSON.stringify(user));</code></pre>
+
+        <p class="code-caption">Record#constructor4</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+const store = new Container();
+store.defineMapper('user', {
+  schema: {
+    properties: {
+      name: { type: 'string' }
+    }
+  }
+});
+
+// Validate on instantiation
+const user = store.createRecord('user', { name: 1234 });
+console.log('user: ' + JSON.stringify(user));</code></pre>
+
+        <p class="code-caption">Record#constructor5</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+const store = new Container();
+store.defineMapper('user', {
+  schema: {
+    properties: {
+      name: { type: 'string' }
+    }
+  }
+});
+
+// Skip validation on instantiation
+const user = store.createRecord('user', { name: 1234 }, { noValidate: true });
+console.log('user: ' + JSON.stringify(user));
+console.log('user.isValid(): ' + user.isValid());</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The initial properties of the new Record instance.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>noValidate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to skip validation on the
+initial properties.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>validateOnSet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to enable setter
+validation on properties after the Record has been initialized.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        </div>
+    
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="Component.html">Component</a></li>
+    </ul>
+
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="debug"><span class="type-signature"></span>debug<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Component.js.html">Component.js</a>, <a href="Component.js.html#line28">line 28</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Component.html#debug">Component#debug</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy">
+            <li>false</li>
+        </ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Whether to enable debug-level logs for this component. Anything that
+extends <code>Component</code> inherits this option and the corresponding logging
+functionality.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Component#debug</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Component } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+const component = new Component();
+component.log('debug', 'some message'); // nothing gets logged
+// Display debug logs:
+component.debug = true;
+component.log('debug', 'other message'); // this DOES get logged</code></pre>
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".extend"><span class="type-signature">(static) </span>extend<span class="signature">(props<span class="signature-attributes">opt</span>, classProps<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Constructor}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line883">line 883</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Create a subclass of this Record:</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record.extend</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Record } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+// Extend the class using ES2015 class syntax.
+class CustomRecordClass extends Record {
+  foo () { return 'bar'; }
+  static beep () { return 'boop'; }
+}
+const customRecord = new CustomRecordClass();
+console.log(customRecord.foo());
+console.log(CustomRecordClass.beep());
+
+// Extend the class using alternate method.
+const OtherRecordClass = Record.extend({
+  foo () { return 'bar'; }
+}, {
+  beep () { return 'boop'; }
+});
+const otherRecord = new OtherRecordClass();
+console.log(otherRecord.foo());
+console.log(OtherRecordClass.beep());
+
+// Extend the class, providing a custom constructor.
+function AnotherRecordClass () {
+  Record.call(this);
+  this.created_at = new Date().getTime();
+}
+Record.extend({
+  constructor: AnotherRecordClass,
+  foo () { return 'bar'; }
+}, {
+  beep () { return 'boop'; }
+});
+const anotherRecord = new AnotherRecordClass();
+console.log(anotherRecord.created_at);
+console.log(anotherRecord.foo());
+console.log(AnotherRecordClass.beep());</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Properties to add to the prototype of the
+subclass.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>constructor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Provide a custom constructor function
+to be used as the subclass itself.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>classProps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Static properties to add to the subclass.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Subclass of this Record class.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Constructor</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="_mapper"><span class="type-signature"></span>_mapper<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Mapper.html">Mapper</a>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line155">line 155</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Returns the <a href="Mapper.html">Mapper</a> paired with this record's class, if any.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The <a href="Mapper.html">Mapper</a> paired with this record's class, if any.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Mapper.html">Mapper</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="afterLoadRelations"><span class="type-signature"></span>afterLoadRelations<span class="signature">(relations, opts)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line170">line 170</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Lifecycle hook.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>relations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>relations</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="beforeLoadRelations"><span class="type-signature"></span>beforeLoadRelations<span class="signature">(relations, opts)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line180">line 180</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Lifecycle hook.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>relations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>relations</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="changeHistory"><span class="type-signature"></span>changeHistory<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line190">line 190</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return the change history of this record since it was instantiated or
+<a href="Record.html#commit">Record#commit</a> was called.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="changes"><span class="type-signature"></span>changes<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line201">line 201</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return changes to this record since it was instantiated or
+<a href="Record.html#commit">Record#commit</a> was called.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#changes</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+const store = new Container();
+store.defineMapper('user');
+const user = store.createRecord('user');
+console.log('user changes: ' + JSON.stringify(user.changes()));
+user.name = 'John';
+console.log('user changes: ' + JSON.stringify(user.changes()));</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>equalsFn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code><a href="utils.html#.deepEqual">utils.deepEqual</a></code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Equality function.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>[]</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Array of strings or RegExp of fields to ignore.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Object describing the changes to this record since it was
+instantiated or its <a href="Record.html#commit">Record#commit</a> method was last called.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="commit"><span class="type-signature"></span>commit<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line230">line 230</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Make the record's current in-memory state it's only state, with any
+previous property values being set to current values.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#commit</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+
+const store = new Container();
+store.defineMapper('user');
+const user = store.createRecord('user');
+console.log('user hasChanges: ' + user.hasChanges());
+user.name = 'John';
+console.log('user hasChanges: ' + user.hasChanges());
+user.commit();
+console.log('user hasChanges: ' + user.hasChanges());</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. Passed to <a href="Record.html#toJSON">Record#toJSON</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="dbg"><span class="type-signature"></span>dbg<span class="signature">(&hellip;args<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Component.js.html">Component.js</a>, <a href="Component.js.html#line122">line 122</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Component.html#dbg">Component#dbg</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Log the provided values at the &quot;debug&quot; level. Debug-level logs are only
+logged if <a href="Component.html#debug">Component#debug</a> is <code>true</code>.</p>
+<p><code>.dbg(...)</code> is shorthand for <code>.log('debug', ...)</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Values to log.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="destroy"><span class="type-signature"></span>destroy<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line259">line 259</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Call <a href="Mapper.html#destroy">Mapper#destroy</a> using this record's primary key.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import { Container } from 'js-data';
+import { RethinkDBAdapter } from 'js-data-rethinkdb';
+
+const store = new Container();
+store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true });
+store.defineMapper('user');
+store.find('user', 1234).then((user) => {
+  console.log(user.id); // 1234
+
+  // Destroy this user from the database
+  return user.destroy();
+});</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options passed to <a href="Mapper.html#destroy">Mapper#destroy</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The result of calling <a href="Mapper.html#destroy">Mapper#destroy</a> with the
+primary key of this record.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="emit"><span class="type-signature"></span>emit<span class="signature">(event, &hellip;args<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Component.js.html">Component.js</a>, <a href="Component.js.html#line200">line 200</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Component.html#emit">Component#emit</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Trigger an event on this Component.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Component#emit</p>
+    
+    <pre class="prettyprint"><code>// import { Collection, DataStore } from 'js-data';
+const JSData = require('js-data');
+const { Collection, DataStore } = JSData;
+
+const collection = new Collection();
+collection.on('foo', function (msg) {
+  console.log(msg);
+});
+collection.emit('foo', 'bar');
+
+const store = new DataStore();
+store.on('beep', function (msg) {
+  console.log(msg);
+});
+store.emit('beep', 'boop');</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Name of event to emit.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Arguments to pass to any listeners.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(key)</span><span class="type-signature"> &rarr; {*}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line288">line 288</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return the value at the given path for this instance.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#get</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user');
+
+const user = store.createRecord('user', { name: 'Bob' });
+console.log('user.get("name"): ' + user.get('name'));</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Path of value to retrieve.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Value at path.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="hasChanges"><span class="type-signature"></span>hasChanges<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line310">line 310</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return whether this record has changed since it was instantiated or
+<a href="Record.html#commit">Record#commit</a> was called.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#hasChanges</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user');
+const user = store.createRecord('user');
+console.log('user hasChanges: ' + user.hasChanges());
+user.name = 'John';
+console.log('user hasChanges: ' + user.hasChanges());
+user.commit();
+console.log('user hasChanges: ' + user.hasChanges());</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>equalsFn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code><a href="utils.html#.deepEqual">utils.deepEqual</a></code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Equality function.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>[]</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Array of strings or RegExp of fields to ignore.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Return whether the record has changed since it was
+instantiated or since its <a href="Record.html#commit">Record#commit</a> method was called.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="isNew"><span class="type-signature"></span>isNew<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line340">line 340</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return whether the record is unsaved. Records that have primary keys are
+considered &quot;saved&quot;. Records without primary keys are considered &quot;unsaved&quot;.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#isNew</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user');
+const user = store.createRecord('user', {
+  id: 1234
+});
+const user2 = store.createRecord('user');
+console.log('user isNew: ' + user.isNew()); // false
+console.log('user2 isNew: ' + user2.isNew()); // true</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Whether the record is unsaved.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="isValid"><span class="type-signature"></span>isValid<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line365">line 365</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return whether the record in its current state passes validation.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#isValid</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user', {
+  schema: {
+    properties: {
+      name: { type: 'string' }
+    }
+  }
+});
+const user = store.createRecord('user', {
+  name: 1234
+}, {
+  noValidate: true // this allows us to put the record into an invalid state
+});
+console.log('user isValid: ' + user.isValid());
+user.name = 'John';
+console.log('user isValid: ' + user.isValid());</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. Passed to <a href="Mapper.html#validate">Mapper#validate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Whether the record in its current state passes
+validation.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="loadRelations"><span class="type-signature"></span>loadRelations<span class="signature">(relations<span class="signature-attributes">opt</span>, opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line429">line 429</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Lazy load relations of this record, to be attached to the record once their
+loaded.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import { Container } from 'js-data';
+import { RethinkDBAdapter } from 'js-data-rethinkdb';
+
+const store = new Container();
+store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true });
+store.defineMapper('user', {
+  relations: {
+    hasMany: {
+      post: {
+        localField: 'posts',
+        foreignKey: 'user_id'
+      }
+    }
+  }
+});
+store.defineMapper('post', {
+  relations: {
+    belongsTo: {
+      user: {
+        localField: 'user',
+        foreignKey: 'user_id'
+      }
+    }
+  }
+});
+store.find('user', 1234).then((user) => {
+  console.log(user.id); // 1234
+
+  // Load the user's post relations
+  return user.loadRelations(['post']);
+}).then((user) => {
+  console.log(user.posts); // [{...}, {...}, ...]
+});</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>relations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>List of relations to load. Can use localField
+names or Mapper names to pick relations.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Resolves with the record, with the loaded relations now
+attached.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="log"><span class="type-signature"></span>log<span class="signature">(level, &hellip;args<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Component.js.html">Component.js</a>, <a href="Component.js.html#line132">line 132</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Component.html#log">Component#log</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Log the provided values. By default sends values to <code>console[level]</code>.
+Debug-level logs are only logged if <a href="Component.html#debug">Component#debug</a> is <code>true</code>.</p>
+<p>Will attempt to use appropriate <code>console</code> methods if they are available.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>level</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Log level.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Values to log.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="off"><span class="type-signature"></span>off<span class="signature">(event<span class="signature-attributes">opt</span>, listener<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Component.js.html">Component.js</a>, <a href="Component.js.html#line178">line 178</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Component.html#off">Component#off</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Remove an event listener from this Component. If no listener is provided,
+then all listeners for the specified event will be removed. If no event is
+specified then all listeners for all events will be removed.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+    <pre class="prettyprint"><code>// Remove a particular listener for a particular event
+collection.off('add', handler);</code></pre>
+
+    <pre class="prettyprint"><code>// Remove all listeners for a particular event
+record.off('change');</code></pre>
+
+    <pre class="prettyprint"><code>// Remove all listeners to all events
+store.off();</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Name of event to unsubsribe to.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>listener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Listener to remove.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="on"><span class="type-signature"></span>on<span class="signature">(event, listener, ctx<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Component.js.html">Component.js</a>, <a href="Component.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Component.html#on">Component#on</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Register a new event listener on this Component.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Examples</h5>
+    
+    <pre class="prettyprint"><code>// Listen for all "afterCreate" events in a DataStore
+store.on('afterCreate', (mapperName, props, opts, result) => {
+  console.log(mapperName); // "post"
+  console.log(props.id); // undefined
+  console.log(result.id); // 1234
+});
+store.create('post', { title: 'Modeling your data' }).then((post) => {
+  console.log(post.id); // 1234
+});</code></pre>
+
+    <pre class="prettyprint"><code>// Listen for the "add" event on a collection
+collection.on('add', (records) => {
+  console.log(records); // [...]
+});</code></pre>
+
+    <pre class="prettyprint"><code>// Listen for "change" events on a record
+post.on('change', (record, changes) => {
+  console.log(changes); // { changed: { title: 'Modeling your data' } }
+});
+post.title = 'Modeling your data';</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Name of event to subsribe to.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>listener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Listener function to handle the event.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optional content in which to invoke the listener.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="previous"><span class="type-signature"></span>previous<span class="signature">(key<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line553">line 553</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return the properties with which this record was instantiated.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#previous</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user');
+const user = store.createRecord('user', {
+  name: 'William'
+});
+console.log('user previous: ' + JSON.stringify(user.previous()));
+user.name = 'Bob';
+console.log('user previous: ' + JSON.stringify(user.previous()));
+user.commit();
+console.log('user previous: ' + JSON.stringify(user.previous()));</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>If specified, return just the initial value of the
+given key.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The initial properties of this record.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="revert"><span class="type-signature"></span>revert<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line584">line 584</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Revert changes to this record back to the properties it had when it was
+instantiated.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#revert</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user');
+const user = store.createRecord('user', {
+  name: 'William'
+});
+console.log('user: ' + JSON.stringify(user));
+user.name = 'Bob';
+console.log('user: ' + JSON.stringify(user));
+user.revert();
+console.log('user: ' + JSON.stringify(user));</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>preserve</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Array of strings or Regular Expressions
+denoting properties that should not be reverted.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="save"><span class="type-signature"></span>save<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line626">line 626</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Delegates to <a href="Mapper.html#create">Mapper#create</a> or <a href="Mapper.html#update">Mapper#update</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import { Container } from 'js-data';
+import { RethinkDBAdapter } from 'js-data-rethinkdb';
+
+const store = new Container();
+store.registerAdapter('rethink', new RethinkDBAdapter(), { default: true });
+store.defineMapper('session');
+const session = store.createRecord('session', { topic: 'Node.js' });
+
+// Create a new record in the database
+session.save().then(() => {
+  console.log(session.id); // 1234
+
+  session.skill_level = 'beginner';
+
+  // Update the record in the database
+  return session.save();
+});</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. See <a href="Mapper.html#create">Mapper#create</a> and
+<a href="Mapper.html#update">Mapper#update</a>.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>changesOnly</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Equality function. Default uses <code>===</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>equalsFn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Passed to <a href="Record.html#changes">Record#changes</a> when
+<code>opts.changesOnly</code> is <code>true</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Passed to <a href="Record.html#changes">Record#changes</a> when
+<code>opts.changesOnly</code> is <code>true</code>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The result of calling <a href="Mapper.html#create">Mapper#create</a> or
+<a href="Mapper.html#update">Mapper#update</a>.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">(key, value<span class="signature-attributes">opt</span>, opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line687">line 687</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Set the value for a given key, or the values for the given keys if &quot;key&quot; is
+an object. Triggers change events on those properties that have <code>track: true</code>
+in <a href="Mapper.html#schema">Mapper#schema</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#set</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user');
+
+const user = store.createRecord('user');
+console.log('user: ' + JSON.stringify(user));
+
+user.set('name', 'Bob');
+console.log('user: ' + JSON.stringify(user));
+
+user.set({ age: 30, role: 'admin' });
+console.log('user: ' + JSON.stringify(user));</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Key to set or hash of key-value pairs to set.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Value to set for the given key.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>silent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to trigger change events.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<h5>Fires:</h5>
+<ul>
+    <li><a href="Record.html#event:change">Record#event:change</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="toJSON"><span class="type-signature"></span>toJSON<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line730">line 730</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Return a plain object representation of this record. If the class from
+which this record was created has a Mapper, then <a href="Mapper.html#toJSON">Mapper#toJSON</a> will
+be called with this record instead.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#toJSON</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user', {
+  schema: {
+    properties: {
+      name: { type: 'string' }
+    }
+  }
+});
+
+const user = store.createRecord('user', {
+  name: 'John',
+  $$hashKey: '1234'
+});
+console.log('user: ' + JSON.stringify(user.toJSON()));</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>with</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Array of relation names or relation fields
+to include in the representation. Only available as an option if the class
+from which this record was created has a Mapper and this record resides in
+an instance of <a href="DataStore.html">DataStore</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Plain object representation of this record.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="unset"><span class="type-signature"></span>unset<span class="signature">(key, opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line776">line 776</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Unset the value for a given key. Triggers change events on those properties
+that have <code>track: true</code> in <a href="Mapper.html#schema">Mapper#schema</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#unset</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user');
+
+const user = store.createRecord('user', {
+  name: 'John'
+});
+console.log('user: ' + JSON.stringify(user));
+
+user.unset('name');
+console.log('user: ' + JSON.stringify(user));</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Key to unset.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>silent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to trigger change events.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="validate"><span class="type-signature"></span>validate<span class="signature">(opts<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {*}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line805">line 805</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Validate this record based on its current properties.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+        <p class="code-caption">Record#validate</p>
+    
+    <pre class="prettyprint"><code>const JSData = require('js-data');
+const { Container } = JSData;
+console.log('Using JSData v' + JSData.version.full);
+const store = new Container();
+store.defineMapper('user', {
+  schema: {
+    properties: {
+      name: { type: 'string' }
+    }
+  }
+});
+const user = store.createRecord('user', {
+  name: 1234
+}, {
+  noValidate: true // this allows us to put the record into an invalid state
+});
+console.log('user validation: ' + JSON.stringify(user.validate()));
+user.name = 'John';
+console.log('user validation: ' + user.validate());</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. Passed to <a href="Mapper.html#validate">Mapper#validate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Array of errors or <code>undefined</code> if no errors.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+
+    
+
+    <h4 class="name" id="~changeListener"><span class="type-signature"></span>changeListener<span class="signature">(The, The)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line867">line 867</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Record.html#event:change">Record#event:change</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Callback signature for the <a href="Record.html#event:change">Record#event:change</a> event.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>function onChange (record, changes) {
+  // do something
+}
+record.on('change', onChange);</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>The</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Record.html">Record</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Record that changed.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>The</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>changes.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+    
+
+    
+        <h3 class="subsection-title">Events</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:change">change</h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Record.js.html">Record.js</a>, <a href="Record.js.html#line859">line 859</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Record.html#~changeListener">Record~changeListener</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Fired when a record changes. Only works for records that have tracked fields.
+See <a href="Record.html#~changeListener">Record~changeListener</a> on how to listen for this event.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jan 25 2020 22:32:21 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>
