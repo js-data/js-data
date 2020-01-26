@@ -4,13 +4,22 @@
   },
   "plugins": ["plugins/markdown"],
   "opts": {
-    "template": "./node_modules/ink-docstrap/template",
+    "template": "node_modules/docdash",
     "destination": "./doc/",
     "recurse": true,
     "verbose": true,
     "readme": "./README.md",
     "package": "./package.json"
   },
+    "docdash": {
+      "static": true,
+      "sort": true,
+      "search": true,
+      "collapse": true,
+      "wrap": true,
+      "typedefs": true,
+      "navLevel": 3
+    },
   "templates": {
     "theme": "jsdata",
     "systemName": "js-data",
