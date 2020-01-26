@@ -1,0 +1,7706 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Class: Record</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/googlecode.min.css">
+	<link type="text/css" rel="stylesheet" href="styles/site.jsdata.css">
+  <style>
+    a {
+      text-decoration: none !important;
+    }
+    .hljs {
+      padding: 0;
+      background: none;
+    }
+    #toc {
+      position: fixed;
+      margin-top: 62px;
+      overflow-y: scroll;
+      max-height: 85%;
+    }
+    #toc .toc-list-group-item {
+      display: block;
+    }
+    #toc .toc-list-group-item.active {
+      font-weight: bold;
+    }
+    #toc .toc-list-group-item span.toc-h3 {
+      font-weight: bold;
+    }
+    #main {
+      padding-left: 4%;
+    }
+    article h4.name, article dt.name {
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .code-panel.panel pre {
+      background-color: #FBFBFB;
+      border-color: #E6E5E5;
+    }
+    .page-title {
+      color: #000;
+    }
+    span.param-type a {
+      padding: 3px 5px;
+    }
+    span.param-type a:hover {
+      background-color: #158CBA;
+      color: #fff;
+    }
+    .panel ul {
+      padding-left: 0;
+    }
+    .panel ul li {
+      list-style-type: none;
+    }
+    .tonic {
+      padding-left: 20px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html"><img class="branding-logo" src="https://raw.githubusercontent.com/js-data/js-data/master/js-data-64.png"
+		alt="logo"/>js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="query_.html">query</a></li><li><a href="utils.html">utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Component.html">Component</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li><li><a href="Settable.html">Settable</a></li><li><a href="SimpleStore.html">SimpleStore</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html#event:add">Collection#event:add</a></li><li><a href="Collection.html#event:change">Collection#event:change</a></li><li><a href="Collection.html#event:remove">Collection#event:remove</a></li><li><a href="Container.html#event:afterCreate">Container#event:afterCreate</a></li><li><a href="Container.html#event:afterCreateMany">Container#event:afterCreateMany</a></li><li><a href="Container.html#event:afterDestroy">Container#event:afterDestroy</a></li><li><a href="Container.html#event:afterDestroyAll">Container#event:afterDestroyAll</a></li><li><a href="Container.html#event:afterFind">Container#event:afterFind</a></li><li><a href="Container.html#event:afterFindAll">Container#event:afterFindAll</a></li><li><a href="Container.html#event:afterUpdate">Container#event:afterUpdate</a></li><li><a href="Container.html#event:afterUpdateAll">Container#event:afterUpdateAll</a></li><li><a href="Container.html#event:afterUpdateMany">Container#event:afterUpdateMany</a></li><li><a href="Container.html#event:beforeCreate">Container#event:beforeCreate</a></li><li><a href="Container.html#event:beforeCreateMany">Container#event:beforeCreateMany</a></li><li><a href="Container.html#event:beforeDestroy">Container#event:beforeDestroy</a></li><li><a href="Container.html#event:beforeDestroyAll">Container#event:beforeDestroyAll</a></li><li><a href="Container.html#event:beforeFind">Container#event:beforeFind</a></li><li><a href="Container.html#event:beforeFindAll">Container#event:beforeFindAll</a></li><li><a href="Container.html#event:beforeUpdate">Container#event:beforeUpdate</a></li><li><a href="Container.html#event:beforeUpdateAll">Container#event:beforeUpdateAll</a></li><li><a href="Container.html#event:beforeUpdateMany">Container#event:beforeUpdateMany</a></li><li><a href="DataStore.html#event:add">DataStore#event:add</a></li><li><a href="DataStore.html#event:afterCreate">DataStore#event:afterCreate</a></li><li><a href="DataStore.html#event:afterCreateMany">DataStore#event:afterCreateMany</a></li><li><a href="DataStore.html#event:afterDestroy">DataStore#event:afterDestroy</a></li><li><a href="DataStore.html#event:afterDestroyAll">DataStore#event:afterDestroyAll</a></li><li><a href="DataStore.html#event:afterFind">DataStore#event:afterFind</a></li><li><a href="DataStore.html#event:afterFindAll">DataStore#event:afterFindAll</a></li><li><a href="DataStore.html#event:afterUpdate">DataStore#event:afterUpdate</a></li><li><a href="DataStore.html#event:afterUpdateAll">DataStore#event:afterUpdateAll</a></li><li><a href="DataStore.html#event:afterUpdateMany">DataStore#event:afterUpdateMany</a></li><li><a href="DataStore.html#event:beforeCreate">DataStore#event:beforeCreate</a></li><li><a href="DataStore.html#event:beforeCreateMany">DataStore#event:beforeCreateMany</a></li><li><a href="DataStore.html#event:beforeDestroy">DataStore#event:beforeDestroy</a></li><li><a href="DataStore.html#event:beforeDestroyAll">DataStore#event:beforeDestroyAll</a></li><li><a href="DataStore.html#event:beforeFind">DataStore#event:beforeFind</a></li><li><a href="DataStore.html#event:beforeFindAll">DataStore#event:beforeFindAll</a></li><li><a href="DataStore.html#event:beforeUpdate">DataStore#event:beforeUpdate</a></li><li><a href="DataStore.html#event:beforeUpdateAll">DataStore#event:beforeUpdateAll</a></li><li><a href="DataStore.html#event:beforeUpdateMany">DataStore#event:beforeUpdateMany</a></li><li><a href="DataStore.html#event:change">DataStore#event:change</a></li><li><a href="DataStore.html#event:remove">DataStore#event:remove</a></li><li><a href="LinkedCollection.html#event:add">LinkedCollection#event:add</a></li><li><a href="LinkedCollection.html#event:change">LinkedCollection#event:change</a></li><li><a href="LinkedCollection.html#event:remove">LinkedCollection#event:remove</a></li><li><a href="Mapper.html#event:afterCreate">Mapper#event:afterCreate</a></li><li><a href="Mapper.html#event:afterCreateMany">Mapper#event:afterCreateMany</a></li><li><a href="Mapper.html#event:afterDestroy">Mapper#event:afterDestroy</a></li><li><a href="Mapper.html#event:afterDestroyAll">Mapper#event:afterDestroyAll</a></li><li><a href="Mapper.html#event:afterFind">Mapper#event:afterFind</a></li><li><a href="Mapper.html#event:afterFindAll">Mapper#event:afterFindAll</a></li><li><a href="Mapper.html#event:afterUpdate">Mapper#event:afterUpdate</a></li><li><a href="Mapper.html#event:afterUpdateAll">Mapper#event:afterUpdateAll</a></li><li><a href="Mapper.html#event:afterUpdateMany">Mapper#event:afterUpdateMany</a></li><li><a href="Mapper.html#event:beforeCreate">Mapper#event:beforeCreate</a></li><li><a href="Mapper.html#event:beforeCreateMany">Mapper#event:beforeCreateMany</a></li><li><a href="Mapper.html#event:beforeDestroy">Mapper#event:beforeDestroy</a></li><li><a href="Mapper.html#event:beforeDestroyAll">Mapper#event:beforeDestroyAll</a></li><li><a href="Mapper.html#event:beforeFind">Mapper#event:beforeFind</a></li><li><a href="Mapper.html#event:beforeFindAll">Mapper#event:beforeFindAll</a></li><li><a href="Mapper.html#event:beforeUpdate">Mapper#event:beforeUpdate</a></li><li><a href="Mapper.html#event:beforeUpdateAll">Mapper#event:beforeUpdateAll</a></li><li><a href="Mapper.html#event:beforeUpdateMany">Mapper#event:beforeUpdateMany</a></li><li><a href="Record.html#event:change">Record#event:change</a></li><li><a href="SimpleStore.html#event:add">SimpleStore#event:add</a></li><li><a href="SimpleStore.html#event:afterCreate">SimpleStore#event:afterCreate</a></li><li><a href="SimpleStore.html#event:afterCreateMany">SimpleStore#event:afterCreateMany</a></li><li><a href="SimpleStore.html#event:afterDestroy">SimpleStore#event:afterDestroy</a></li><li><a href="SimpleStore.html#event:afterDestroyAll">SimpleStore#event:afterDestroyAll</a></li><li><a href="SimpleStore.html#event:afterFind">SimpleStore#event:afterFind</a></li><li><a href="SimpleStore.html#event:afterFindAll">SimpleStore#event:afterFindAll</a></li><li><a href="SimpleStore.html#event:afterUpdate">SimpleStore#event:afterUpdate</a></li><li><a href="SimpleStore.html#event:afterUpdateAll">SimpleStore#event:afterUpdateAll</a></li><li><a href="SimpleStore.html#event:afterUpdateMany">SimpleStore#event:afterUpdateMany</a></li><li><a href="SimpleStore.html#event:beforeCreate">SimpleStore#event:beforeCreate</a></li><li><a href="SimpleStore.html#event:beforeCreateMany">SimpleStore#event:beforeCreateMany</a></li><li><a href="SimpleStore.html#event:beforeDestroy">SimpleStore#event:beforeDestroy</a></li><li><a href="SimpleStore.html#event:beforeDestroyAll">SimpleStore#event:beforeDestroyAll</a></li><li><a href="SimpleStore.html#event:beforeFind">SimpleStore#event:beforeFind</a></li><li><a href="SimpleStore.html#event:beforeFindAll">SimpleStore#event:beforeFindAll</a></li><li><a href="SimpleStore.html#event:beforeUpdate">SimpleStore#event:beforeUpdate</a></li><li><a href="SimpleStore.html#event:beforeUpdateAll">SimpleStore#event:beforeUpdateAll</a></li><li><a href="SimpleStore.html#event:beforeUpdateMany">SimpleStore#event:beforeUpdateMany</a></li><li><a href="SimpleStore.html#event:change">SimpleStore#event:change</a></li><li><a href="SimpleStore.html#event:remove">SimpleStore#event:remove</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#_createOrAssignChildRecordIfRequired">_createOrAssignChildRecordIfRequired</a></li><li><a href="global.html#_createParentRecordIfRequired">_createParentRecordIfRequired</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+	</div>
+
+</div>
+</div>
+
+
+<div style="padding: 1%" id="toc-content">
+<div class="row">
+
+	
+		<div class="col-lg-3 col-md-4 hidden-xs hidden-sm toc-wrapper">
+			<div id="toc" class="col-lg-3 col-md-4 hidden-xs hidden-sm toc-wrapper"></div>
+		</div>
+	
+
+	<!-- <div class="clearfix"></div> -->
+
+	
+	<div class="col-lg-9 col-md-8">
+	
+		<div id="main">
+			
+
+	<h1 class="page-title">Class: Record</h1>
+<section>
+
+<header>
+    
+        <h2>
+        Record
+        </h2>
+        
+    
+</header>
+
+
+<article>
+    <div class="container-overview">
+    
+        
+<hr>
+<dt>
+  <h4 class="name" id="Record"><span class="type-signature"></span>new Record(<span class="optional">props</span>, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>js-data's Record class. An instance of <code>Record</code> corresponds to an in-memory
+representation of a single row or document in a database, Firebase,
+localstorage, etc. Basically, a <code>Record</code> instance represents whatever kind of
+entity in your persistence layer that has a primary key.</p>
+<pre class="prettyprint source lang-javascript"><code>import {Record} from 'js-data'
+</code></pre>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The initial properties of the new Record instance.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>noValidate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to skip validation on the
+initial properties.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>validateOnSet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to enable setter
+validation on properties after the Record has been initialized.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-27">line 27</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Examples</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#constructor">
+          <button class="btn btn-primary" onclick="loadTonic('Record#constructor')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#constructor"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Record } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+// Instantiate a plain record
+let record = new Record();
+console.log(&#x27;record: &#x27; + JSON.stringify(record));
+
+// You can supply properties on instantiation
+record = new Record({ name: &#x27;John&#x27; });
+console.log(&#x27;record: &#x27; + JSON.stringify(record));</code></pre>
+    <div class="tonic" id="tonic-Record#constructor" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Record } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+// Instantiate a plain record
+let record = new Record();
+console.log(&#x27;record: &#x27; + JSON.stringify(record));
+
+// You can supply properties on instantiation
+record = new Record({ name: &#x27;John&#x27; });
+console.log(&#x27;record: &#x27; + JSON.stringify(record));
+    </div>
+
+        <p class="code-caption" id="btn-Record#constructor2">
+          <button class="btn btn-primary" onclick="loadTonic('Record#constructor2')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#constructor2"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Mapper } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+// Instantiate a record that&#x27;s associated with a Mapper:
+const UserMapper = new Mapper({ name: &#x27;user&#x27; });
+const User = UserMapper.recordClass;
+const user = UserMapper.createRecord({ name: &#x27;John&#x27; });
+const user2 = new User({ name: &#x27;Sally&#x27; });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+console.log(&#x27;user2: &#x27; + JSON.stringify(user2));</code></pre>
+    <div class="tonic" id="tonic-Record#constructor2" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Mapper } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+// Instantiate a record that&#x27;s associated with a Mapper:
+const UserMapper = new Mapper({ name: &#x27;user&#x27; });
+const User = UserMapper.recordClass;
+const user = UserMapper.createRecord({ name: &#x27;John&#x27; });
+const user2 = new User({ name: &#x27;Sally&#x27; });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+console.log(&#x27;user2: &#x27; + JSON.stringify(user2));
+    </div>
+
+        <p class="code-caption" id="btn-Record#constructor3">
+          <button class="btn btn-primary" onclick="loadTonic('Record#constructor3')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#constructor3"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+// Instantiate a record that&#x27;s associated with a store&#x27;s Mapper
+const user = store.createRecord(&#x27;user&#x27;, { name: &#x27;John&#x27; });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));</code></pre>
+    <div class="tonic" id="tonic-Record#constructor3" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+// Instantiate a record that&#x27;s associated with a store&#x27;s Mapper
+const user = store.createRecord(&#x27;user&#x27;, { name: &#x27;John&#x27; });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+    </div>
+
+        <p class="code-caption" id="btn-Record#constructor4">
+          <button class="btn btn-primary" onclick="loadTonic('Record#constructor4')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#constructor4"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+
+// Validate on instantiation
+const user = store.createRecord(&#x27;user&#x27;, { name: 1234 });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));</code></pre>
+    <div class="tonic" id="tonic-Record#constructor4" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+
+// Validate on instantiation
+const user = store.createRecord(&#x27;user&#x27;, { name: 1234 });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+    </div>
+
+        <p class="code-caption" id="btn-Record#constructor5">
+          <button class="btn btn-primary" onclick="loadTonic('Record#constructor5')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#constructor5"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+
+// Skip validation on instantiation
+const user = store.createRecord(&#x27;user&#x27;, { name: 1234 }, { noValidate: true });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+console.log(&#x27;user.isValid(): &#x27; + user.isValid());</code></pre>
+    <div class="tonic" id="tonic-Record#constructor5" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+
+// Skip validation on instantiation
+const user = store.createRecord(&#x27;user&#x27;, { name: 1234 }, { noValidate: true });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+console.log(&#x27;user.isValid(): &#x27; + user.isValid());
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+    
+    </div>
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    This class extends the <a href="Component.html">Component</a> class.
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+            
+<hr>
+<dt class="name" id="debug">
+    <h4><strong><span class="type-signature"></span>debug</strong></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Whether to enable debug-level logs for this component. Anything that
+extends <code>Component</code> inherits this option and the corresponding logging
+functionality.</p>
+    </div>
+    
+
+    
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+          <th>Default value</th>
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+          <td><pre><code>false</code></pre></td>
+        
+        
+          <td>
+            <a href="Component.js.html">Component.js</a>,
+             <a href="Component.js.html#sunlight-1-line-28">line 28</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Component.html#debug">Component#debug</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+    
+        <div class="code-panel panel panel-warning">
+          <div class="panel-heading">
+            <strong>Example</strong>
+          </div>
+          <div class="panel-body">
+            
+        <p class="code-caption" id="btn-Component#debug">
+          <button class="btn btn-primary" onclick="loadTonic('Component#debug')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Component#debug"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Component } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const component = new Component();
+component.log(&#x27;debug&#x27;, &#x27;some message&#x27;); // nothing gets logged
+// Display debug logs:
+component.debug = true;
+component.log(&#x27;debug&#x27;, &#x27;other message&#x27;); // this DOES get logged</code></pre>
+    <div class="tonic" id="tonic-Component#debug" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Component } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const component = new Component();
+component.log(&#x27;debug&#x27;, &#x27;some message&#x27;); // nothing gets logged
+// Display debug logs:
+component.debug = true;
+component.log(&#x27;debug&#x27;, &#x27;other message&#x27;); // this DOES get logged
+    </div>
+
+
+          </div>
+        </div>
+    
+</dd>
+
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+  <h4 class="name" id=".extend"><span class="type-signature">&lt;static> </span>extend(<span class="optional">props</span>, <span class="optional">classProps</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Create a subclass of this Record:</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>props</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p>Properties to add to the prototype of the
+subclass.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>constructor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Provide a custom constructor function
+to be used as the subclass itself.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>classProps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p>Static properties to add to the subclass.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/new" target="_blank">Constructor</a></span>
+
+
+</td>
+            
+            
+              <td><p>Subclass of this Record class.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-883">line 883</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record.extend">
+          <button class="btn btn-primary" onclick="loadTonic('Record.extend')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record.extend"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Record } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+// Extend the class using ES2015 class syntax.
+class CustomRecordClass extends Record {
+  foo () { return &#x27;bar&#x27;; }
+  static beep () { return &#x27;boop&#x27;; }
+}
+const customRecord = new CustomRecordClass();
+console.log(customRecord.foo());
+console.log(CustomRecordClass.beep());
+
+// Extend the class using alternate method.
+const OtherRecordClass = Record.extend({
+  foo () { return &#x27;bar&#x27;; }
+}, {
+  beep () { return &#x27;boop&#x27;; }
+});
+const otherRecord = new OtherRecordClass();
+console.log(otherRecord.foo());
+console.log(OtherRecordClass.beep());
+
+// Extend the class, providing a custom constructor.
+function AnotherRecordClass () {
+  Record.call(this);
+  this.created_at = new Date().getTime();
+}
+Record.extend({
+  constructor: AnotherRecordClass,
+  foo () { return &#x27;bar&#x27;; }
+}, {
+  beep () { return &#x27;boop&#x27;; }
+});
+const anotherRecord = new AnotherRecordClass();
+console.log(anotherRecord.created_at);
+console.log(anotherRecord.foo());
+console.log(AnotherRecordClass.beep());</code></pre>
+    <div class="tonic" id="tonic-Record.extend" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Record } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+// Extend the class using ES2015 class syntax.
+class CustomRecordClass extends Record {
+  foo () { return &#x27;bar&#x27;; }
+  static beep () { return &#x27;boop&#x27;; }
+}
+const customRecord = new CustomRecordClass();
+console.log(customRecord.foo());
+console.log(CustomRecordClass.beep());
+
+// Extend the class using alternate method.
+const OtherRecordClass = Record.extend({
+  foo () { return &#x27;bar&#x27;; }
+}, {
+  beep () { return &#x27;boop&#x27;; }
+});
+const otherRecord = new OtherRecordClass();
+console.log(otherRecord.foo());
+console.log(OtherRecordClass.beep());
+
+// Extend the class, providing a custom constructor.
+function AnotherRecordClass () {
+  Record.call(this);
+  this.created_at = new Date().getTime();
+}
+Record.extend({
+  constructor: AnotherRecordClass,
+  foo () { return &#x27;bar&#x27;; }
+}, {
+  beep () { return &#x27;boop&#x27;; }
+});
+const anotherRecord = new AnotherRecordClass();
+console.log(anotherRecord.created_at);
+console.log(anotherRecord.foo());
+console.log(AnotherRecordClass.beep());
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="_mapper"><span class="type-signature"></span>_mapper()</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Returns the <a href="Mapper.html">Mapper</a> paired with this record's class, if any.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="Mapper.html">Mapper</a></span>
+
+
+</td>
+            
+            
+              <td><p>The <a href="Mapper.html">Mapper</a> paired with this record's class, if any.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-155">line 155</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="afterLoadRelations"><span class="type-signature"></span>afterLoadRelations(relations, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Lifecycle hook.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>relations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>relations</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-170">line 170</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="beforeLoadRelations"><span class="type-signature"></span>beforeLoadRelations(relations, opts)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Lifecycle hook.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>relations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>relations</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The <code>opts</code> argument passed to <a href="Record.html#loadRelations">Record#loadRelations</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-180">line 180</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="changeHistory"><span class="type-signature"></span>changeHistory()</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return the change history of this record since it was instantiated or
+<a href="Record.html#commit">Record#commit</a> was called.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-190">line 190</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="changes"><span class="type-signature"></span>changes(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return changes to this record since it was instantiated or
+<a href="Record.html#commit">Record#commit</a> was called.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>equalsFn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <a href="utils.html#.deepEqual">utils.deepEqual</a>
+                
+                </td>
+            
+
+            <td class="description last"><p>Equality function.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    []
+                
+                </td>
+            
+
+            <td class="description last"><p>Array of strings or RegExp of fields to ignore.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+</td>
+            
+            
+              <td><p>Object describing the changes to this record since it was
+instantiated or its <a href="Record.html#commit">Record#commit</a> method was last called.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-201">line 201</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#changes">
+          <button class="btn btn-primary" onclick="loadTonic('Record#changes')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#changes"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user changes: &#x27; + JSON.stringify(user.changes()));
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user changes: &#x27; + JSON.stringify(user.changes()));</code></pre>
+    <div class="tonic" id="tonic-Record#changes" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user changes: &#x27; + JSON.stringify(user.changes()));
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user changes: &#x27; + JSON.stringify(user.changes()));
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="commit"><span class="type-signature"></span>commit(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Make the record's current in-memory state it's only state, with any
+previous property values being set to current values.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. Passed to <a href="Record.html#toJSON">Record#toJSON</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-230">line 230</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#commit">
+          <button class="btn btn-primary" onclick="loadTonic('Record#commit')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#commit"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.commit();
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());</code></pre>
+    <div class="tonic" id="tonic-Record#commit" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.commit();
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="dbg"><span class="type-signature"></span>dbg(<span class="optional">args</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Log the provided values at the &quot;debug&quot; level. Debug-level logs are only
+logged if <a href="Component.html#debug">Component#debug</a> is <code>true</code>.</p>
+<p><code>.dbg(...)</code> is shorthand for <code>.log('debug', ...)</code>.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Values to log.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Component.js.html">Component.js</a>,
+             <a href="Component.js.html#sunlight-1-line-122">line 122</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Component.html#dbg">Component#dbg</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="destroy"><span class="type-signature"></span>destroy(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Call <a href="Mapper.html#destroy">Mapper#destroy</a> using this record's primary key.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options passed to <a href="Mapper.html#destroy">Mapper#destroy</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">Promise</a></span>
+
+
+</td>
+            
+            
+              <td><p>The result of calling <a href="Mapper.html#destroy">Mapper#destroy</a> with the
+primary key of this record.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-259">line 259</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">import { Container } from &#x27;js-data&#x27;;
+import { RethinkDBAdapter } from &#x27;js-data-rethinkdb&#x27;;
+
+const store = new Container();
+store.registerAdapter(&#x27;rethink&#x27;, new RethinkDBAdapter(), { default: true });
+store.defineMapper(&#x27;user&#x27;);
+store.find(&#x27;user&#x27;, 1234).then((user) =&gt; {
+  console.log(user.id); // 1234
+
+  // Destroy this user from the database
+  return user.destroy();
+});</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      import { Container } from &#x27;js-data&#x27;;
+import { RethinkDBAdapter } from &#x27;js-data-rethinkdb&#x27;;
+
+const store = new Container();
+store.registerAdapter(&#x27;rethink&#x27;, new RethinkDBAdapter(), { default: true });
+store.defineMapper(&#x27;user&#x27;);
+store.find(&#x27;user&#x27;, 1234).then((user) =&gt; {
+  console.log(user.id); // 1234
+
+  // Destroy this user from the database
+  return user.destroy();
+});
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="emit"><span class="type-signature"></span>emit(event, <span class="optional">args</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Trigger an event on this Component.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Name of event to emit.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Arguments to pass to any listeners.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Component.js.html">Component.js</a>,
+             <a href="Component.js.html#sunlight-1-line-200">line 200</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Component.html#emit">Component#emit</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Component#emit">
+          <button class="btn btn-primary" onclick="loadTonic('Component#emit')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Component#emit"><code class="javascript">// import { Collection, DataStore } from &#x27;js-data&#x27;;
+const JSData = require(&#x27;js-data&#x27;);
+const { Collection, DataStore } = JSData;
+
+const collection = new Collection();
+collection.on(&#x27;foo&#x27;, function (msg) {
+  console.log(msg);
+});
+collection.emit(&#x27;foo&#x27;, &#x27;bar&#x27;);
+
+const store = new DataStore();
+store.on(&#x27;beep&#x27;, function (msg) {
+  console.log(msg);
+});
+store.emit(&#x27;beep&#x27;, &#x27;boop&#x27;);</code></pre>
+    <div class="tonic" id="tonic-Component#emit" style="display: none;">
+      // import { Collection, DataStore } from &#x27;js-data&#x27;;
+const JSData = require(&#x27;js-data&#x27;);
+const { Collection, DataStore } = JSData;
+
+const collection = new Collection();
+collection.on(&#x27;foo&#x27;, function (msg) {
+  console.log(msg);
+});
+collection.emit(&#x27;foo&#x27;, &#x27;bar&#x27;);
+
+const store = new DataStore();
+store.on(&#x27;beep&#x27;, function (msg) {
+  console.log(msg);
+});
+store.emit(&#x27;beep&#x27;, &#x27;boop&#x27;);
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="get"><span class="type-signature"></span>get(key)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return the value at the given path for this instance.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Path of value to retrieve.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type">*</span>
+
+
+</td>
+            
+            
+              <td><p>Value at path.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-288">line 288</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#get">
+          <button class="btn btn-primary" onclick="loadTonic('Record#get')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#get"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+const user = store.createRecord(&#x27;user&#x27;, { name: &#x27;Bob&#x27; });
+console.log(&#x27;user.get(&quot;name&quot;): &#x27; + user.get(&#x27;name&#x27;));</code></pre>
+    <div class="tonic" id="tonic-Record#get" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+const user = store.createRecord(&#x27;user&#x27;, { name: &#x27;Bob&#x27; });
+console.log(&#x27;user.get(&quot;name&quot;): &#x27; + user.get(&#x27;name&#x27;));
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="hasChanges"><span class="type-signature"></span>hasChanges(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return whether this record has changed since it was instantiated or
+<a href="Record.html#commit">Record#commit</a> was called.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>equalsFn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <a href="utils.html#.deepEqual">utils.deepEqual</a>
+                
+                </td>
+            
+
+            <td class="description last"><p>Equality function.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    []
+                
+                </td>
+            
+
+            <td class="description last"><p>Array of strings or RegExp of fields to ignore.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+</td>
+            
+            
+              <td><p>Return whether the record has changed since it was
+instantiated or since its <a href="Record.html#commit">Record#commit</a> method was called.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-310">line 310</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#hasChanges">
+          <button class="btn btn-primary" onclick="loadTonic('Record#hasChanges')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#hasChanges"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.commit();
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());</code></pre>
+    <div class="tonic" id="tonic-Record#hasChanges" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+user.commit();
+console.log(&#x27;user hasChanges: &#x27; + user.hasChanges());
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="isNew"><span class="type-signature"></span>isNew()</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return whether the record is unsaved. Records that have primary keys are
+considered &quot;saved&quot;. Records without primary keys are considered &quot;unsaved&quot;.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+</td>
+            
+            
+              <td><p>Whether the record is unsaved.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-340">line 340</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#isNew">
+          <button class="btn btn-primary" onclick="loadTonic('Record#isNew')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#isNew"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;, {
+  id: 1234
+});
+const user2 = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user isNew: &#x27; + user.isNew()); // false
+console.log(&#x27;user2 isNew: &#x27; + user2.isNew()); // true</code></pre>
+    <div class="tonic" id="tonic-Record#isNew" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;, {
+  id: 1234
+});
+const user2 = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user isNew: &#x27; + user.isNew()); // false
+console.log(&#x27;user2 isNew: &#x27; + user2.isNew()); // true
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="isValid"><span class="type-signature"></span>isValid(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return whether the record in its current state passes validation.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. Passed to <a href="Mapper.html#validate">Mapper#validate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+</td>
+            
+            
+              <td><p>Whether the record in its current state passes
+validation.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-365">line 365</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#isValid">
+          <button class="btn btn-primary" onclick="loadTonic('Record#isValid')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#isValid"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: 1234
+}, {
+  noValidate: true // this allows us to put the record into an invalid state
+});
+console.log(&#x27;user isValid: &#x27; + user.isValid());
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user isValid: &#x27; + user.isValid());</code></pre>
+    <div class="tonic" id="tonic-Record#isValid" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: 1234
+}, {
+  noValidate: true // this allows us to put the record into an invalid state
+});
+console.log(&#x27;user isValid: &#x27; + user.isValid());
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user isValid: &#x27; + user.isValid());
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="loadRelations"><span class="type-signature"></span>loadRelations(<span class="optional">relations</span>, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Lazy load relations of this record, to be attached to the record once their
+loaded.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>relations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>List of relations to load. Can use localField
+names or Mapper names to pick relations.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">Promise</a></span>
+
+
+</td>
+            
+            
+              <td><p>Resolves with the record, with the loaded relations now
+attached.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-429">line 429</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">import { Container } from &#x27;js-data&#x27;;
+import { RethinkDBAdapter } from &#x27;js-data-rethinkdb&#x27;;
+
+const store = new Container();
+store.registerAdapter(&#x27;rethink&#x27;, new RethinkDBAdapter(), { default: true });
+store.defineMapper(&#x27;user&#x27;, {
+  relations: {
+    hasMany: {
+      post: {
+        localField: &#x27;posts&#x27;,
+        foreignKey: &#x27;user_id&#x27;
+      }
+    }
+  }
+});
+store.defineMapper(&#x27;post&#x27;, {
+  relations: {
+    belongsTo: {
+      user: {
+        localField: &#x27;user&#x27;,
+        foreignKey: &#x27;user_id&#x27;
+      }
+    }
+  }
+});
+store.find(&#x27;user&#x27;, 1234).then((user) =&gt; {
+  console.log(user.id); // 1234
+
+  // Load the user&#x27;s post relations
+  return user.loadRelations([&#x27;post&#x27;]);
+}).then((user) =&gt; {
+  console.log(user.posts); // [{...}, {...}, ...]
+});</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      import { Container } from &#x27;js-data&#x27;;
+import { RethinkDBAdapter } from &#x27;js-data-rethinkdb&#x27;;
+
+const store = new Container();
+store.registerAdapter(&#x27;rethink&#x27;, new RethinkDBAdapter(), { default: true });
+store.defineMapper(&#x27;user&#x27;, {
+  relations: {
+    hasMany: {
+      post: {
+        localField: &#x27;posts&#x27;,
+        foreignKey: &#x27;user_id&#x27;
+      }
+    }
+  }
+});
+store.defineMapper(&#x27;post&#x27;, {
+  relations: {
+    belongsTo: {
+      user: {
+        localField: &#x27;user&#x27;,
+        foreignKey: &#x27;user_id&#x27;
+      }
+    }
+  }
+});
+store.find(&#x27;user&#x27;, 1234).then((user) =&gt; {
+  console.log(user.id); // 1234
+
+  // Load the user&#x27;s post relations
+  return user.loadRelations([&#x27;post&#x27;]);
+}).then((user) =&gt; {
+  console.log(user.posts); // [{...}, {...}, ...]
+});
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="log"><span class="type-signature"></span>log(level, <span class="optional">args</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Log the provided values. By default sends values to <code>console[level]</code>.
+Debug-level logs are only logged if <a href="Component.html#debug">Component#debug</a> is <code>true</code>.</p>
+<p>Will attempt to use appropriate <code>console</code> methods if they are available.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>level</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Log level.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Values to log.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Component.js.html">Component.js</a>,
+             <a href="Component.js.html#sunlight-1-line-132">line 132</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Component.html#log">Component#log</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="off"><span class="type-signature"></span>off(<span class="optional">event</span>, <span class="optional">listener</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Remove an event listener from this Component. If no listener is provided,
+then all listeners for the specified event will be removed. If no event is
+specified then all listeners for all events will be removed.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Name of event to unsubsribe to.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>listener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Listener to remove.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Component.js.html">Component.js</a>,
+             <a href="Component.js.html#sunlight-1-line-178">line 178</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Component.html#off">Component#off</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Examples</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">// Remove a particular listener for a particular event
+collection.off(&#x27;add&#x27;, handler);</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      // Remove a particular listener for a particular event
+collection.off(&#x27;add&#x27;, handler);
+    </div>
+
+    <pre id="pre-"><code class="javascript">// Remove all listeners for a particular event
+record.off(&#x27;change&#x27;);</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      // Remove all listeners for a particular event
+record.off(&#x27;change&#x27;);
+    </div>
+
+    <pre id="pre-"><code class="javascript">// Remove all listeners to all events
+store.off();</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      // Remove all listeners to all events
+store.off();
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="on"><span class="type-signature"></span>on(event, listener, <span class="optional">ctx</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Register a new event listener on this Component.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Name of event to subsribe to.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>listener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Listener function to handle the event.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optional content in which to invoke the listener.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Component.js.html">Component.js</a>,
+             <a href="Component.js.html#sunlight-1-line-145">line 145</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+  <dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+  <dd class="inherited-from">
+    <ul class="dummy">
+      <li>
+        <a href="Component.html#on">Component#on</a>
+      </li>
+    </ul>
+  </dd>
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Examples</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">// Listen for all &quot;afterCreate&quot; events in a DataStore
+store.on(&#x27;afterCreate&#x27;, (mapperName, props, opts, result) =&gt; {
+  console.log(mapperName); // &quot;post&quot;
+  console.log(props.id); // undefined
+  console.log(result.id); // 1234
+});
+store.create(&#x27;post&#x27;, { title: &#x27;Modeling your data&#x27; }).then((post) =&gt; {
+  console.log(post.id); // 1234
+});</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      // Listen for all &quot;afterCreate&quot; events in a DataStore
+store.on(&#x27;afterCreate&#x27;, (mapperName, props, opts, result) =&gt; {
+  console.log(mapperName); // &quot;post&quot;
+  console.log(props.id); // undefined
+  console.log(result.id); // 1234
+});
+store.create(&#x27;post&#x27;, { title: &#x27;Modeling your data&#x27; }).then((post) =&gt; {
+  console.log(post.id); // 1234
+});
+    </div>
+
+    <pre id="pre-"><code class="javascript">// Listen for the &quot;add&quot; event on a collection
+collection.on(&#x27;add&#x27;, (records) =&gt; {
+  console.log(records); // [...]
+});</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      // Listen for the &quot;add&quot; event on a collection
+collection.on(&#x27;add&#x27;, (records) =&gt; {
+  console.log(records); // [...]
+});
+    </div>
+
+    <pre id="pre-"><code class="javascript">// Listen for &quot;change&quot; events on a record
+post.on(&#x27;change&#x27;, (record, changes) =&gt; {
+  console.log(changes); // { changed: { title: &#x27;Modeling your data&#x27; } }
+});
+post.title = &#x27;Modeling your data&#x27;;</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      // Listen for &quot;change&quot; events on a record
+post.on(&#x27;change&#x27;, (record, changes) =&gt; {
+  console.log(changes); // { changed: { title: &#x27;Modeling your data&#x27; } }
+});
+post.title = &#x27;Modeling your data&#x27;;
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="previous"><span class="type-signature"></span>previous(<span class="optional">key</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return the properties with which this record was instantiated.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>If specified, return just the initial value of the
+given key.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+</td>
+            
+            
+              <td><p>The initial properties of this record.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-553">line 553</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#previous">
+          <button class="btn btn-primary" onclick="loadTonic('Record#previous')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#previous"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;William&#x27;
+});
+console.log(&#x27;user previous: &#x27; + JSON.stringify(user.previous()));
+user.name = &#x27;Bob&#x27;;
+console.log(&#x27;user previous: &#x27; + JSON.stringify(user.previous()));
+user.commit();
+console.log(&#x27;user previous: &#x27; + JSON.stringify(user.previous()));</code></pre>
+    <div class="tonic" id="tonic-Record#previous" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;William&#x27;
+});
+console.log(&#x27;user previous: &#x27; + JSON.stringify(user.previous()));
+user.name = &#x27;Bob&#x27;;
+console.log(&#x27;user previous: &#x27; + JSON.stringify(user.previous()));
+user.commit();
+console.log(&#x27;user previous: &#x27; + JSON.stringify(user.previous()));
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="revert"><span class="type-signature"></span>revert(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Revert changes to this record back to the properties it had when it was
+instantiated.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>preserve</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Array of strings or Regular Expressions
+denoting properties that should not be reverted.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-584">line 584</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#revert">
+          <button class="btn btn-primary" onclick="loadTonic('Record#revert')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#revert"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;William&#x27;
+});
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+user.name = &#x27;Bob&#x27;;
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+user.revert();
+console.log(&#x27;user: &#x27; + JSON.stringify(user));</code></pre>
+    <div class="tonic" id="tonic-Record#revert" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;William&#x27;
+});
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+user.name = &#x27;Bob&#x27;;
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+user.revert();
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="save"><span class="type-signature"></span>save(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Delegates to <a href="Mapper.html#create">Mapper#create</a> or <a href="Mapper.html#update">Mapper#update</a>.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. See <a href="Mapper.html#create">Mapper#create</a> and
+<a href="Mapper.html#update">Mapper#update</a>.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>changesOnly</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Equality function. Default uses <code>===</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>equalsFn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Passed to <a href="Record.html#changes">Record#changes</a> when
+<code>opts.changesOnly</code> is <code>true</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ignore</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Passed to <a href="Record.html#changes">Record#changes</a> when
+<code>opts.changesOnly</code> is <code>true</code>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">Promise</a></span>
+
+
+</td>
+            
+            
+              <td><p>The result of calling <a href="Mapper.html#create">Mapper#create</a> or
+<a href="Mapper.html#update">Mapper#update</a>.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-626">line 626</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">import { Container } from &#x27;js-data&#x27;;
+import { RethinkDBAdapter } from &#x27;js-data-rethinkdb&#x27;;
+
+const store = new Container();
+store.registerAdapter(&#x27;rethink&#x27;, new RethinkDBAdapter(), { default: true });
+store.defineMapper(&#x27;session&#x27;);
+const session = store.createRecord(&#x27;session&#x27;, { topic: &#x27;Node.js&#x27; });
+
+// Create a new record in the database
+session.save().then(() =&gt; {
+  console.log(session.id); // 1234
+
+  session.skill_level = &#x27;beginner&#x27;;
+
+  // Update the record in the database
+  return session.save();
+});</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      import { Container } from &#x27;js-data&#x27;;
+import { RethinkDBAdapter } from &#x27;js-data-rethinkdb&#x27;;
+
+const store = new Container();
+store.registerAdapter(&#x27;rethink&#x27;, new RethinkDBAdapter(), { default: true });
+store.defineMapper(&#x27;session&#x27;);
+const session = store.createRecord(&#x27;session&#x27;, { topic: &#x27;Node.js&#x27; });
+
+// Create a new record in the database
+session.save().then(() =&gt; {
+  console.log(session.id); // 1234
+
+  session.skill_level = &#x27;beginner&#x27;;
+
+  // Update the record in the database
+  return session.save();
+});
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="set"><span class="type-signature"></span>set(key, <span class="optional">value</span>, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Set the value for a given key, or the values for the given keys if &quot;key&quot; is
+an object. Triggers change events on those properties that have <code>track: true</code>
+in <a href="Mapper.html#schema">Mapper#schema</a>.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Key to set or hash of key-value pairs to set.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Value to set for the given key.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>silent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to trigger change events.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+  <h5><strong>Fires:</strong></h5>
+  <ul>
+    <li><a href="Record.html#event:change">Record#event:change</a></li>
+  </ul>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-687">line 687</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#set">
+          <button class="btn btn-primary" onclick="loadTonic('Record#set')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#set"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+
+user.set(&#x27;name&#x27;, &#x27;Bob&#x27;);
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+
+user.set({ age: 30, role: &#x27;admin&#x27; });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));</code></pre>
+    <div class="tonic" id="tonic-Record#set" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+const user = store.createRecord(&#x27;user&#x27;);
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+
+user.set(&#x27;name&#x27;, &#x27;Bob&#x27;);
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+
+user.set({ age: 30, role: &#x27;admin&#x27; });
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="toJSON"><span class="type-signature"></span>toJSON(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Return a plain object representation of this record. If the class from
+which this record was created has a Mapper, then <a href="Mapper.html#toJSON">Mapper#toJSON</a> will
+be called with this record instead.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>with</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a>&gt;</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Array of relation names or relation fields
+to include in the representation. Only available as an option if the class
+from which this record was created has a Mapper and this record resides in
+an instance of <a href="DataStore.html">DataStore</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+</td>
+            
+            
+              <td><p>Plain object representation of this record.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-730">line 730</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#toJSON">
+          <button class="btn btn-primary" onclick="loadTonic('Record#toJSON')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#toJSON"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;John&#x27;,
+  $$hashKey: &#x27;1234&#x27;
+});
+console.log(&#x27;user: &#x27; + JSON.stringify(user.toJSON()));</code></pre>
+    <div class="tonic" id="tonic-Record#toJSON" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;John&#x27;,
+  $$hashKey: &#x27;1234&#x27;
+});
+console.log(&#x27;user: &#x27; + JSON.stringify(user.toJSON()));
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="unset"><span class="type-signature"></span>unset(key, <span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Unset the value for a given key. Triggers change events on those properties
+that have <code>track: true</code> in <a href="Mapper.html#schema">Mapper#schema</a>.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Key to unset.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options.</p>
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>silent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" target="_blank">Boolean</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether to trigger change events.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-776">line 776</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#unset">
+          <button class="btn btn-primary" onclick="loadTonic('Record#unset')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#unset"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;John&#x27;
+});
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+
+user.unset(&#x27;name&#x27;);
+console.log(&#x27;user: &#x27; + JSON.stringify(user));</code></pre>
+    <div class="tonic" id="tonic-Record#unset" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;);
+
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: &#x27;John&#x27;
+});
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+
+user.unset(&#x27;name&#x27;);
+console.log(&#x27;user: &#x27; + JSON.stringify(user));
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        
+            
+<hr>
+<dt>
+  <h4 class="name" id="validate"><span class="type-signature"></span>validate(<span class="optional">opts</span>)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Validate this record based on its current properties.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>opts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Configuration options. Passed to <a href="Mapper.html#validate">Mapper#validate</a>.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  <div class="panel panel-info">
+    <!-- Default panel contents -->
+    <div class="panel-heading"><strong>Return value:</strong></div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            
+              <td>
+<span class="param-type">*</span>
+
+
+</td>
+            
+            
+              <td><p>Array of errors or <code>undefined</code> if no errors.</p></td>
+            
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-805">line 805</a>
+          </td>
+        
+        
+        
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+        <p class="code-caption" id="btn-Record#validate">
+          <button class="btn btn-primary" onclick="loadTonic('Record#validate')">Try it out</button>
+        </p>
+    
+    <pre id="pre-Record#validate"><code class="javascript">const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: 1234
+}, {
+  noValidate: true // this allows us to put the record into an invalid state
+});
+console.log(&#x27;user validation: &#x27; + JSON.stringify(user.validate()));
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user validation: &#x27; + user.validate());</code></pre>
+    <div class="tonic" id="tonic-Record#validate" style="display: none;">
+      const JSData = require(&#x27;js-data&#x27;);
+const { Container } = JSData;
+console.log(&#x27;Using JSData v&#x27; + JSData.version.full);
+const store = new Container();
+store.defineMapper(&#x27;user&#x27;, {
+  schema: {
+    properties: {
+      name: { type: &#x27;string&#x27; }
+    }
+  }
+});
+const user = store.createRecord(&#x27;user&#x27;, {
+  name: 1234
+}, {
+  noValidate: true // this allows us to put the record into an invalid state
+});
+console.log(&#x27;user validation: &#x27; + JSON.stringify(user.validate()));
+user.name = &#x27;John&#x27;;
+console.log(&#x27;user validation: &#x27; + user.validate());
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        <dl>
+                
+<hr>
+<dt>
+  <h4 class="name" id="~changeListener"><span class="type-signature"></span>changeListener(The, The)</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Callback signature for the <a href="Record.html#event:change">Record#event:change</a> event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+    <div class="panel panel-success">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>Method parameters:</strong></div>
+      
+
+<table class="params table table-striped table-bordered">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>The</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Record.html">Record</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Record that changed.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>The</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" target="_blank">Object</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>changes.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+          <th>Type</th>
+        
+        
+        
+          <th>Since</th>
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+          <td>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function" target="_blank">Function</a></span>
+
+
+
+          </td>
+        
+        
+        
+          <td>3.0.0</td>
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-867">line 867</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="Record.html#event:change">Record#event:change</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+    <div class="code-panel panel panel-warning">
+      <div class="panel-heading">
+        <strong>Example</strong>
+      </div>
+      <div class="panel-body">
+        
+    <pre id="pre-"><code class="javascript">function onChange (record, changes) {
+  // do something
+}
+record.on(&#x27;change&#x27;, onChange);</code></pre>
+    <div class="tonic" id="tonic-" style="display: none;">
+      function onChange (record, changes) {
+  // do something
+}
+record.on(&#x27;change&#x27;, onChange);
+    </div>
+
+
+      </div>
+    </div>
+  
+</dd>
+
+            </dl>
+    
+
+    
+        <h3 class="subsection-title">Events</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+  <h4 class="name" id="event:change">change</h4>
+
+  
+</dt>
+<dd>
+
+  
+  <div class="description">
+    <p>Fired when a record changes. Only works for records that have tracked fields.
+See <a href="Record.html#~changeListener">Record~changeListener</a> on how to listen for this event.</p>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+<div class="panel panel-default">
+  <div class="panel-heading"><strong>Details</strong></div>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        
+        
+        
+        
+        
+          <th>Source</th>
+        
+        
+        
+        
+          <th>See</th>
+        
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        
+        
+        
+        
+        
+          <td>
+            <a href="Record.js.html">Record.js</a>,
+             <a href="Record.js.html#sunlight-1-line-859">line 859</a>
+          </td>
+        
+        
+        
+        
+          <td>
+            <ul>
+              <li><a href="Record.html#~changeListener">Record~changeListener</a></li>
+              </ul>
+          </td>
+        
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+<dl class="details">
+    
+
+  
+
+    
+
+    
+
+    
+
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+  
+</dd>
+
+        </dl>
+    
+</article>
+
+</section>
+
+
+
+
+		</div>
+	</div>
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center"><a href="/">api.js-data.io</a>&nbsp;&#8226;&nbsp;<a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2020 js-data project authors
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
+	
+		on 2020-01-24T22:16:18-08:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<!-- <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script> -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/languages/javascript.min.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	hljs.initHighlightingOnLoad();
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true,
+    highlightOnScroll: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+<script>
+	(function ( i, s, o, g, r, a, m ) {
+		i['GoogleAnalyticsObject'] = r;
+		i[r] = i[r] || function () {
+			(i[r].q = i[r].q || []).push( arguments )
+		}, i[r].l = 1 * new Date();
+		a = s.createElement( o ),
+			m = s.getElementsByTagName( o )[0];
+		a.async = 1;
+		a.src = g;
+		m.parentNode.insertBefore( a, m )
+	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
+
+	ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
+	ga( 'send', 'pageview' );
+</script>
+
+
+<script src="https://embed.tonicdev.com"></script>
+<script>
+  window.loadTonic = function (id) {
+    var btn = document.getElementById('btn-' + id);
+    $(btn).hide();
+    var pre = document.getElementById('pre-' + id);
+    $(pre).hide();
+    var el = document.getElementById('tonic-' + id);
+    var $el = $(el);
+    var html = $el.html();
+    $el.empty();
+    $el.show();
+    console.log(html);
+    Tonic.createNotebook({
+      element: el,
+      source: html
+    });
+  };
+</script>
+
+</body>
+</html>

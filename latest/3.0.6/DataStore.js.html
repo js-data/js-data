@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>js-data Source: DataStore.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/googlecode.min.css">
+	<link type="text/css" rel="stylesheet" href="styles/site.jsdata.css">
+  <style>
+    a {
+      text-decoration: none !important;
+    }
+    .hljs {
+      padding: 0;
+      background: none;
+    }
+    #toc {
+      position: fixed;
+      margin-top: 62px;
+      overflow-y: scroll;
+      max-height: 85%;
+    }
+    #toc .toc-list-group-item {
+      display: block;
+    }
+    #toc .toc-list-group-item.active {
+      font-weight: bold;
+    }
+    #toc .toc-list-group-item span.toc-h3 {
+      font-weight: bold;
+    }
+    #main {
+      padding-left: 4%;
+    }
+    article h4.name, article dt.name {
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .code-panel.panel pre {
+      background-color: #FBFBFB;
+      border-color: #E6E5E5;
+    }
+    .page-title {
+      color: #000;
+    }
+    span.param-type a {
+      padding: 3px 5px;
+    }
+    span.param-type a:hover {
+      background-color: #158CBA;
+      color: #fff;
+    }
+    .panel ul {
+      padding-left: 0;
+    }
+    .panel ul li {
+      list-style-type: none;
+    }
+    .tonic {
+      padding-left: 20px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html"><img class="branding-logo" src="https://raw.githubusercontent.com/js-data/js-data/master/js-data-64.png"
+		alt="logo"/>js-data</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="query_.html">query</a></li><li><a href="utils.html">utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-js-data.html">js-data</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html">Collection</a></li><li><a href="Component.html">Component</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li><li><a href="Settable.html">Settable</a></li><li><a href="SimpleStore.html">SimpleStore</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Collection.html#event:add">Collection#event:add</a></li><li><a href="Collection.html#event:change">Collection#event:change</a></li><li><a href="Collection.html#event:remove">Collection#event:remove</a></li><li><a href="Container.html#event:afterCreate">Container#event:afterCreate</a></li><li><a href="Container.html#event:afterCreateMany">Container#event:afterCreateMany</a></li><li><a href="Container.html#event:afterDestroy">Container#event:afterDestroy</a></li><li><a href="Container.html#event:afterDestroyAll">Container#event:afterDestroyAll</a></li><li><a href="Container.html#event:afterFind">Container#event:afterFind</a></li><li><a href="Container.html#event:afterFindAll">Container#event:afterFindAll</a></li><li><a href="Container.html#event:afterUpdate">Container#event:afterUpdate</a></li><li><a href="Container.html#event:afterUpdateAll">Container#event:afterUpdateAll</a></li><li><a href="Container.html#event:afterUpdateMany">Container#event:afterUpdateMany</a></li><li><a href="Container.html#event:beforeCreate">Container#event:beforeCreate</a></li><li><a href="Container.html#event:beforeCreateMany">Container#event:beforeCreateMany</a></li><li><a href="Container.html#event:beforeDestroy">Container#event:beforeDestroy</a></li><li><a href="Container.html#event:beforeDestroyAll">Container#event:beforeDestroyAll</a></li><li><a href="Container.html#event:beforeFind">Container#event:beforeFind</a></li><li><a href="Container.html#event:beforeFindAll">Container#event:beforeFindAll</a></li><li><a href="Container.html#event:beforeUpdate">Container#event:beforeUpdate</a></li><li><a href="Container.html#event:beforeUpdateAll">Container#event:beforeUpdateAll</a></li><li><a href="Container.html#event:beforeUpdateMany">Container#event:beforeUpdateMany</a></li><li><a href="DataStore.html#event:add">DataStore#event:add</a></li><li><a href="DataStore.html#event:afterCreate">DataStore#event:afterCreate</a></li><li><a href="DataStore.html#event:afterCreateMany">DataStore#event:afterCreateMany</a></li><li><a href="DataStore.html#event:afterDestroy">DataStore#event:afterDestroy</a></li><li><a href="DataStore.html#event:afterDestroyAll">DataStore#event:afterDestroyAll</a></li><li><a href="DataStore.html#event:afterFind">DataStore#event:afterFind</a></li><li><a href="DataStore.html#event:afterFindAll">DataStore#event:afterFindAll</a></li><li><a href="DataStore.html#event:afterUpdate">DataStore#event:afterUpdate</a></li><li><a href="DataStore.html#event:afterUpdateAll">DataStore#event:afterUpdateAll</a></li><li><a href="DataStore.html#event:afterUpdateMany">DataStore#event:afterUpdateMany</a></li><li><a href="DataStore.html#event:beforeCreate">DataStore#event:beforeCreate</a></li><li><a href="DataStore.html#event:beforeCreateMany">DataStore#event:beforeCreateMany</a></li><li><a href="DataStore.html#event:beforeDestroy">DataStore#event:beforeDestroy</a></li><li><a href="DataStore.html#event:beforeDestroyAll">DataStore#event:beforeDestroyAll</a></li><li><a href="DataStore.html#event:beforeFind">DataStore#event:beforeFind</a></li><li><a href="DataStore.html#event:beforeFindAll">DataStore#event:beforeFindAll</a></li><li><a href="DataStore.html#event:beforeUpdate">DataStore#event:beforeUpdate</a></li><li><a href="DataStore.html#event:beforeUpdateAll">DataStore#event:beforeUpdateAll</a></li><li><a href="DataStore.html#event:beforeUpdateMany">DataStore#event:beforeUpdateMany</a></li><li><a href="DataStore.html#event:change">DataStore#event:change</a></li><li><a href="DataStore.html#event:remove">DataStore#event:remove</a></li><li><a href="LinkedCollection.html#event:add">LinkedCollection#event:add</a></li><li><a href="LinkedCollection.html#event:change">LinkedCollection#event:change</a></li><li><a href="LinkedCollection.html#event:remove">LinkedCollection#event:remove</a></li><li><a href="Mapper.html#event:afterCreate">Mapper#event:afterCreate</a></li><li><a href="Mapper.html#event:afterCreateMany">Mapper#event:afterCreateMany</a></li><li><a href="Mapper.html#event:afterDestroy">Mapper#event:afterDestroy</a></li><li><a href="Mapper.html#event:afterDestroyAll">Mapper#event:afterDestroyAll</a></li><li><a href="Mapper.html#event:afterFind">Mapper#event:afterFind</a></li><li><a href="Mapper.html#event:afterFindAll">Mapper#event:afterFindAll</a></li><li><a href="Mapper.html#event:afterUpdate">Mapper#event:afterUpdate</a></li><li><a href="Mapper.html#event:afterUpdateAll">Mapper#event:afterUpdateAll</a></li><li><a href="Mapper.html#event:afterUpdateMany">Mapper#event:afterUpdateMany</a></li><li><a href="Mapper.html#event:beforeCreate">Mapper#event:beforeCreate</a></li><li><a href="Mapper.html#event:beforeCreateMany">Mapper#event:beforeCreateMany</a></li><li><a href="Mapper.html#event:beforeDestroy">Mapper#event:beforeDestroy</a></li><li><a href="Mapper.html#event:beforeDestroyAll">Mapper#event:beforeDestroyAll</a></li><li><a href="Mapper.html#event:beforeFind">Mapper#event:beforeFind</a></li><li><a href="Mapper.html#event:beforeFindAll">Mapper#event:beforeFindAll</a></li><li><a href="Mapper.html#event:beforeUpdate">Mapper#event:beforeUpdate</a></li><li><a href="Mapper.html#event:beforeUpdateAll">Mapper#event:beforeUpdateAll</a></li><li><a href="Mapper.html#event:beforeUpdateMany">Mapper#event:beforeUpdateMany</a></li><li><a href="Record.html#event:change">Record#event:change</a></li><li><a href="SimpleStore.html#event:add">SimpleStore#event:add</a></li><li><a href="SimpleStore.html#event:afterCreate">SimpleStore#event:afterCreate</a></li><li><a href="SimpleStore.html#event:afterCreateMany">SimpleStore#event:afterCreateMany</a></li><li><a href="SimpleStore.html#event:afterDestroy">SimpleStore#event:afterDestroy</a></li><li><a href="SimpleStore.html#event:afterDestroyAll">SimpleStore#event:afterDestroyAll</a></li><li><a href="SimpleStore.html#event:afterFind">SimpleStore#event:afterFind</a></li><li><a href="SimpleStore.html#event:afterFindAll">SimpleStore#event:afterFindAll</a></li><li><a href="SimpleStore.html#event:afterUpdate">SimpleStore#event:afterUpdate</a></li><li><a href="SimpleStore.html#event:afterUpdateAll">SimpleStore#event:afterUpdateAll</a></li><li><a href="SimpleStore.html#event:afterUpdateMany">SimpleStore#event:afterUpdateMany</a></li><li><a href="SimpleStore.html#event:beforeCreate">SimpleStore#event:beforeCreate</a></li><li><a href="SimpleStore.html#event:beforeCreateMany">SimpleStore#event:beforeCreateMany</a></li><li><a href="SimpleStore.html#event:beforeDestroy">SimpleStore#event:beforeDestroy</a></li><li><a href="SimpleStore.html#event:beforeDestroyAll">SimpleStore#event:beforeDestroyAll</a></li><li><a href="SimpleStore.html#event:beforeFind">SimpleStore#event:beforeFind</a></li><li><a href="SimpleStore.html#event:beforeFindAll">SimpleStore#event:beforeFindAll</a></li><li><a href="SimpleStore.html#event:beforeUpdate">SimpleStore#event:beforeUpdate</a></li><li><a href="SimpleStore.html#event:beforeUpdateAll">SimpleStore#event:beforeUpdateAll</a></li><li><a href="SimpleStore.html#event:beforeUpdateMany">SimpleStore#event:beforeUpdateMany</a></li><li><a href="SimpleStore.html#event:change">SimpleStore#event:change</a></li><li><a href="SimpleStore.html#event:remove">SimpleStore#event:remove</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#_createOrAssignChildRecordIfRequired">_createOrAssignChildRecordIfRequired</a></li><li><a href="global.html#_createParentRecordIfRequired">_createParentRecordIfRequired</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+	</div>
+
+</div>
+</div>
+
+
+<div style="padding: 1%" id="toc-content">
+<div class="row">
+
+	
+
+	<!-- <div class="clearfix"></div> -->
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: DataStore.js</h1>
+    
+<section>
+    <article>
+        <pre><code
+            class="javascript linenums">import utils, { safeSetLink, safeSetProp } from './utils'
+
+import {
+  belongsToType,
+  hasManyType,
+  hasOneType
+} from './decorators'
+import SimpleStore from './SimpleStore'
+import LinkedCollection from './LinkedCollection'
+
+const DATASTORE_DEFAULTS = {
+  /**
+   * Whether in-memory relations should be unlinked from records after they are
+   * destroyed.
+   *
+   * @default true
+   * @name DataStore#unlinkOnDestroy
+   * @since 3.0.0
+   * @type {boolean}
+   */
+  unlinkOnDestroy: true
+}
+
+/**
+ * The `DataStore` class is an extension of {@link SimpleStore}. Not only does
+ * `DataStore` manage mappers and store data in collections, it uses the
+ * {@link LinkedCollection} class to link related records together in memory.
+ *
+ * ```javascript
+ * import { DataStore } from 'js-data';
+ * ```
+ *
+ * @example
+ * import { DataStore } from 'js-data';
+ * import HttpAdapter from 'js-data-http';
+ * const store = new DataStore();
+ *
+ * // DataStore#defineMapper returns a direct reference to the newly created
+ * // Mapper.
+ * const UserMapper = store.defineMapper('user');
+ *
+ * // DataStore#as returns the store scoped to a particular Mapper.
+ * const UserStore = store.as('user');
+ *
+ * // Call "find" on "UserMapper" (Stateless ORM)
+ * UserMapper.find(1).then((user) => {
+ *   // retrieved a "user" record via the http adapter, but that's it
+ *
+ *   // Call "find" on "store" targeting "user" (Stateful DataStore)
+ *   return store.find('user', 1); // same as "UserStore.find(1)"
+ * }).then((user) => {
+ *   // not only was a "user" record retrieved, but it was added to the
+ *   // store's "user" collection
+ *   const cachedUser = store.getCollection('user').get(1);
+ *   console.log(user === cachedUser); // true
+ * });
+ *
+ * @class DataStore
+ * @extends SimpleStore
+ * @param {object} [opts] Configuration options. See {@link SimpleStore}.
+ * @param {boolean} [opts.collectionClass={@link LinkedCollection}] See {@link DataStore#collectionClass}.
+ * @param {boolean} [opts.debug=false] See {@link Component#debug}.
+ * @param {boolean} [opts.unlinkOnDestroy=true] See {@link DataStore#unlinkOnDestroy}.
+ * @param {boolean|Function} [opts.usePendingFind=true] See {@link DataStore#usePendingFind}.
+ * @param {boolean|Function} [opts.usePendingFindAll=true] See {@link DataStore#usePendingFindAll}.
+ * @returns {DataStore}
+ * @see SimpleStore
+ * @since 3.0.0
+ * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#datastore","Components of JSData: DataStore"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-datastore","Working with the DataStore"]
+ * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
+ */
+function DataStore (opts) {
+  utils.classCallCheck(this, DataStore)
+
+  opts || (opts = {})
+  // Fill in any missing options with the defaults
+  utils.fillIn(opts, DATASTORE_DEFAULTS)
+  opts.collectionClass || (opts.collectionClass = LinkedCollection)
+  SimpleStore.call(this, opts)
+}
+
+const props = {
+  constructor: DataStore,
+
+  defineMapper (name, opts) {
+    // Complexity of this method is beyond simply using => functions to bind context
+    const self = this
+    const mapper = SimpleStore.prototype.defineMapper.call(self, name, opts)
+    const idAttribute = mapper.idAttribute
+    const collection = this.getCollection(name)
+
+    mapper.relationList.forEach(function (def) {
+      const relation = def.relation
+      const localField = def.localField
+      const path = `links.${localField}`
+      const foreignKey = def.foreignKey
+      const type = def.type
+      const updateOpts = { index: foreignKey }
+      let descriptor
+
+      const getter = function () { return this._get(path) }
+
+      if (type === belongsToType) {
+        if (!collection.indexes[foreignKey]) {
+          collection.createIndex(foreignKey)
+        }
+
+        descriptor = {
+          get: getter,
+          // e.g. profile.user = someUser
+          // or comment.post = somePost
+          set (record) {
+            // e.g. const otherUser = profile.user
+            const currentParent = this._get(path)
+            // e.g. profile.user === someUser
+            if (record === currentParent) {
+              return currentParent
+            }
+            const id = utils.get(this, idAttribute)
+            const inverseDef = def.getInverse(mapper)
+
+            // e.g. profile.user !== someUser
+            // or comment.post !== somePost
+            if (currentParent &amp;&amp; inverseDef) {
+              this.removeInverseRelation(currentParent, id, inverseDef, idAttribute)
+            }
+            if (record) {
+              // e.g. profile.user = someUser
+              const relatedIdAttribute = def.getRelation().idAttribute
+              const relatedId = utils.get(record, relatedIdAttribute)
+
+              // Prefer store record
+              if (relatedId !== undefined &amp;&amp; this._get('$')) {
+                record = self.get(relation, relatedId) || record
+              }
+
+              // Set locals
+              // e.g. profile.user = someUser
+              // or comment.post = somePost
+              safeSetLink(this, localField, record)
+              safeSetProp(this, foreignKey, relatedId)
+              collection.updateIndex(this, updateOpts)
+
+              if (inverseDef) {
+                this.setupInverseRelation(record, id, inverseDef, idAttribute)
+              }
+            } else {
+              // Unset in-memory link only
+              // e.g. profile.user = undefined
+              // or comment.post = undefined
+              safeSetLink(this, localField, undefined)
+            }
+            return record
+          }
+        }
+
+        let foreignKeyDescriptor = Object.getOwnPropertyDescriptor(mapper.recordClass.prototype, foreignKey)
+        if (!foreignKeyDescriptor) {
+          foreignKeyDescriptor = {
+            enumerable: true
+          }
+        }
+        const originalGet = foreignKeyDescriptor.get
+        foreignKeyDescriptor.get = function () {
+          if (originalGet) {
+            return originalGet.call(this)
+          }
+          return this._get(`props.${foreignKey}`)
+        }
+        const originalSet = foreignKeyDescriptor.set
+        foreignKeyDescriptor.set = function (value) {
+          if (originalSet) {
+            originalSet.call(this, value)
+          }
+          const currentParent = utils.get(this, localField)
+          const id = utils.get(this, idAttribute)
+          const inverseDef = def.getInverse(mapper)
+          const currentParentId = currentParent ? utils.get(currentParent, def.getRelation().idAttribute) : undefined
+
+          if (inverseDef &amp;&amp; currentParent &amp;&amp; currentParentId !== undefined &amp;&amp; currentParentId !== value) {
+            if (inverseDef.type === hasOneType) {
+              safeSetLink(currentParent, inverseDef.localField, undefined)
+            } else if (inverseDef.type === hasManyType) {
+              const children = utils.get(currentParent, inverseDef.localField)
+              if (id === undefined) {
+                utils.remove(children, (child) => child === this)
+              } else {
+                utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
+              }
+            }
+          }
+
+          safeSetProp(this, foreignKey, value)
+          collection.updateIndex(this, updateOpts)
+
+          if ((value === undefined || value === null)) {
+            if (currentParentId !== undefined) {
+              // Unset locals
+              utils.set(this, localField, undefined)
+            }
+          } else if (this._get('$')) {
+            const storeRecord = self.get(relation, value)
+            if (storeRecord) {
+              utils.set(this, localField, storeRecord)
+            }
+          }
+        }
+        Object.defineProperty(mapper.recordClass.prototype, foreignKey, foreignKeyDescriptor)
+      } else if (type === hasManyType) {
+        const localKeys = def.localKeys
+        const foreignKeys = def.foreignKeys
+
+        // TODO: Handle case when belongsTo relation isn't ever defined
+        if (self._collections[relation] &amp;&amp; foreignKey &amp;&amp; !self.getCollection(relation).indexes[foreignKey]) {
+          self.getCollection(relation).createIndex(foreignKey)
+        }
+
+        descriptor = {
+          get () {
+            let current = getter.call(this)
+            if (!current) {
+              this._set(path, [])
+            }
+            return getter.call(this)
+          },
+          // e.g. post.comments = someComments
+          // or user.groups = someGroups
+          // or group.users = someUsers
+          set (records) {
+            if (records &amp;&amp; !utils.isArray(records)) {
+              records = [records]
+            }
+            const id = utils.get(this, idAttribute)
+            const relatedIdAttribute = def.getRelation().idAttribute
+            const inverseDef = def.getInverse(mapper)
+            const inverseLocalField = inverseDef.localField
+            const current = this._get(path) || []
+            const toLink = []
+            const toLinkIds = {}
+
+            if (records) {
+              records.forEach((record) => {
+                // e.g. comment.id
+                const relatedId = utils.get(record, relatedIdAttribute)
+                const currentParent = utils.get(record, inverseLocalField)
+                if (currentParent &amp;&amp; currentParent !== this) {
+                  const currentChildrenOfParent = utils.get(currentParent, localField)
+                  // e.g. somePost.comments.remove(comment)
+                  if (relatedId === undefined) {
+                    utils.remove(currentChildrenOfParent, (child) => child === record)
+                  } else {
+                    utils.remove(currentChildrenOfParent, (child) => child === record || relatedId === utils.get(child, relatedIdAttribute))
+                  }
+                }
+                if (relatedId !== undefined) {
+                  if (this._get('$')) {
+                    // Prefer store record
+                    record = self.get(relation, relatedId) || record
+                  }
+                  // e.g. toLinkIds[comment.id] = comment
+                  toLinkIds[relatedId] = record
+                }
+                toLink.push(record)
+              })
+            }
+
+            // e.g. post.comments = someComments
+            if (foreignKey) {
+              current.forEach((record) => {
+                // e.g. comment.id
+                const relatedId = utils.get(record, relatedIdAttribute)
+                if ((relatedId === undefined &amp;&amp; toLink.indexOf(record) === -1) || (relatedId !== undefined &amp;&amp; !(relatedId in toLinkIds))) {
+                  // Update (unset) inverse relation
+                  if (records) {
+                    // e.g. comment.post_id = undefined
+                    safeSetProp(record, foreignKey, undefined)
+                    // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                    self.getCollection(relation).updateIndex(record, updateOpts)
+                  }
+                  // e.g. comment.post = undefined
+                  safeSetLink(record, inverseLocalField, undefined)
+                }
+              })
+              toLink.forEach((record) => {
+                // Update (set) inverse relation
+                // e.g. comment.post_id = post.id
+                safeSetProp(record, foreignKey, id)
+                // e.g. CommentCollection.updateIndex(comment, { index: 'post_id' })
+                self.getCollection(relation).updateIndex(record, updateOpts)
+                // e.g. comment.post = post
+                safeSetLink(record, inverseLocalField, this)
+              })
+            } else if (localKeys) {
+              // Update locals
+              // e.g. group.users = someUsers
+              // Update (set) inverse relation
+              const ids = toLink.map((child) => utils.get(child, relatedIdAttribute)).filter((id) => id !== undefined)
+              // e.g. group.user_ids = [1,2,3,...]
+              utils.set(this, localKeys, ids)
+              // Update (unset) inverse relation
+              if (inverseDef.foreignKeys) {
+                current.forEach((child) => {
+                  const relatedId = utils.get(child, relatedIdAttribute)
+                  if ((relatedId === undefined &amp;&amp; toLink.indexOf(child) === -1) || (relatedId !== undefined &amp;&amp; !(relatedId in toLinkIds))) {
+                    // Update inverse relation
+                    // safeSetLink(child, inverseLocalField, undefined)
+                    const parents = utils.get(child, inverseLocalField) || []
+                    // e.g. someUser.groups.remove(group)
+                    if (id === undefined) {
+                      utils.remove(parents, (parent) => parent === this)
+                    } else {
+                      utils.remove(parents, (parent) => parent === this || id === utils.get(parent, idAttribute))
+                    }
+                  }
+                })
+                toLink.forEach((child) => {
+                  // Update (set) inverse relation
+                  const parents = utils.get(child, inverseLocalField)
+                  // e.g. someUser.groups.push(group)
+                  if (id === undefined) {
+                    utils.noDupeAdd(parents, this, (parent) => parent === this)
+                  } else {
+                    utils.noDupeAdd(parents, this, (parent) => parent === this || id === utils.get(parent, idAttribute))
+                  }
+                })
+              }
+            } else if (foreignKeys) {
+              // e.g. user.groups = someGroups
+              // Update (unset) inverse relation
+              current.forEach((parent) => {
+                const ids = utils.get(parent, foreignKeys) || []
+                // e.g. someGroup.user_ids.remove(user.id)
+                utils.remove(ids, (_key) => id === _key)
+                const children = utils.get(parent, inverseLocalField)
+                // e.g. someGroup.users.remove(user)
+                if (id === undefined) {
+                  utils.remove(children, (child) => child === this)
+                } else {
+                  utils.remove(children, (child) => child === this || id === utils.get(child, idAttribute))
+                }
+              })
+              // Update (set) inverse relation
+              toLink.forEach((parent) => {
+                const ids = utils.get(parent, foreignKeys) || []
+                utils.noDupeAdd(ids, id, (_key) => id === _key)
+                const children = utils.get(parent, inverseLocalField)
+                if (id === undefined) {
+                  utils.noDupeAdd(children, this, (child) => child === this)
+                } else {
+                  utils.noDupeAdd(children, this, (child) => child === this || id === utils.get(child, idAttribute))
+                }
+              })
+            }
+
+            this._set(path, toLink)
+            return toLink
+          }
+        }
+      } else if (type === hasOneType) {
+        // TODO: Handle case when belongsTo relation isn't ever defined
+        if (self._collections[relation] &amp;&amp; foreignKey &amp;&amp; !self.getCollection(relation).indexes[foreignKey]) {
+          self.getCollection(relation).createIndex(foreignKey)
+        }
+        descriptor = {
+          get: getter,
+          // e.g. user.profile = someProfile
+          set (record) {
+            const current = this._get(path)
+            if (record === current) {
+              return current
+            }
+            const inverseLocalField = def.getInverse(mapper).localField
+            // Update (unset) inverse relation
+            if (current) {
+              safeSetProp(current, foreignKey, undefined)
+              self.getCollection(relation).updateIndex(current, updateOpts)
+              safeSetLink(current, inverseLocalField, undefined)
+            }
+            if (record) {
+              const relatedId = utils.get(record, def.getRelation().idAttribute)
+              // Prefer store record
+              if (relatedId !== undefined) {
+                record = self.get(relation, relatedId) || record
+              }
+
+              // Set locals
+              safeSetLink(this, localField, record)
+
+              // Update (set) inverse relation
+              safeSetProp(record, foreignKey, utils.get(this, idAttribute))
+              self.getCollection(relation).updateIndex(record, updateOpts)
+              safeSetLink(record, inverseLocalField, this)
+            } else {
+              // Unset locals
+              safeSetLink(this, localField, undefined)
+            }
+            return record
+          }
+        }
+      }
+
+      if (descriptor) {
+        descriptor.enumerable = def.enumerable === undefined ? false : def.enumerable
+        if (def.get) {
+          let origGet = descriptor.get
+          descriptor.get = function () {
+            return def.get(def, this, (...args) => origGet.apply(this, args))
+          }
+        }
+        if (def.set) {
+          let origSet = descriptor.set
+          descriptor.set = function (related) {
+            return def.set(def, this, related, (value) => origSet.call(this, value === undefined ? related : value))
+          }
+        }
+        Object.defineProperty(mapper.recordClass.prototype, localField, descriptor)
+      }
+    })
+
+    return mapper
+  },
+
+  destroy (name, id, opts) {
+    opts || (opts = {})
+    return SimpleStore.prototype.destroy.call(this, name, id, opts).then((result) => {
+      let record
+      if (opts.raw) {
+        record = result.data
+      } else {
+        record = result
+      }
+
+      if (record &amp;&amp; this.unlinkOnDestroy) {
+        const _opts = utils.plainCopy(opts)
+        _opts.withAll = true
+        utils.forEachRelation(this.getMapper(name), _opts, (def) => {
+          utils.set(record, def.localField, undefined)
+        })
+      }
+      return result
+    })
+  },
+
+  destroyAll (name, query, opts) {
+    opts || (opts = {})
+    return SimpleStore.prototype.destroyAll.call(this, name, query, opts).then((result) => {
+      let records
+      if (opts.raw) {
+        records = result.data
+      } else {
+        records = result
+      }
+
+      if (records &amp;&amp; records.length &amp;&amp; this.unlinkOnDestroy) {
+        const _opts = utils.plainCopy(opts)
+        _opts.withAll = true
+        utils.forEachRelation(this.getMapper(name), _opts, (def) => {
+          records.forEach((record) => {
+            utils.set(record, def.localField, undefined)
+          })
+        })
+      }
+      return result
+    })
+  }
+}
+
+export default SimpleStore.extend(props)
+
+/**
+ * Create a subclass of this DataStore:
+ * @example &lt;caption>DataStore.extend&lt;/caption>
+ * const JSData = require('js-data');
+ * const { DataStore } = JSData;
+ * console.log('Using JSData v' + JSData.version.full);
+ *
+ * // Extend the class using ES2015 class syntax.
+ * class CustomDataStoreClass extends DataStore {
+ *   foo () { return 'bar'; }
+ *   static beep () { return 'boop'; }
+ * }
+ * const customDataStore = new CustomDataStoreClass();
+ * console.log(customDataStore.foo());
+ * console.log(CustomDataStoreClass.beep());
+ *
+ * // Extend the class using alternate method.
+ * const OtherDataStoreClass = DataStore.extend({
+ *   foo () { return 'bar'; }
+ * }, {
+ *   beep () { return 'boop'; }
+ * });
+ * const otherDataStore = new OtherDataStoreClass();
+ * console.log(otherDataStore.foo());
+ * console.log(OtherDataStoreClass.beep());
+ *
+ * // Extend the class, providing a custom constructor.
+ * function AnotherDataStoreClass () {
+ *   DataStore.call(this);
+ *   this.created_at = new Date().getTime();
+ * }
+ * DataStore.extend({
+ *   constructor: AnotherDataStoreClass,
+ *   foo () { return 'bar'; }
+ * }, {
+ *   beep () { return 'boop'; }
+ * });
+ * const anotherDataStore = new AnotherDataStoreClass();
+ * console.log(anotherDataStore.created_at);
+ * console.log(anotherDataStore.foo());
+ * console.log(AnotherDataStoreClass.beep());
+ *
+ * @method DataStore.extend
+ * @param {object} [props={}] Properties to add to the prototype of the
+ * subclass.
+ * @param {object} [props.constructor] Provide a custom constructor function
+ * to be used as the subclass itself.
+ * @param {object} [classProps={}] Static properties to add to the subclass.
+ * @returns {Constructor} Subclass of this DataStore class.
+ * @since 3.0.0
+ */
+</code></pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+	<div style="text-align:center"><a href="/">api.js-data.io</a>&nbsp;&#8226;&nbsp;<a href="http://js-data.io">js-data.io</a></div>
+
+
+	<span class="copyright">
+	js-data Copyright © 2014-2020 js-data project authors
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
+	
+		on 2020-01-24T22:16:17-08:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<!-- <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script> -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/languages/javascript.min.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	hljs.initHighlightingOnLoad();
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true,
+    highlightOnScroll: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+<script>
+	(function ( i, s, o, g, r, a, m ) {
+		i['GoogleAnalyticsObject'] = r;
+		i[r] = i[r] || function () {
+			(i[r].q = i[r].q || []).push( arguments )
+		}, i[r].l = 1 * new Date();
+		a = s.createElement( o ),
+			m = s.getElementsByTagName( o )[0];
+		a.async = 1;
+		a.src = g;
+		m.parentNode.insertBefore( a, m )
+	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
+
+	ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
+	ga( 'send', 'pageview' );
+</script>
+
+
+<script src="https://embed.tonicdev.com"></script>
+<script>
+  window.loadTonic = function (id) {
+    var btn = document.getElementById('btn-' + id);
+    $(btn).hide();
+    var pre = document.getElementById('pre-' + id);
+    $(pre).hide();
+    var el = document.getElementById('tonic-' + id);
+    var $el = $(el);
+    var html = $el.html();
+    $el.empty();
+    $el.show();
+    console.log(html);
+    Tonic.createNotebook({
+      element: el,
+      source: html
+    });
+  };
+</script>
+
+</body>
+</html>

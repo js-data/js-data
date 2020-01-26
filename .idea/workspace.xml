@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="SCOPE_TYPE" value="3" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="adebb361-e8f7-49f8-ac3f-e1b7344c6e68" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/index.md" beforeDir="false" afterPath="$PROJECT_DIR$/index.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JsFlowSettings">
+    <service-enabled>true</service-enabled>
+    <exe-path />
+    <other-services-enabled>true</other-services-enabled>
+    <auto-save>true</auto-save>
+  </component>
+  <component name="ProjectId" id="1Qg1ikk1LQadp7LfGcln0QOGc83" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///Users/coryrobinson/projects/js-data/src/utils.js&#10;mapp&#9;FILE&#9;file:///Users/coryrobinson/projects/js-data/src/Mapper.js&#10;record.js&#9;FILE&#9;file:///Users/coryrobinson/projects/js-data/src/Record.js" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="editor.config.ad.shown" value="true" />
+    <property name="jsx.switch.disabled" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.standard" value="true" />
+    <property name="node.js.detected.package.stylelint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.standard" value="project" />
+    <property name="node.js.path.for.package.stylelint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="$PROJECT_DIR$/node_modules/eslint" />
+    <property name="node.js.selected.package.standard" value="$PROJECT_DIR$/node_modules/eslint" />
+    <property name="node.js.selected.package.stylelint" value="" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="prettierjs.PrettierConfiguration.Package" value="$USER_HOME$/.nvm/versions/node/v8.11.2/lib/node_modules/prettier" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="JavaScript.Libraries" />
+    <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
+  </component>
+  <component name="RunManager">
+    <configuration name="Mapper#create.should create with defaults" type="JavaScriptTestRunnerKarma" temporary="true" nameIsGenerated="true">
+      <config-file value="$PROJECT_DIR$/karma.conf.js" />
+      <karma-package-dir value="$PROJECT_DIR$/node_modules/karma" />
+      <working-directory value="$PROJECT_DIR$" />
+      <node-interpreter value="project" />
+      <envs />
+      <scope-kind value="TEST" />
+      <test-names>
+        <test-name value="Mapper#create" />
+        <test-name value="should create with defaults" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Karma.Mapper#create.should create with defaults" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="adebb361-e8f7-49f8-ac3f-e1b7344c6e68" name="Default" comment="" />
+      <created>1529673801193</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1529673801193</updated>
+      <workItem from="1529673802521" duration="4919000" />
+      <workItem from="1529706744726" duration="6133000" />
+      <workItem from="1534470406264" duration="2105000" />
+      <workItem from="1534550622059" duration="9190000" />
+      <workItem from="1535473506864" duration="555000" />
+      <workItem from="1538073270460" duration="2494000" />
+      <workItem from="1538103749332" duration="3184000" />
+      <workItem from="1538525080324" duration="7573000" />
+      <workItem from="1539744460376" duration="1251000" />
+      <workItem from="1539777478454" duration="7096000" />
+      <workItem from="1540149476670" duration="2562000" />
+      <workItem from="1541302844515" duration="882000" />
+      <workItem from="1541372957187" duration="95000" />
+      <workItem from="1541481853956" duration="357000" />
+      <workItem from="1541605449132" duration="11216000" />
+      <workItem from="1541686588113" duration="1321000" />
+      <workItem from="1541690233309" duration="1305000" />
+      <workItem from="1541710531173" duration="9389000" />
+      <workItem from="1541770515152" duration="136000" />
+      <workItem from="1541771328779" duration="4666000" />
+      <workItem from="1541777775348" duration="748000" />
+      <workItem from="1541865304113" duration="1594000" />
+      <workItem from="1541881208452" duration="611000" />
+      <workItem from="1543553475239" duration="8000" />
+      <workItem from="1545323211380" duration="568000" />
+      <workItem from="1545348295403" duration="1744000" />
+      <workItem from="1545400480991" duration="240000" />
+      <workItem from="1546050230855" duration="38000" />
+      <workItem from="1546300744564" duration="944000" />
+      <workItem from="1549815156158" duration="799000" />
+      <workItem from="1549815999717" duration="702000" />
+      <workItem from="1551556384002" duration="1654000" />
+      <workItem from="1551832503970" duration="1293000" />
+      <workItem from="1552054184341" duration="4420000" />
+      <workItem from="1554082117502" duration="692000" />
+      <workItem from="1554086101404" duration="378000" />
+      <workItem from="1554086732150" duration="53000" />
+      <workItem from="1554658198964" duration="159000" />
+      <workItem from="1554671205577" duration="545000" />
+      <workItem from="1555936762647" duration="717000" />
+      <workItem from="1563736802168" duration="1458000" />
+      <workItem from="1563738464910" duration="133000" />
+      <workItem from="1568177556835" duration="837000" />
+      <workItem from="1568219042402" duration="2866000" />
+      <workItem from="1568297664771" duration="1644000" />
+      <workItem from="1568382207746" duration="168000" />
+      <workItem from="1576556893364" duration="818000" />
+      <workItem from="1579928767798" duration="955000" />
+      <workItem from="1579929827348" duration="4947000" />
+      <workItem from="1580018065004" duration="244000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TestHistory">
+    <history-entry file="Mapper#create_should_create_with_defaults - 2019.07.21 at 12h 42m 35s.xml">
+      <configuration name="Mapper#create.should create with defaults" configurationId="JavaScriptTestRunnerKarma" />
+    </history-entry>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+    <option name="exactExcludedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/node_modules/karma/config.tpl.js" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="397" y="199" key="SettingsEditor" timestamp="1579933753594">
+      <screen x="0" y="0" width="1792" height="1120" />
+    </state>
+    <state x="397" y="199" key="SettingsEditor/0.0.1792.1120@0.0.1792.1120" timestamp="1579933753594" />
+    <state width="500" height="445" key="SwitcherDM" timestamp="1579931339206">
+      <screen x="0" y="0" width="1792" height="1120" />
+    </state>
+    <state width="500" height="445" key="SwitcherDM/0.0.1792.1120@0.0.1792.1120" timestamp="1579931339206" />
+    <state x="554" y="317" width="837" height="550" key="find.popup" timestamp="1579964788635">
+      <screen x="0" y="0" width="1792" height="1120" />
+    </state>
+    <state x="554" y="317" width="837" height="550" key="find.popup/0.0.1792.1120@0.0.1792.1120" timestamp="1579964788635" />
+  </component>
+</project>
