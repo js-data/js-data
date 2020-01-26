@@ -1,150 +1,50 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
-	<title>js-data Source: LinkedCollection.js</title>
-
-	<!--[if lt IE 9]>
-	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
-	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/googlecode.min.css">
-	<link type="text/css" rel="stylesheet" href="styles/site.jsdata.css">
-  <style>
-    a {
-      text-decoration: none !important;
-    }
-    .hljs {
-      padding: 0;
-      background: none;
-    }
-    #toc {
-      position: fixed;
-      margin-top: 62px;
-      overflow-y: scroll;
-      max-height: 85%;
-    }
-    #toc .toc-list-group-item {
-      display: block;
-    }
-    #toc .toc-list-group-item.active {
-      font-weight: bold;
-    }
-    #toc .toc-list-group-item span.toc-h3 {
-      font-weight: bold;
-    }
-    #main {
-      padding-left: 4%;
-    }
-    article h4.name, article dt.name {
-      font-family: monospace;
-      font-weight: bold;
-    }
-    .code-panel.panel pre {
-      background-color: #FBFBFB;
-      border-color: #E6E5E5;
-    }
-    .page-title {
-      color: #000;
-    }
-    span.param-type a {
-      padding: 3px 5px;
-    }
-    span.param-type a:hover {
-      background-color: #158CBA;
-      color: #fff;
-    }
-    .panel ul {
-      padding-left: 0;
-    }
-    .panel ul li {
-      list-style-type: none;
-    }
-    .tonic {
-      padding-left: 20px;
-    }
-  </style>
-
+    
+    <meta charset="utf-8">
+    <title>LinkedCollection.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-
 <body>
 
-<div class="navbar navbar-default navbar-fixed-top ">
-<div class="container">
-	<div class="navbar-header">
-		<a class="navbar-brand" href="index.html"><img class="branding-logo" src="https://raw.githubusercontent.com/js-data/js-data/master/js-data-64.png"
-		alt="logo"/>js-data</a>
-		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-			<span class="icon-bar"></span>
-        </button>
-	</div>
-	<div class="navbar-collapse collapse" id="topNavigation">
-		<ul class="nav navbar-nav">
-			
-			<li class="dropdown">
-				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-					<li><a href="query_.html">query</a></li><li><a href="utils.html">utils</a></li>
-				</ul>
-			</li>
-			
-			<li class="dropdown">
-				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-					<li><a href="module-js-data.html">js-data</a></li>
-				</ul>
-			</li>
-			
-			<li class="dropdown">
-				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-					<li><a href="Collection.html">Collection</a></li><li><a href="Component.html">Component</a></li><li><a href="Container.html">Container</a></li><li><a href="DataStore.html">DataStore</a></li><li><a href="LinkedCollection.html">LinkedCollection</a></li><li><a href="Mapper.html">Mapper</a></li><li><a href="Query.html">Query</a></li><li><a href="Record.html">Record</a></li><li><a href="Schema.html">Schema</a></li><li><a href="Settable.html">Settable</a></li><li><a href="SimpleStore.html">SimpleStore</a></li>
-				</ul>
-			</li>
-			
-			<li class="dropdown">
-				<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-					<li><a href="Collection.html#event:add">Collection#event:add</a></li><li><a href="Collection.html#event:change">Collection#event:change</a></li><li><a href="Collection.html#event:remove">Collection#event:remove</a></li><li><a href="Container.html#event:afterCreate">Container#event:afterCreate</a></li><li><a href="Container.html#event:afterCreateMany">Container#event:afterCreateMany</a></li><li><a href="Container.html#event:afterDestroy">Container#event:afterDestroy</a></li><li><a href="Container.html#event:afterDestroyAll">Container#event:afterDestroyAll</a></li><li><a href="Container.html#event:afterFind">Container#event:afterFind</a></li><li><a href="Container.html#event:afterFindAll">Container#event:afterFindAll</a></li><li><a href="Container.html#event:afterUpdate">Container#event:afterUpdate</a></li><li><a href="Container.html#event:afterUpdateAll">Container#event:afterUpdateAll</a></li><li><a href="Container.html#event:afterUpdateMany">Container#event:afterUpdateMany</a></li><li><a href="Container.html#event:beforeCreate">Container#event:beforeCreate</a></li><li><a href="Container.html#event:beforeCreateMany">Container#event:beforeCreateMany</a></li><li><a href="Container.html#event:beforeDestroy">Container#event:beforeDestroy</a></li><li><a href="Container.html#event:beforeDestroyAll">Container#event:beforeDestroyAll</a></li><li><a href="Container.html#event:beforeFind">Container#event:beforeFind</a></li><li><a href="Container.html#event:beforeFindAll">Container#event:beforeFindAll</a></li><li><a href="Container.html#event:beforeUpdate">Container#event:beforeUpdate</a></li><li><a href="Container.html#event:beforeUpdateAll">Container#event:beforeUpdateAll</a></li><li><a href="Container.html#event:beforeUpdateMany">Container#event:beforeUpdateMany</a></li><li><a href="DataStore.html#event:add">DataStore#event:add</a></li><li><a href="DataStore.html#event:afterCreate">DataStore#event:afterCreate</a></li><li><a href="DataStore.html#event:afterCreateMany">DataStore#event:afterCreateMany</a></li><li><a href="DataStore.html#event:afterDestroy">DataStore#event:afterDestroy</a></li><li><a href="DataStore.html#event:afterDestroyAll">DataStore#event:afterDestroyAll</a></li><li><a href="DataStore.html#event:afterFind">DataStore#event:afterFind</a></li><li><a href="DataStore.html#event:afterFindAll">DataStore#event:afterFindAll</a></li><li><a href="DataStore.html#event:afterUpdate">DataStore#event:afterUpdate</a></li><li><a href="DataStore.html#event:afterUpdateAll">DataStore#event:afterUpdateAll</a></li><li><a href="DataStore.html#event:afterUpdateMany">DataStore#event:afterUpdateMany</a></li><li><a href="DataStore.html#event:beforeCreate">DataStore#event:beforeCreate</a></li><li><a href="DataStore.html#event:beforeCreateMany">DataStore#event:beforeCreateMany</a></li><li><a href="DataStore.html#event:beforeDestroy">DataStore#event:beforeDestroy</a></li><li><a href="DataStore.html#event:beforeDestroyAll">DataStore#event:beforeDestroyAll</a></li><li><a href="DataStore.html#event:beforeFind">DataStore#event:beforeFind</a></li><li><a href="DataStore.html#event:beforeFindAll">DataStore#event:beforeFindAll</a></li><li><a href="DataStore.html#event:beforeUpdate">DataStore#event:beforeUpdate</a></li><li><a href="DataStore.html#event:beforeUpdateAll">DataStore#event:beforeUpdateAll</a></li><li><a href="DataStore.html#event:beforeUpdateMany">DataStore#event:beforeUpdateMany</a></li><li><a href="DataStore.html#event:change">DataStore#event:change</a></li><li><a href="DataStore.html#event:remove">DataStore#event:remove</a></li><li><a href="LinkedCollection.html#event:add">LinkedCollection#event:add</a></li><li><a href="LinkedCollection.html#event:change">LinkedCollection#event:change</a></li><li><a href="LinkedCollection.html#event:remove">LinkedCollection#event:remove</a></li><li><a href="Mapper.html#event:afterCreate">Mapper#event:afterCreate</a></li><li><a href="Mapper.html#event:afterCreateMany">Mapper#event:afterCreateMany</a></li><li><a href="Mapper.html#event:afterDestroy">Mapper#event:afterDestroy</a></li><li><a href="Mapper.html#event:afterDestroyAll">Mapper#event:afterDestroyAll</a></li><li><a href="Mapper.html#event:afterFind">Mapper#event:afterFind</a></li><li><a href="Mapper.html#event:afterFindAll">Mapper#event:afterFindAll</a></li><li><a href="Mapper.html#event:afterUpdate">Mapper#event:afterUpdate</a></li><li><a href="Mapper.html#event:afterUpdateAll">Mapper#event:afterUpdateAll</a></li><li><a href="Mapper.html#event:afterUpdateMany">Mapper#event:afterUpdateMany</a></li><li><a href="Mapper.html#event:beforeCreate">Mapper#event:beforeCreate</a></li><li><a href="Mapper.html#event:beforeCreateMany">Mapper#event:beforeCreateMany</a></li><li><a href="Mapper.html#event:beforeDestroy">Mapper#event:beforeDestroy</a></li><li><a href="Mapper.html#event:beforeDestroyAll">Mapper#event:beforeDestroyAll</a></li><li><a href="Mapper.html#event:beforeFind">Mapper#event:beforeFind</a></li><li><a href="Mapper.html#event:beforeFindAll">Mapper#event:beforeFindAll</a></li><li><a href="Mapper.html#event:beforeUpdate">Mapper#event:beforeUpdate</a></li><li><a href="Mapper.html#event:beforeUpdateAll">Mapper#event:beforeUpdateAll</a></li><li><a href="Mapper.html#event:beforeUpdateMany">Mapper#event:beforeUpdateMany</a></li><li><a href="Record.html#event:change">Record#event:change</a></li><li><a href="SimpleStore.html#event:add">SimpleStore#event:add</a></li><li><a href="SimpleStore.html#event:afterCreate">SimpleStore#event:afterCreate</a></li><li><a href="SimpleStore.html#event:afterCreateMany">SimpleStore#event:afterCreateMany</a></li><li><a href="SimpleStore.html#event:afterDestroy">SimpleStore#event:afterDestroy</a></li><li><a href="SimpleStore.html#event:afterDestroyAll">SimpleStore#event:afterDestroyAll</a></li><li><a href="SimpleStore.html#event:afterFind">SimpleStore#event:afterFind</a></li><li><a href="SimpleStore.html#event:afterFindAll">SimpleStore#event:afterFindAll</a></li><li><a href="SimpleStore.html#event:afterUpdate">SimpleStore#event:afterUpdate</a></li><li><a href="SimpleStore.html#event:afterUpdateAll">SimpleStore#event:afterUpdateAll</a></li><li><a href="SimpleStore.html#event:afterUpdateMany">SimpleStore#event:afterUpdateMany</a></li><li><a href="SimpleStore.html#event:beforeCreate">SimpleStore#event:beforeCreate</a></li><li><a href="SimpleStore.html#event:beforeCreateMany">SimpleStore#event:beforeCreateMany</a></li><li><a href="SimpleStore.html#event:beforeDestroy">SimpleStore#event:beforeDestroy</a></li><li><a href="SimpleStore.html#event:beforeDestroyAll">SimpleStore#event:beforeDestroyAll</a></li><li><a href="SimpleStore.html#event:beforeFind">SimpleStore#event:beforeFind</a></li><li><a href="SimpleStore.html#event:beforeFindAll">SimpleStore#event:beforeFindAll</a></li><li><a href="SimpleStore.html#event:beforeUpdate">SimpleStore#event:beforeUpdate</a></li><li><a href="SimpleStore.html#event:beforeUpdateAll">SimpleStore#event:beforeUpdateAll</a></li><li><a href="SimpleStore.html#event:beforeUpdateMany">SimpleStore#event:beforeUpdateMany</a></li><li><a href="SimpleStore.html#event:change">SimpleStore#event:change</a></li><li><a href="SimpleStore.html#event:remove">SimpleStore#event:remove</a></li>
-				</ul>
-			</li>
-			
-			<li class="dropdown">
-				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
-				<ul class="dropdown-menu ">
-					<li><a href="global.html#_createOrAssignChildRecordIfRequired">_createOrAssignChildRecordIfRequired</a></li><li><a href="global.html#_createParentRecordIfRequired">_createParentRecordIfRequired</a></li>
-				</ul>
-			</li>
-			
-		</ul>
-	</div>
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
 
-</div>
-</div>
+<label for="nav-trigger" class="overlay"></label>
 
-
-<div style="padding: 1%" id="toc-content">
-<div class="row">
-
-	
-
-	<!-- <div class="clearfix"></div> -->
-
-	
-	<div class="col-md-12">
-	
-		<div id="main">
-			
-
-		<h1 class="page-title">Source: LinkedCollection.js</h1>
+<nav class="wrap">
     
-<section>
-    <article>
-        <pre><code
-            class="javascript linenums">import utils from './utils'
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Collection.html">Collection</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Collection.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Collection.html#add">add</a></li><li data-type='method' style='display: none;'><a href="Collection.html#afterRemove">afterRemove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#afterRemoveAll">afterRemoveAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeAdd">beforeAdd</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeRemove">beforeRemove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#beforeRemoveAll">beforeRemoveAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#between">between</a></li><li data-type='method' style='display: none;'><a href="Collection.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Collection.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Collection.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="Collection.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="Collection.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Collection.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#getIndex">getIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="Collection.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Collection.html#map">map</a></li><li data-type='method' style='display: none;'><a href="Collection.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="Collection.html#method">method</a></li><li data-type='method' style='display: none;'><a href="Collection.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Collection.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Collection.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="Collection.html#query">query</a></li><li data-type='method' style='display: none;'><a href="Collection.html#recordId">recordId</a></li><li data-type='method' style='display: none;'><a href="Collection.html#reduce">reduce</a></li><li data-type='method' style='display: none;'><a href="Collection.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="Collection.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="Collection.html#skip">skip</a></li><li data-type='method' style='display: none;'><a href="Collection.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Collection.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="Collection.html#updateIndex">updateIndex</a></li><li data-type='method' style='display: none;'><a href="Collection.html#updateIndexes">updateIndexes</a></li></ul></li><li><a href="Component.html">Component</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Component.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Component.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Component.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Component.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Component.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Component.html#on">on</a></li></ul></li><li><a href="Container.html">Container</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Container.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Container.html#as">as</a></li><li data-type='method' style='display: none;'><a href="Container.html#count">count</a></li><li data-type='method' style='display: none;'><a href="Container.html#create">create</a></li><li data-type='method' style='display: none;'><a href="Container.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="Container.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="Container.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Container.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="Container.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Container.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Container.html#find">find</a></li><li data-type='method' style='display: none;'><a href="Container.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="Container.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="Container.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="Container.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="Container.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="Container.html#is">is</a></li><li data-type='method' style='display: none;'><a href="Container.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Container.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Container.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Container.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="Container.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="Container.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Container.html#update">update</a></li><li data-type='method' style='display: none;'><a href="Container.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="Container.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="Container.html#validate">validate</a></li></ul></li><li><a href="DataStore.html">DataStore</a><ul class='methods'><li data-type='method' style='display: none;'><a href="DataStore.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#add">add</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#addToCache">addToCache</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#as">as</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#between">between</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cachedFind">cachedFind</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cachedFindAll">cachedFindAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cacheFind">cacheFind</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#cacheFindAll">cacheFindAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#clear">clear</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#count">count</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#create">create</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#find">find</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#get">get</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getCollection">getCollection</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#hashQuery">hashQuery</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#is">is</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#log">log</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#off">off</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#on">on</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#query">query</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#removeRelated">removeRelated</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#update">update</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="DataStore.html#validate">validate</a></li></ul></li><li><a href="LinkedCollection.html">LinkedCollection</a><ul class='methods'><li data-type='method' style='display: none;'><a href="LinkedCollection.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#add">add</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#afterRemove">afterRemove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#afterRemoveAll">afterRemoveAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeAdd">beforeAdd</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeRemove">beforeRemove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#beforeRemoveAll">beforeRemoveAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#between">between</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#get">get</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#getIndex">getIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#log">log</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#map">map</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#method">method</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#off">off</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#on">on</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#query">query</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#recordId">recordId</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#reduce">reduce</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#skip">skip</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#updateIndex">updateIndex</a></li><li data-type='method' style='display: none;'><a href="LinkedCollection.html#updateIndexes">updateIndexes</a></li></ul></li><li><a href="Mapper.html">Mapper</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Mapper.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCount">afterCount</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCreate">afterCreate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterCreateMany">afterCreateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterDestroy">afterDestroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterDestroyAll">afterDestroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterFind">afterFind</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterFindAll">afterFindAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterSum">afterSum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdate">afterUpdate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdateAll">afterUpdateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#afterUpdateMany">afterUpdateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCount">beforeCount</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCreate">beforeCreate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeCreateMany">beforeCreateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeDestroy">beforeDestroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeDestroyAll">beforeDestroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeFind">beforeFind</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeFindAll">beforeFindAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeSum">beforeSum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdate">beforeUpdate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdateAll">beforeUpdateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#beforeUpdateMany">beforeUpdateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#belongsTo">belongsTo</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#count">count</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#create">create</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createInstance">createInstance</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#crud">crud</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#find">find</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#hasMany">hasMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#hasOne">hasOne</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#is">is</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#update">update</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#validate">validate</a></li><li data-type='method' style='display: none;'><a href="Mapper.html#wrap">wrap</a></li></ul></li><li><a href="Query.html">Query</a><ul class='members'><li data-type='member' style='display: none;'><a href="Query.html#.ops">ops</a></li><li data-type='member' style='display: none;'><a href="Query.html#collection">collection</a></li><li data-type='member' style='display: none;'><a href="Query.html#data">data</a></li><li data-type='member' style='display: none;'><a href="Query.html#debug">debug</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="Query.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Query.html#between">between</a></li><li data-type='method' style='display: none;'><a href="Query.html#compare">compare</a></li><li data-type='method' style='display: none;'><a href="Query.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Query.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Query.html#evaluate">evaluate</a></li><li data-type='method' style='display: none;'><a href="Query.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="Query.html#forEach">forEach</a></li><li data-type='method' style='display: none;'><a href="Query.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Query.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="Query.html#getData">getData</a></li><li data-type='method' style='display: none;'><a href="Query.html#like">like</a></li><li data-type='method' style='display: none;'><a href="Query.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="Query.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Query.html#map">map</a></li><li data-type='method' style='display: none;'><a href="Query.html#mapCall">mapCall</a></li><li data-type='method' style='display: none;'><a href="Query.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Query.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Query.html#run">run</a></li><li data-type='method' style='display: none;'><a href="Query.html#skip">skip</a></li></ul></li><li><a href="Record.html">Record</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Record.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Record.html#_mapper">_mapper</a></li><li data-type='method' style='display: none;'><a href="Record.html#afterLoadRelations">afterLoadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#beforeLoadRelations">beforeLoadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#changeHistory">changeHistory</a></li><li data-type='method' style='display: none;'><a href="Record.html#changes">changes</a></li><li data-type='method' style='display: none;'><a href="Record.html#commit">commit</a></li><li data-type='method' style='display: none;'><a href="Record.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Record.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="Record.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Record.html#get">get</a></li><li data-type='method' style='display: none;'><a href="Record.html#hasChanges">hasChanges</a></li><li data-type='method' style='display: none;'><a href="Record.html#isNew">isNew</a></li><li data-type='method' style='display: none;'><a href="Record.html#isValid">isValid</a></li><li data-type='method' style='display: none;'><a href="Record.html#loadRelations">loadRelations</a></li><li data-type='method' style='display: none;'><a href="Record.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Record.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Record.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Record.html#previous">previous</a></li><li data-type='method' style='display: none;'><a href="Record.html#revert">revert</a></li><li data-type='method' style='display: none;'><a href="Record.html#save">save</a></li><li data-type='method' style='display: none;'><a href="Record.html#set">set</a></li><li data-type='method' style='display: none;'><a href="Record.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="Record.html#unset">unset</a></li><li data-type='method' style='display: none;'><a href="Record.html#validate">validate</a></li></ul></li><li><a href="Schema.html">Schema</a><ul class='members'><li data-type='member' style='display: none;'><a href="Schema.html#.ANY_OPS">ANY_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.ARRAY_OPS">ARRAY_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.NUMERIC_OPS">NUMERIC_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.OBJECT_OPS">OBJECT_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.STRING_OPS">STRING_OPS</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.typeGroupValidators">typeGroupValidators</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.types">types</a></li><li data-type='member' style='display: none;'><a href="Schema.html#.validationKeywords">validationKeywords</a></li><li data-type='member' style='display: none;'><a href="Schema.html#debug">debug</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="Schema.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Schema.html#.validate">validate</a></li><li data-type='method' style='display: none;'><a href="Schema.html#apply">apply</a></li><li data-type='method' style='display: none;'><a href="Schema.html#applyDefaults">applyDefaults</a></li><li data-type='method' style='display: none;'><a href="Schema.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="Schema.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="Schema.html#log">log</a></li><li data-type='method' style='display: none;'><a href="Schema.html#makeDescriptor">makeDescriptor</a></li><li data-type='method' style='display: none;'><a href="Schema.html#off">off</a></li><li data-type='method' style='display: none;'><a href="Schema.html#on">on</a></li><li data-type='method' style='display: none;'><a href="Schema.html#pick">pick</a></li><li data-type='method' style='display: none;'><a href="Schema.html#validate">validate</a></li></ul></li><li><a href="Settable.html">Settable</a><ul class='methods'><li data-type='method' style='display: none;'><a href="Settable.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="Settable.html#_get">_get</a></li></ul></li><li><a href="SimpleStore.html">SimpleStore</a><ul class='methods'><li data-type='method' style='display: none;'><a href="SimpleStore.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#add">add</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#addToCache">addToCache</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#as">as</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#between">between</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cachedFind">cachedFind</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cachedFindAll">cachedFindAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cacheFind">cacheFind</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#cacheFindAll">cacheFindAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#clear">clear</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#count">count</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#create">create</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createIndex">createIndex</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createMany">createMany</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#createRecord">createRecord</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#dbg">dbg</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#defineMapper">defineMapper</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#destroy">destroy</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#destroyAll">destroyAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#emit">emit</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#filter">filter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#find">find</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#findAll">findAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#get">get</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapter">getAdapter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapterName">getAdapterName</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAdapters">getAdapters</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getAll">getAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getCollection">getCollection</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getMapper">getMapper</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getMapperByName">getMapperByName</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#getSchema">getSchema</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#hashQuery">hashQuery</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#is">is</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#log">log</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#off">off</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#on">on</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#prune">prune</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#query">query</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#registerAdapter">registerAdapter</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#remove">remove</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#removeAll">removeAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#removeRelated">removeRelated</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#sum">sum</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#toJSON">toJSON</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#unsaved">unsaved</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#update">update</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#updateAll">updateAll</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#updateMany">updateMany</a></li><li data-type='method' style='display: none;'><a href="SimpleStore.html#validate">validate</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-js-data.html">js-data</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-js-data.html#.Collection">Collection</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Component">Component</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Container">Container</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.DataStore">DataStore</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Index">Index</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.LinkedCollection">LinkedCollection</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Mapper">Mapper</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Query">Query</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Record">Record</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Schema">Schema</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.Settable">Settable</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.SimpleStore">SimpleStore</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.utils">utils</a></li><li data-type='member' style='display: none;'><a href="module-js-data.html#.version">version</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="module-js-data.html#.belongsTo">belongsTo</a></li><li data-type='method' style='display: none;'><a href="module-js-data.html#.hasMany">hasMany</a></li><li data-type='method' style='display: none;'><a href="module-js-data.html#.hasOne">hasOne</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Collection.html#event:add">add</a></li><li><a href="Collection.html#event:change">change</a></li><li><a href="Collection.html#event:remove">remove</a></li><li><a href="Container.html#event:afterCreate">afterCreate</a></li><li><a href="Container.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="Container.html#event:afterDestroy">afterDestroy</a></li><li><a href="Container.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="Container.html#event:afterFind">afterFind</a></li><li><a href="Container.html#event:afterFindAll">afterFindAll</a></li><li><a href="Container.html#event:afterUpdate">afterUpdate</a></li><li><a href="Container.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="Container.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="Container.html#event:beforeCreate">beforeCreate</a></li><li><a href="Container.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="Container.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="Container.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="Container.html#event:beforeFind">beforeFind</a></li><li><a href="Container.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="Container.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="Container.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="Container.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="DataStore.html#event:add">add</a></li><li><a href="DataStore.html#event:afterCreate">afterCreate</a></li><li><a href="DataStore.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="DataStore.html#event:afterDestroy">afterDestroy</a></li><li><a href="DataStore.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="DataStore.html#event:afterFind">afterFind</a></li><li><a href="DataStore.html#event:afterFindAll">afterFindAll</a></li><li><a href="DataStore.html#event:afterUpdate">afterUpdate</a></li><li><a href="DataStore.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="DataStore.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="DataStore.html#event:beforeCreate">beforeCreate</a></li><li><a href="DataStore.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="DataStore.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="DataStore.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="DataStore.html#event:beforeFind">beforeFind</a></li><li><a href="DataStore.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="DataStore.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="DataStore.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="DataStore.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="DataStore.html#event:change">change</a></li><li><a href="DataStore.html#event:remove">remove</a></li><li><a href="LinkedCollection.html#event:add">add</a></li><li><a href="LinkedCollection.html#event:change">change</a></li><li><a href="LinkedCollection.html#event:remove">remove</a></li><li><a href="Mapper.html#event:afterCreate">afterCreate</a></li><li><a href="Mapper.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="Mapper.html#event:afterDestroy">afterDestroy</a></li><li><a href="Mapper.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="Mapper.html#event:afterFind">afterFind</a></li><li><a href="Mapper.html#event:afterFindAll">afterFindAll</a></li><li><a href="Mapper.html#event:afterUpdate">afterUpdate</a></li><li><a href="Mapper.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="Mapper.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="Mapper.html#event:beforeCreate">beforeCreate</a></li><li><a href="Mapper.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="Mapper.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="Mapper.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="Mapper.html#event:beforeFind">beforeFind</a></li><li><a href="Mapper.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="Mapper.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="Mapper.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="Mapper.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="Record.html#event:change">change</a></li><li><a href="SimpleStore.html#event:add">add</a></li><li><a href="SimpleStore.html#event:afterCreate">afterCreate</a></li><li><a href="SimpleStore.html#event:afterCreateMany">afterCreateMany</a></li><li><a href="SimpleStore.html#event:afterDestroy">afterDestroy</a></li><li><a href="SimpleStore.html#event:afterDestroyAll">afterDestroyAll</a></li><li><a href="SimpleStore.html#event:afterFind">afterFind</a></li><li><a href="SimpleStore.html#event:afterFindAll">afterFindAll</a></li><li><a href="SimpleStore.html#event:afterUpdate">afterUpdate</a></li><li><a href="SimpleStore.html#event:afterUpdateAll">afterUpdateAll</a></li><li><a href="SimpleStore.html#event:afterUpdateMany">afterUpdateMany</a></li><li><a href="SimpleStore.html#event:beforeCreate">beforeCreate</a></li><li><a href="SimpleStore.html#event:beforeCreateMany">beforeCreateMany</a></li><li><a href="SimpleStore.html#event:beforeDestroy">beforeDestroy</a></li><li><a href="SimpleStore.html#event:beforeDestroyAll">beforeDestroyAll</a></li><li><a href="SimpleStore.html#event:beforeFind">beforeFind</a></li><li><a href="SimpleStore.html#event:beforeFindAll">beforeFindAll</a></li><li><a href="SimpleStore.html#event:beforeUpdate">beforeUpdate</a></li><li><a href="SimpleStore.html#event:beforeUpdateAll">beforeUpdateAll</a></li><li><a href="SimpleStore.html#event:beforeUpdateMany">beforeUpdateMany</a></li><li><a href="SimpleStore.html#event:change">change</a></li><li><a href="SimpleStore.html#event:remove">remove</a></li></ul><h3>Namespaces</h3><ul><li><a href="query_.html">query</a><ul class='members'><li data-type='member' style='display: none;'><a href="query_.html#.limit">limit</a></li><li data-type='member' style='display: none;'><a href="query_.html#.offset">offset</a></li><li data-type='member' style='display: none;'><a href="query_.html#.orderBy">orderBy</a></li><li data-type='member' style='display: none;'><a href="query_.html#.where">where</a></li></ul></li><li><a href="utils.html">utils</a><ul class='members'><li data-type='member' style='display: none;'><a href="utils.html#.Promise">Promise</a></li></ul><ul class='methods'><li data-type='method' style='display: none;'><a href="utils.html#.addHiddenPropsToTarget">addHiddenPropsToTarget</a></li><li data-type='method' style='display: none;'><a href="utils.html#.areDifferent">areDifferent</a></li><li data-type='method' style='display: none;'><a href="utils.html#.classCallCheck">classCallCheck</a></li><li data-type='method' style='display: none;'><a href="utils.html#.copy">copy</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepEqual">deepEqual</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepFillIn">deepFillIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.deepMixIn">deepMixIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.diffObjects">diffObjects</a></li><li data-type='method' style='display: none;'><a href="utils.html#.equal">equal</a></li><li data-type='method' style='display: none;'><a href="utils.html#.err">err</a></li><li data-type='method' style='display: none;'><a href="utils.html#.eventify">eventify</a></li><li data-type='method' style='display: none;'><a href="utils.html#.extend">extend</a></li><li data-type='method' style='display: none;'><a href="utils.html#.fillIn">fillIn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.findIndex">findIndex</a></li><li data-type='method' style='display: none;'><a href="utils.html#.forEachRelation">forEachRelation</a></li><li data-type='method' style='display: none;'><a href="utils.html#.forOwn">forOwn</a></li><li data-type='method' style='display: none;'><a href="utils.html#.fromJson">fromJson</a></li><li data-type='method' style='display: none;'><a href="utils.html#.get">get</a></li><li data-type='method' style='display: none;'><a href="utils.html#.getSuper">getSuper</a></li><li data-type='method' style='display: none;'><a href="utils.html#.intersection">intersection</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isArray">isArray</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isBlacklisted">isBlacklisted</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isBoolean">isBoolean</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isDate">isDate</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isFunction">isFunction</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isInteger">isInteger</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isNull">isNull</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isNumber">isNumber</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isObject">isObject</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isRegExp">isRegExp</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isSorN">isSorN</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isString">isString</a></li><li data-type='method' style='display: none;'><a href="utils.html#.isUndefined">isUndefined</a></li><li data-type='method' style='display: none;'><a href="utils.html#.logify">logify</a></li><li data-type='method' style='display: none;'><a href="utils.html#.noDupeAdd">noDupeAdd</a></li><li data-type='method' style='display: none;'><a href="utils.html#.omit">omit</a></li><li data-type='method' style='display: none;'><a href="utils.html#.pick">pick</a></li><li data-type='method' style='display: none;'><a href="utils.html#.plainCopy">plainCopy</a></li><li data-type='method' style='display: none;'><a href="utils.html#.reject">reject</a></li><li data-type='method' style='display: none;'><a href="utils.html#.remove">remove</a></li><li data-type='method' style='display: none;'><a href="utils.html#.resolve">resolve</a></li><li data-type='method' style='display: none;'><a href="utils.html#.set">set</a></li><li data-type='method' style='display: none;'><a href="utils.html#.toJson">toJson</a></li><li data-type='method' style='display: none;'><a href="utils.html#.unset">unset</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#_createOrAssignChildRecordIfRequired">_createOrAssignChildRecordIfRequired</a></li><li><a href="global.html#_createParentRecordIfRequired">_createParentRecordIfRequired</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">LinkedCollection.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import utils from './utils'
 import './decorators'
 import Collection from './Collection'
 
@@ -322,162 +222,31 @@ export default Collection.extend({
  * @since 3.0.0
  */
 </code></pre>
-    </article>
-</section>
+        </article>
+    </section>
 
 
 
 
-
-		</div>
-	</div>
-
-</div>
+    
+    
 </div>
 
-<div class="modal fade" id="searchResults">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Search results</h4>
-      </div>
-      <div class="modal-body"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div>
+<br class="clear">
 
 <footer>
-
-	<div style="text-align:center"><a href="/">api.js-data.io</a>&nbsp;&#8226;&nbsp;<a href="http://js-data.io">js-data.io</a></div>
-
-
-	<span class="copyright">
-	js-data Copyright © 2014-2020 js-data project authors
-	</span>
-
-<span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
-	
-		on 2020-01-24T22:16:17-08:00
-	
-	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
-</span>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Sat Jan 25 2020 22:32:20 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
-<script src="scripts/docstrap.lib.js"></script>
-<script src="scripts/toc.js"></script>
-<!-- <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script> -->
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/languages/javascript.min.js"></script>
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
 
-<script>
-$( function () {
-	$( "[id*='$']" ).each( function () {
-		var $this = $( this );
-
-		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
-	} );
-
-	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
-		var $this = $( this );
-
-		var example = $this.find( "code" );
-		exampleText = example.html();
-		var lang = /{@lang (.*?)}/.exec( exampleText );
-		if ( lang && lang[1] ) {
-			exampleText = exampleText.replace( lang[0], "" );
-			example.html( exampleText );
-			lang = lang[1];
-		} else {
-			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
-			lang = langClassMatch ? langClassMatch[1] : "javascript";
-		}
-
-		if ( lang ) {
-
-			$this
-			.addClass( lang )
-			.addClass( "linenums" )
-			.html( example.html() );
-
-		}
-	} );
-
-	hljs.initHighlightingOnLoad();
-
-	$.catchAnchorLinks( {
-        navbarOffset: 10
-	} );
-	$( "#toc" ).toc( {
-		anchorName  : function ( i, heading, prefix ) {
-			var id = $( heading ).attr( "id" );
-			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
-		},
-		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
-		showAndHide : false,
-		smoothScrolling: true,
-    highlightOnScroll: true
-	} );
-
-	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
-	$( '.dropdown-toggle' ).dropdown();
-
-    $( "table" ).each( function () {
-      var $this = $( this );
-      $this.addClass('table');
-    } );
-
-} );
-</script>
+<script src="scripts/search.js" defer></script>
 
 
+<script src="scripts/collapse.js" defer></script>
 
-<!--Navigation and Symbol Display-->
-
-
-<!--Google Analytics-->
-
-<script>
-	(function ( i, s, o, g, r, a, m ) {
-		i['GoogleAnalyticsObject'] = r;
-		i[r] = i[r] || function () {
-			(i[r].q = i[r].q || []).push( arguments )
-		}, i[r].l = 1 * new Date();
-		a = s.createElement( o ),
-			m = s.getElementsByTagName( o )[0];
-		a.async = 1;
-		a.src = g;
-		m.parentNode.insertBefore( a, m )
-	})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
-
-	ga( 'create', 'UA-55528236-2', 'api.js-data.io' );
-	ga( 'send', 'pageview' );
-</script>
-
-
-<script src="https://embed.tonicdev.com"></script>
-<script>
-  window.loadTonic = function (id) {
-    var btn = document.getElementById('btn-' + id);
-    $(btn).hide();
-    var pre = document.getElementById('pre-' + id);
-    $(pre).hide();
-    var el = document.getElementById('tonic-' + id);
-    var $el = $(el);
-    var html = $el.html();
-    $el.empty();
-    $el.show();
-    console.log(html);
-    Tonic.createNotebook({
-      element: el,
-      source: html
-    });
-  };
-</script>
 
 </body>
 </html>

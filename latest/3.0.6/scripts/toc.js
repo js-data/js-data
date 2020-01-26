@@ -148,7 +148,7 @@
     return this.each(function() {
       //build TOC
       var el = $(this);
-      var ul = $('<div class="toc-list-group">');
+      var ul = $('<div class="list-group">');
 
       headings.each(function(i, heading) {
         var $h = $(heading);
@@ -159,7 +159,7 @@
           .text(opts.headerText(i, heading, $h));
 
         //build TOC item
-        var a = $('<a class="toc-list-group-item"/>')
+        var a = $('<a class="list-group-item"/>')
           .append(span)
           .attr('href', '#' + opts.anchorName(i, heading, opts.prefix))
           .bind('click', function(e) {
