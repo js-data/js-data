@@ -10,244 +10,15 @@ import Collection from './Collection'
 
 const DOMAIN = 'SimpleStore'
 const proxiedCollectionMethods = [
-  /**
-   * Wrapper for {@link Collection#add}.
-   *
-   * @example <caption>SimpleStore#add</caption>
-   * const JSData = require('js-data');
-   * const { SimpleStore } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new SimpleStore();
-   * store.defineMapper('book');
-   *
-   * // Add one book to the in-memory store:
-   * store.add('book', { id: 1, title: 'Respect your Data' });
-   * // Add multiple books to the in-memory store:
-   * store.add('book', [
-   *   { id: 2, title: 'Easy data recipes' },
-   *   { id: 3, title: 'Active Record 101' }
-   * ]);
-   *
-   * @fires SimpleStore#add
-   * @method SimpleStore#add
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @param {(Object|Object[]|Record|Record[])} data See {@link Collection#add}.
-   * @param {object} [opts] Configuration options. See {@link Collection#add}.
-   * @returns {(Object|Object[]|Record|Record[])} See {@link Collection#add}.
-   * @see Collection#add
-   * @see Collection#add
-   * @since 3.0.0
-   */
   'add',
-
-  /**
-   * Wrapper for {@link Collection#between}.
-   *
-   * @example
-   * // Get all users ages 18 to 30
-   * const users = store.between('user', 18, 30, { index: 'age' });
-   *
-   * @example
-   * // Same as above
-   * const users = store.between('user', [18], [30], { index: 'age' });
-   *
-   * @method SimpleStore#between
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @param {array} leftKeys See {@link Collection#between}.
-   * @param {array} rightKeys See {@link Collection#between}.
-   * @param {object} [opts] Configuration options. See {@link Collection#between}.
-   * @returns {Object[]|Record[]} See {@link Collection#between}.
-   * @see Collection#between
-   * @see Collection#between
-   * @since 3.0.0
-   */
   'between',
-
-  /**
-   * Wrapper for {@link Collection#createIndex}.
-   *
-   * @example
-   * // Index users by age
-   * store.createIndex('user', 'age');
-   *
-   * @example
-   * // Index users by status and role
-   * store.createIndex('user', 'statusAndRole', ['status', 'role']);
-   *
-   * @method SimpleStore#createIndex
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @param {string} name See {@link Collection#createIndex}.
-   * @param {string[]} [fieldList] See {@link Collection#createIndex}.
-   * @see Collection#createIndex
-   * @see Collection#createIndex
-   * @since 3.0.0
-   */
   'createIndex',
-
-  /**
-   * Wrapper for {@link Collection#filter}.
-   *
-   * @example <caption>SimpleStore#filter</caption>
-   * const JSData = require('js-data');
-   * const { SimpleStore } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new SimpleStore();
-   * store.defineMapper('post');
-   * store.add('post', [
-   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
-   * ]);
-   *
-   * // Get the draft posts created less than three months ago
-   * let posts = store.filter('post', {
-   *   where: {
-   *     status: {
-   *       '==': 'draft'
-   *     },
-   *     created_at_timestamp: {
-   *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
-   *     }
-   *   }
-   * });
-   * console.log(posts);
-   *
-   * // Use a custom filter function
-   * posts = store.filter('post', function (post) { return post.id % 2 === 0 });
-   *
-   * @method SimpleStore#filter
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @param {(Object|Function)} [queryOrFn={}] See {@link Collection#filter}.
-   * @param {object} [thisArg] See {@link Collection#filter}.
-   * @returns {Array} See {@link Collection#filter}.
-   * @see Collection#filter
-   * @see Collection#filter
-   * @since 3.0.0
-   */
   'filter',
-
-  /**
-   * Wrapper for {@link Collection#get}.
-   *
-   * @example <caption>SimpleStore#get</caption>
-   * const JSData = require('js-data');
-   * const { SimpleStore } = JSData;
-   * console.log('Using JSData v' + JSData.version.full);
-   *
-   * const store = new SimpleStore();
-   * store.defineMapper('post');
-   * store.add('post', [
-   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
-   * ]);
-   *
-   * console.log(store.get('post', 1)); // {...}
-   * console.log(store.get('post', 2)); // undefined
-   *
-   * @method SimpleStore#get
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @param {(string|number)} id See {@link Collection#get}.
-   * @returns {(Object|Record)} See {@link Collection#get}.
-   * @see Collection#get
-   * @see Collection#get
-   * @since 3.0.0
-   */
   'get',
-
-  /**
-   * Wrapper for {@link Collection#getAll}.
-   *
-   * @example
-   * // Get the posts where "status" is "draft" or "inReview"
-   * const posts = store.getAll('post', 'draft', 'inReview', { index: 'status' });
-   *
-   * @example
-   * // Same as above
-   * const posts = store.getAll('post', ['draft'], ['inReview'], { index: 'status' });
-   *
-   * @method SimpleStore#getAll
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @param {...Array} [keyList] See {@link Collection#getAll}.
-   * @param {object} [opts] See {@link Collection#getAll}.
-   * @returns {Array} See {@link Collection#getAll}.
-   * @see Collection#getAll
-   * @see Collection#getAll
-   * @since 3.0.0
-   */
   'getAll',
-
-  /**
-   * Wrapper for {@link Collection#prune}.
-   *
-   * @method SimpleStore#prune
-   * @param {object} [opts] See {@link Collection#prune}.
-   * @returns {Array} See {@link Collection#prune}.
-   * @see Collection#prune
-   * @see Collection#prune
-   * @since 3.0.0
-   */
   'prune',
-
-  /**
-   * Wrapper for {@link Collection#query}.
-   *
-   * @example
-   * // Grab page 2 of users between ages 18 and 30
-   * store.query('user')
-   *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
-   *   .skip(10) // second page
-   *   .limit(10) // page size
-   *   .run();
-   *
-   * @method SimpleStore#query
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @returns {Query} See {@link Collection#query}.
-   * @see Collection#query
-   * @see Collection#query
-   * @since 3.0.0
-   */
   'query',
-
-  /**
-   * Wrapper for {@link Collection#toJSON}.
-   *
-   * @example
-   * store.defineMapper('post', {
-   *   schema: {
-   *     properties: {
-   *       id: { type: 'number' },
-   *       title: { type: 'string' }
-   *     }
-   *   }
-   * });
-   * store.add('post', [
-   *   { id: 1, status: 'published', title: 'Respect your Data' },
-   *   { id: 2, status: 'draft', title: 'Connecting to a data source' }
-   * ]);
-   * console.log(store.toJSON('post'));
-   * const draftsJSON = store.query('post')
-   *   .filter({ status: 'draft' })
-   *   .mapCall('toJSON')
-   *   .run();
-   *
-   * @method SimpleStore#toJSON
-   * @param {(string|number)} name Name of the {@link Mapper} to target.
-   * @param {object} [opts] See {@link Collection#toJSON}.
-   * @returns {Array} See {@link Collection#toJSON}.
-   * @see Collection#toJSON
-   * @see Collection#toJSON
-   * @since 3.0.0
-   */
   'toJSON',
-
-  /**
-   * Wrapper for {@link Collection#unsaved}.
-   *
-   * @method SimpleStore#unsaved
-   * @returns {Array} See {@link Collection#unsaved}.
-   * @see Collection#unsaved
-   * @see Collection#unsaved
-   * @since 3.0.0
-   */
   'unsaved'
 ]
 const ownMethodsForScoping = [
@@ -347,22 +118,17 @@ const SIMPLESTORE_DEFAULTS = {
  * @tutorial ["http://www.js-data.io/v3.0/docs/working-with-the-SimpleStore","Working with the SimpleStore"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/jsdata-and-the-browser","Notes on using JSData in the Browser"]
  */
-function SimpleStore (opts) {
-  utils.classCallCheck(this, SimpleStore)
+export default class SimpleStore extends Container {
+  constructor (opts = {}) {
+    // Fill in any missing options with the defaults
+    utils.fillIn(opts, SIMPLESTORE_DEFAULTS)
+    super(opts)
 
-  opts || (opts = {})
-  // Fill in any missing options with the defaults
-  utils.fillIn(opts, SIMPLESTORE_DEFAULTS)
-  Container.call(this, opts)
-
-  this.collectionClass = this.collectionClass || Collection
-  this._collections = {}
-  this._pendingQueries = {}
-  this._completedQueries = {}
-}
-
-const props = {
-  constructor: SimpleStore,
+    this.collectionClass = this.collectionClass || Collection
+    this._collections = {}
+    this._pendingQueries = {}
+    this._completedQueries = {}
+  }
 
   /**
    * Internal method used to handle Mapper responses.
@@ -386,7 +152,7 @@ const props = {
       }
     }
     return result
-  },
+  }
 
   /**
    * Register a new event listener on this SimpleStore.
@@ -436,7 +202,7 @@ const props = {
   _onCollectionEvent (name, ...args) {
     const type = args.shift()
     this.emit(type, name, ...args)
-  },
+  }
 
   /**
    * This method takes the data received from {@link SimpleStore#find},
@@ -482,7 +248,7 @@ const props = {
    */
   addToCache (name, data, opts) {
     return this.getCollection(name).add(data, opts)
-  },
+  }
 
   /**
    * Return the store scoped to a particular mapper/collection pair.
@@ -536,7 +302,7 @@ const props = {
       }
     }
     return Object.create(this, props)
-  },
+  }
 
   /**
    * Retrieve a cached `find` result, if any. This method is called during
@@ -582,7 +348,7 @@ const props = {
    * @param {object} opts The `opts` argument passed to {@link SimpleStore#find}.
    * @since 3.0.0
    */
-  cachedFind: cachedFn,
+  cachedFind = cachedFn
 
   /**
    * Retrieve a cached `findAll` result, if any. This method is called during
@@ -629,7 +395,7 @@ const props = {
    * @param {object} opts The `opts` argument passed to {@link SimpleStore#findAll}.
    * @since 3.0.0
    */
-  cachedFindAll: cachedFn,
+  cachedFindAll = cachedFn
 
   /**
    * Mark a {@link Mapper#find} result as cached by adding an entry to
@@ -678,7 +444,7 @@ const props = {
    */
   cacheFind (name, data, id, opts) {
     this._completedQueries[name][id] = (name, id, opts) => this.get(name, id)
-  },
+  }
 
   /**
    * Mark a {@link Mapper#findAll} result as cached by adding an entry to
@@ -728,7 +494,7 @@ const props = {
    */
   cacheFindAll (name, data, hash, opts) {
     this._completedQueries[name][hash] = (name, hash, opts) => this.filter(name, utils.fromJson(hash))
-  },
+  }
 
   /**
    * Remove __all__ records from the in-memory store and reset
@@ -747,7 +513,7 @@ const props = {
       this._completedQueries[name] = {}
     })
     return removed
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#create}. See
@@ -782,6 +548,7 @@ const props = {
    * @see SimpleStore~afterCreateListener
    * @see SimpleStore#create
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterCreate} event.
    *
@@ -835,11 +602,10 @@ const props = {
    * @returns {Promise} Resolves with the result of the create.
    * @since 3.0.0
    */
-  create (name, record, opts) {
-    opts || (opts = {})
-    return Container.prototype.create.call(this, name, record, opts)
+  create (name, record, opts = {}) {
+    return super.create(name, record, opts)
       .then((result) => this._end(name, result, opts))
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#createMany}. See
@@ -874,6 +640,7 @@ const props = {
    * @see SimpleStore~afterCreateManyListener
    * @see SimpleStore#createMany
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterCreateMany} event.
    *
@@ -932,15 +699,14 @@ const props = {
    * @returns {Promise} Resolves with the result of the create.
    * @since 3.0.0
    */
-  createMany (name, records, opts) {
-    opts || (opts = {})
-    return Container.prototype.createMany.call(this, name, records, opts)
+  createMany (name, records, opts = {}) {
+    return super.createMany(name, records, opts)
       .then((result) => this._end(name, result, opts))
-  },
+  }
 
   defineMapper (name, opts) {
     const self = this
-    const mapper = Container.prototype.defineMapper.call(self, name, opts)
+    const mapper = super.defineMapper(name, opts)
     self._pendingQueries[name] = {}
     self._completedQueries[name] = {}
     mapper.relationList || Object.defineProperty(mapper, 'relationList', { value: [] })
@@ -983,7 +749,7 @@ const props = {
     })
 
     return mapper
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#destroy}. See
@@ -1018,6 +784,7 @@ const props = {
    * @see SimpleStore~afterDestroyListener
    * @see SimpleStore#destroy
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterDestroy} event.
    *
@@ -1076,9 +843,8 @@ const props = {
    * @returns {Promise} Resolves when the destroy operation completes.
    * @since 3.0.0
    */
-  destroy (name, id, opts) {
-    opts || (opts = {})
-    return Container.prototype.destroy.call(this, name, id, opts).then((result) => {
+  destroy (name, id, opts = {}) {
+    return super.destroy(name, id, opts).then((result) => {
       const record = this.getCollection(name).remove(id, opts)
 
       if (opts.raw) {
@@ -1090,7 +856,7 @@ const props = {
       delete this._completedQueries[name][id]
       return result
     })
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#destroyAll}. See
@@ -1125,6 +891,7 @@ const props = {
    * @see SimpleStore~afterDestroyAllListener
    * @see SimpleStore#destroyAll
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterDestroyAll} event.
    *
@@ -1181,9 +948,8 @@ const props = {
    * @returns {Promise} Resolves when the delete completes.
    * @since 3.0.0
    */
-  destroyAll (name, query, opts) {
-    opts || (opts = {})
-    return Container.prototype.destroyAll.call(this, name, query, opts).then((result) => {
+  destroyAll (name, query, opts = {}) {
+    return super.destroyAll(name, query, opts).then((result) => {
       const records = this.getCollection(name).removeAll(query, opts)
 
       if (opts.raw) {
@@ -1196,17 +962,17 @@ const props = {
       delete this._completedQueries[name][hash]
       return result
     })
-  },
+  }
 
   eject (name, id, opts) {
     console.warn('DEPRECATED: "eject" is deprecated, use "remove" instead')
     return this.remove(name, id, opts)
-  },
+  }
 
   ejectAll (name, query, opts) {
     console.warn('DEPRECATED: "ejectAll" is deprecated, use "removeAll" instead')
     return this.removeAll(name, query, opts)
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#find}. See
@@ -1241,6 +1007,7 @@ const props = {
    * @see SimpleStore~afterFindListener
    * @see SimpleStore#find
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterFind} event.
    *
@@ -1291,8 +1058,7 @@ const props = {
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
-  find (name, id, opts) {
-    opts || (opts = {})
+  find (name, id, opts = {}) {
     const mapper = this.getMapper(name)
     const pendingQuery = this._pendingQueries[name][id]
     const usePendingFind = opts.usePendingFind === undefined ? this.usePendingFind : opts.usePendingFind
@@ -1304,7 +1070,7 @@ const props = {
     const item = this.cachedFind(name, id, opts)
 
     if (opts.force || !item) {
-      const promise = this._pendingQueries[name][id] = Container.prototype.find.call(this, name, id, opts)
+      const promise = this._pendingQueries[name][id] = super.find(name, id, opts)
       return promise
         .then((result) => {
           delete this._pendingQueries[name][id]
@@ -1318,7 +1084,7 @@ const props = {
     }
 
     return utils.resolve(item)
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#findAll}. See
@@ -1353,6 +1119,7 @@ const props = {
    * @see SimpleStore~afterFindAllListener
    * @see SimpleStore#findAll
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterFindAll} event.
    *
@@ -1403,8 +1170,7 @@ const props = {
    * @returns {Promise} Resolves with the result, if any.
    * @since 3.0.0
    */
-  findAll (name, query, opts) {
-    opts || (opts = {})
+  findAll (name, query, opts = {}) {
     const mapper = this.getMapper(name)
     const hash = this.hashQuery(name, query, opts)
     const pendingQuery = this._pendingQueries[name][hash]
@@ -1418,7 +1184,7 @@ const props = {
     const items = this.cachedFindAll(name, hash, opts)
 
     if (opts.force || !items) {
-      const promise = this._pendingQueries[name][hash] = Container.prototype.findAll.call(this, name, query, opts)
+      const promise = this._pendingQueries[name][hash] = super.findAll(name, query, opts)
       return promise
         .then((result) => {
           delete this._pendingQueries[name][hash]
@@ -1432,7 +1198,7 @@ const props = {
     }
 
     return utils.resolve(items)
-  },
+  }
 
   /**
    * Return the {@link Collection} with the given name, if for some
@@ -1451,7 +1217,7 @@ const props = {
       throw utils.err(`${DOMAIN}#getCollection`, name)(404, 'collection')
     }
     return collection
-  },
+  }
 
   /**
    * Hashing function used to cache {@link SimpleStore#find} and
@@ -1470,12 +1236,12 @@ const props = {
    */
   hashQuery (name, query, opts) {
     return utils.toJson(query || {})
-  },
+  }
 
   inject (name, records, opts) {
     console.warn('DEPRECATED: "inject" is deprecated, use "add" instead')
     return this.add(name, records, opts)
-  },
+  }
 
   /**
    * Wrapper for {@link Collection#remove}. Removes the specified
@@ -1512,7 +1278,7 @@ const props = {
       this.removeRelated(name, [record], opts)
     }
     return record
-  },
+  }
 
   /**
    * Wrapper for {@link Collection#removeAll}. Removes the selected
@@ -1558,7 +1324,7 @@ const props = {
       this.removeRelated(name, records, opts)
     }
     return records
-  },
+  }
 
   /**
    * Remove from the store {@link Record}s that are related to the provided
@@ -1617,7 +1383,7 @@ const props = {
         }
       })
     })
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#update}. See
@@ -1653,6 +1419,7 @@ const props = {
    * @see SimpleStore~afterUpdateListener
    * @see SimpleStore#update
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterUpdate} event.
    *
@@ -1705,11 +1472,10 @@ const props = {
    * @returns {Promise} Resolves with the result of the update.
    * @since 3.0.0
    */
-  update (name, id, record, opts) {
-    opts || (opts = {})
-    return Container.prototype.update.call(this, name, id, record, opts)
+  update (name, id, record, opts = {}) {
+    return super.update(name, id, record, opts)
       .then((result) => this._end(name, result, opts))
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#updateAll}. See
@@ -1745,6 +1511,7 @@ const props = {
    * @see SimpleStore~afterUpdateAllListener
    * @see SimpleStore#updateAll
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterUpdateAll} event.
    *
@@ -1797,11 +1564,10 @@ const props = {
    * @returns {Promise} Resolves with the result of the update.
    * @since 3.0.0
    */
-  updateAll (name, props, query, opts) {
-    opts || (opts = {})
-    return Container.prototype.updateAll.call(this, name, props, query, opts)
+  updateAll (name, props, query, opts = {}) {
+    return super.updateAll(name, props, query, opts)
       .then((result) => this._end(name, result, opts))
-  },
+  }
 
   /**
    * Fired during {@link SimpleStore#updateMany}. See
@@ -1836,6 +1602,7 @@ const props = {
    * @see SimpleStore~afterUpdateManyListener
    * @see SimpleStore#updateMany
    */
+
   /**
    * Callback signature for the {@link SimpleStore#event:afterUpdateMany} event.
    *
@@ -1889,20 +1656,272 @@ const props = {
    * @returns {Promise} Resolves with the result of the update.
    * @since 3.0.0
    */
-  updateMany (name, records, opts) {
-    opts || (opts = {})
-    return Container.prototype.updateMany.call(this, name, records, opts)
+  updateMany (name, records, opts = {}) {
+    return super.updateMany(name, records, opts)
       .then((result) => this._end(name, result, opts))
   }
-}
 
-proxiedCollectionMethods.forEach(function (method) {
-  props[method] = function (name, ...args) {
-    return this.getCollection(name)[method](...args)
+  /**
+   * Wrapper for {@link Collection#add}.
+   *
+   * @example <caption>SimpleStore#add</caption>
+   * const JSData = require('js-data');
+   * const { SimpleStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new SimpleStore();
+   * store.defineMapper('book');
+   *
+   * // Add one book to the in-memory store:
+   * store.add('book', { id: 1, title: 'Respect your Data' });
+   * // Add multiple books to the in-memory store:
+   * store.add('book', [
+   *   { id: 2, title: 'Easy data recipes' },
+   *   { id: 3, title: 'Active Record 101' }
+   * ]);
+   *
+   * @fires SimpleStore#add
+   * @method SimpleStore#add
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {(Object|Object[]|Record|Record[])} records See {@link Collection#add}.
+   * @param {object} [opts] Configuration options. See {@link Collection#add}.
+   * @returns {(Object|Object[]|Record|Record[])} See {@link Collection#add}.
+   * @see Collection#add
+   * @see Collection#add
+   * @since 3.0.0
+   */
+  add (name, records, opts) {
+    return this.getCollection(name).add(records, opts)
   }
-})
 
-export default Container.extend(props)
+  /**
+   * Wrapper for {@link Collection#between}.
+   *
+   * @example
+   * // Get all users ages 18 to 30
+   * const users = store.between('user', 18, 30, { index: 'age' });
+   *
+   * @example
+   * // Same as above
+   * const users = store.between('user', [18], [30], { index: 'age' });
+   *
+   * @method SimpleStore#between
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {array} leftKeys See {@link Collection#between}.
+   * @param {array} rightKeys See {@link Collection#between}.
+   * @param {object} [opts] Configuration options. See {@link Collection#between}.
+   * @returns {Object[]|Record[]} See {@link Collection#between}.
+   * @see Collection#between
+   * @see Collection#between
+   * @since 3.0.0
+   */
+  between (name, leftKeys, rightKeys, opts) {
+    return this.getCollection(name).between(leftKeys, rightKeys, opts)
+  }
+
+  /**
+   * Wrapper for {@link Collection#createIndex}.
+   *
+   * @example
+   * // Index users by age
+   * store.createIndex('user', 'age');
+   *
+   * @example
+   * // Index users by status and role
+   * store.createIndex('user', 'statusAndRole', ['status', 'role']);
+   *
+   * @method SimpleStore#createIndex
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {string} indexName See {@link Collection#createIndex}.
+   * @param {string[]} [fieldList] See {@link Collection#createIndex}.
+   * @param {object} [opts] Configuration options. See {@link Collection#between}.
+   * @see Collection#createIndex
+   * @see Collection#createIndex
+   * @since 3.0.0
+   */
+  createIndex (name, indexName, fieldList, opts) {
+    return this.getCollection(name).createIndex(indexName, fieldList, opts)
+  }
+
+  /**
+   * Wrapper for {@link Collection#filter}.
+   *
+   * @example <caption>SimpleStore#filter</caption>
+   * const JSData = require('js-data');
+   * const { SimpleStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new SimpleStore();
+   * store.defineMapper('post');
+   * store.add('post', [
+   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+   * ]);
+   *
+   * // Get the draft posts created less than three months ago
+   * let posts = store.filter('post', {
+   *   where: {
+   *     status: {
+   *       '==': 'draft'
+   *     },
+   *     created_at_timestamp: {
+   *       '>=': (new Date().getTime() - (1000 \* 60 \* 60 \* 24 \* 30 \* 3)) // 3 months ago
+   *     }
+   *   }
+   * });
+   * console.log(posts);
+   *
+   * // Use a custom filter function
+   * posts = store.filter('post', function (post) { return post.id % 2 === 0 });
+   *
+   * @method SimpleStore#filter
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {(Object|Function)} [queryOrFn={}] See {@link Collection#filter}.
+   * @param {object} [thisArg] See {@link Collection#filter}.
+   * @returns {Array} See {@link Collection#filter}.
+   * @see Collection#filter
+   * @see Collection#filter
+   * @since 3.0.0
+   */
+  filter (name, queryOrFn, thisArg) {
+    return this.getCollection(name).filter(queryOrFn, thisArg)
+  }
+
+  /**
+   * Wrapper for {@link Collection#get}.
+   *
+   * @example <caption>SimpleStore#get</caption>
+   * const JSData = require('js-data');
+   * const { SimpleStore } = JSData;
+   * console.log('Using JSData v' + JSData.version.full);
+   *
+   * const store = new SimpleStore();
+   * store.defineMapper('post');
+   * store.add('post', [
+   *   { id: 1, status: 'draft', created_at_timestamp: new Date().getTime() }
+   * ]);
+   *
+   * console.log(store.get('post', 1)); // {...}
+   * console.log(store.get('post', 2)); // undefined
+   *
+   * @method SimpleStore#get
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {(string|number)} id See {@link Collection#get}.
+   * @returns {(Object|Record)} See {@link Collection#get}.
+   * @see Collection#get
+   * @see Collection#get
+   * @since 3.0.0
+   */
+  get (name, id) {
+    return this.getCollection(name).get(id)
+  }
+
+  /**
+   * Wrapper for {@link Collection#getAll}.
+   *
+   * @example
+   * // Get the posts where "status" is "draft" or "inReview"
+   * const posts = store.getAll('post', 'draft', 'inReview', { index: 'status' });
+   *
+   * @example
+   * // Same as above
+   * const posts = store.getAll('post', ['draft'], ['inReview'], { index: 'status' });
+   *
+   * @method SimpleStore#getAll
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {...Array} [keyList] See {@link Collection#getAll}.
+   * @param {object} [opts] See {@link Collection#getAll}.
+   * @returns {Array} See {@link Collection#getAll}.
+   * @see Collection#getAll
+   * @see Collection#getAll
+   * @since 3.0.0
+   */
+  getAll (name, ...args) {
+    return this.getCollection(name).getAll(...args)
+  }
+
+  /**
+   * Wrapper for {@link Collection#prune}.
+   *
+   * @method SimpleStore#prune
+   * @param {object} [opts] See {@link Collection#prune}.
+   * @returns {Array} See {@link Collection#prune}.
+   * @see Collection#prune
+   * @see Collection#prune
+   * @since 3.0.0
+   */
+  prune (name, opts) {
+    return this.getCollection(name).prune(opts)
+  }
+
+  /**
+   * Wrapper for {@link Collection#query}.
+   *
+   * @example
+   * // Grab page 2 of users between ages 18 and 30
+   * store.query('user')
+   *   .between(18, 30, { index: 'age' }) // between ages 18 and 30
+   *   .skip(10) // second page
+   *   .limit(10) // page size
+   *   .run();
+   *
+   * @method SimpleStore#query
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @returns {Query} See {@link Collection#query}.
+   * @see Collection#query
+   * @see Collection#query
+   * @since 3.0.0
+   */
+  query (name) {
+    return this.getCollection(name).query()
+  }
+
+  /**
+   * Wrapper for {@link Collection#toJSON}.
+   *
+   * @example
+   * store.defineMapper('post', {
+   *   schema: {
+   *     properties: {
+   *       id: { type: 'number' },
+   *       title: { type: 'string' }
+   *     }
+   *   }
+   * });
+   * store.add('post', [
+   *   { id: 1, status: 'published', title: 'Respect your Data' },
+   *   { id: 2, status: 'draft', title: 'Connecting to a data source' }
+   * ]);
+   * console.log(store.toJSON('post'));
+   * const draftsJSON = store.query('post')
+   *   .filter({ status: 'draft' })
+   *   .mapCall('toJSON')
+   *   .run();
+   *
+   * @method SimpleStore#toJSON
+   * @param {(string|number)} name Name of the {@link Mapper} to target.
+   * @param {object} [opts] See {@link Collection#toJSON}.
+   * @returns {Array} See {@link Collection#toJSON}.
+   * @see Collection#toJSON
+   * @see Collection#toJSON
+   * @since 3.0.0
+   */
+  toJSON (name, opts) {
+    return this.getCollection(name).toJSON(opts)
+  }
+
+  /**
+   * Wrapper for {@link Collection#unsaved}.
+   *
+   * @method SimpleStore#unsaved
+   * @returns {Array} See {@link Collection#unsaved}.
+   * @see Collection#unsaved
+   * @see Collection#unsaved
+   * @since 3.0.0
+   */
+  unsaved (name, opts) {
+    return this.getCollection(name).unsaved(opts)
+  }
+}
 
 /**
  * Fired when a record changes. Only works for records that have tracked fields.

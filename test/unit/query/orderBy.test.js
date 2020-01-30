@@ -1,6 +1,6 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Query#orderBy', function () {
+describe('Query#orderBy', () => {
   it('should work', function () {
     const collection = this.PostCollection
     const p1 = this.data.p1
@@ -39,7 +39,7 @@ describe('Query#orderBy', function () {
 
     assert.objectsEqual(collection.query().filter(params).run(), [p4, p1, p3, p2], 'should accept an array of a string and sort in ascending for strings')
   })
-  it('should work with multiple orderBy', function () {
+  it('should work with multiple orderBy', () => {
     const store = new JSData.DataStore()
     store.defineMapper('item')
     const items = [
@@ -101,7 +101,7 @@ describe('Query#orderBy', function () {
       items[3]
     ])
   })
-  it('should order by nested keys', function () {
+  it('should order by nested keys', () => {
     const store = new JSData.DataStore()
     store.defineMapper('thing')
     const things = [

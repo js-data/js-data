@@ -304,207 +304,194 @@ const MAPPER_DEFAULTS = {
  * @tutorial ["http://www.js-data.io/v3.0/docs/components-of-jsdata#mapper","Components of JSData: Mapper"]
  * @tutorial ["http://www.js-data.io/v3.0/docs/modeling-your-data","Modeling your data"]
  */
-function Mapper (opts) {
-  utils.classCallCheck(this, Mapper)
-  Component.call(this)
-  opts || (opts = {})
+export default class Mapper extends Component {
+  constructor (opts = {}) {
+    super()
 
-  // Prepare certain properties to be non-enumerable
-  Object.defineProperties(this, {
-    _adapters: {
-      value: undefined,
-      writable: true
-    },
+    // Prepare certain properties to be non-enumerable
+    Object.defineProperties(this, {
+      _adapters: {
+        value: undefined,
+        writable: true
+      },
 
-    /**
-     * The {@link Container} that holds this Mapper. __Do not modify.__
-     *
-     * @name Mapper#lifecycleMethods
-     * @since 3.0.0
-     * @type {Object}
-     */
-    datastore: {
-      value: undefined,
-      writable: true
-    },
+      /**
+       * The {@link Container} that holds this Mapper. __Do not modify.__
+       *
+       * @name Mapper#lifecycleMethods
+       * @since 3.0.0
+       * @type {Object}
+       */
+      datastore: {
+        value: undefined,
+        writable: true
+      },
 
-    /**
-     * The meta information describing this Mapper's available lifecycle
-     * methods. __Do not modify.__
-     *
-     * @name Mapper#lifecycleMethods
-     * @since 3.0.0
-     * @type {Object}
-     */
-    lifecycleMethods: {
-      value: LIFECYCLE_METHODS
-    },
+      /**
+       * The meta information describing this Mapper's available lifecycle
+       * methods. __Do not modify.__
+       *
+       * @name Mapper#lifecycleMethods
+       * @since 3.0.0
+       * @type {Object}
+       */
+      lifecycleMethods: {
+        value: LIFECYCLE_METHODS
+      },
 
-    /**
-     * Set to `false` to force the Mapper to work with POJO objects only.
-     *
-     * @example
-     * // Use POJOs only.
-     * import { Mapper, Record } from 'js-data';
-     * const UserMapper = new Mapper({ recordClass: false });
-     * UserMapper.recordClass // false;
-     * const user = UserMapper.createRecord();
-     * user instanceof Record; // false
-     *
-     * @example
-     * // Set to a custom class to have records wrapped in your custom class.
-     * import { Mapper, Record } from 'js-data';
-     *  // Custom class
-     * class User {
-     *   constructor (props = {}) {
-     *     for (var key in props) {
-     *       if (props.hasOwnProperty(key)) {
-     *         this[key] = props[key];
-     *       }
-     *     }
-     *   }
-     * }
-     * const UserMapper = new Mapper({ recordClass: User });
-     * UserMapper.recordClass; // function User() {}
-     * const user = UserMapper.createRecord();
-     * user instanceof Record; // false
-     * user instanceof User; // true
-     *
-     *
-     * @example
-     * // Extend the {@link Record} class.
-     * import { Mapper, Record } from 'js-data';
-     *  // Custom class
-     * class User extends Record {
-     *   constructor () {
-     *     super(props);
-     *   }
-     * }
-     * const UserMapper = new Mapper({ recordClass: User });
-     * UserMapper.recordClass; // function User() {}
-     * const user = UserMapper.createRecord();
-     * user instanceof Record; // true
-     * user instanceof User; // true
-     *
-     * @name Mapper#recordClass
-     * @default {@link Record}
-     * @see Record
-     * @since 3.0.0
-     */
-    recordClass: {
-      value: undefined,
-      writable: true
-    },
+      /**
+       * Set to `false` to force the Mapper to work with POJO objects only.
+       *
+       * @example
+       * // Use POJOs only.
+       * import { Mapper, Record } from 'js-data';
+       * const UserMapper = new Mapper({ recordClass: false });
+       * UserMapper.recordClass // false;
+       * const user = UserMapper.createRecord();
+       * user instanceof Record; // false
+       *
+       * @example
+       * // Set to a custom class to have records wrapped in your custom class.
+       * import { Mapper, Record } from 'js-data';
+       *  // Custom class
+       * class User {
+       *   constructor (props = {}) {
+       *     for (var key in props) {
+       *       if (props.hasOwnProperty(key)) {
+       *         this[key] = props[key];
+       *       }
+       *     }
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User });
+       * UserMapper.recordClass; // function User() {}
+       * const user = UserMapper.createRecord();
+       * user instanceof Record; // false
+       * user instanceof User; // true
+       *
+       *
+       * @example
+       * // Extend the {@link Record} class.
+       * import { Mapper, Record } from 'js-data';
+       *  // Custom class
+       * class User extends Record {
+       *   constructor () {
+       *     super(props);
+       *   }
+       * }
+       * const UserMapper = new Mapper({ recordClass: User });
+       * UserMapper.recordClass; // function User() {}
+       * const user = UserMapper.createRecord();
+       * user instanceof Record; // true
+       * user instanceof User; // true
+       *
+       * @name Mapper#recordClass
+       * @default {@link Record}
+       * @see Record
+       * @since 3.0.0
+       */
+      recordClass: {
+        value: undefined,
+        writable: true
+      },
 
-    /**
-     * This Mapper's {@link Schema}.
-     *
-     * @example <caption>Mapper#schema</caption>
-     * const JSData = require('js-data');
-     * const { Mapper } = JSData;
-     * console.log('Using JSData v' + JSData.version.full);
-     *
-     * const UserMapper = new Mapper({
-     *   name: 'user',
-     *   schema: {
-     *     properties: {
-     *       id: { type: 'number' },
-     *       first: { type: 'string', track: true },
-     *       last: { type: 'string', track: true },
-     *       role: { type: 'string', track: true, required: true },
-     *       age: { type: 'integer', track: true },
-     *       is_active: { type: 'number' }
-     *     }
-     *   }
-     * });
-     * const user = UserMapper.createRecord({
-     *   id: 1,
-     *   name: 'John',
-     *   role: 'admin'
-     * });
-     * user.on('change', function (user, changes) {
-     *   console.log(changes);
-     * });
-     * user.on('change:role', function (user, value) {
-     *   console.log('change:role - ' + value);
-     * });
-     * user.role = 'owner';
-     *
-     * @name Mapper#schema
-     * @see Schema
-     * @since 3.0.0
-     * @type {Schema}
-     */
-    schema: {
-      value: undefined,
-      writable: true
-    }
-  })
-
-  // Apply user-provided configuration
-  utils.fillIn(this, opts)
-  // Fill in any missing options with the defaults
-  utils.fillIn(this, utils.copy(MAPPER_DEFAULTS))
-
-  /**
-   * The name for this Mapper. This is the minimum amount of meta information
-   * required for a Mapper to be able to execute CRUD operations for a
-   * Resource.
-   *
-   * @name Mapper#name
-   * @since 3.0.0
-   * @type {string}
-   */
-  if (!this.name) {
-    throw utils.err(`new ${DOMAIN}`, 'opts.name')(400, 'string', this.name)
-  }
-
-  // Setup schema, with an empty default schema if necessary
-  if (this.schema) {
-    this.schema.type || (this.schema.type = 'object')
-    if (!(this.schema instanceof Schema)) {
-      this.schema = new Schema(this.schema || { type: 'object' })
-    }
-  }
-
-  // Create a subclass of Record that's tied to this Mapper
-  if (this.recordClass === undefined) {
-    const superClass = Record
-    this.recordClass = superClass.extend({
-      constructor: (function Record () {
-        var subClass = function Record (props, opts) {
-          utils.classCallCheck(this, subClass)
-          superClass.call(this, props, opts)
-        }
-        return subClass
-      })()
+      /**
+       * This Mapper's {@link Schema}.
+       *
+       * @example <caption>Mapper#schema</caption>
+       * const JSData = require('js-data');
+       * const { Mapper } = JSData;
+       * console.log('Using JSData v' + JSData.version.full);
+       *
+       * const UserMapper = new Mapper({
+       *   name: 'user',
+       *   schema: {
+       *     properties: {
+       *       id: { type: 'number' },
+       *       first: { type: 'string', track: true },
+       *       last: { type: 'string', track: true },
+       *       role: { type: 'string', track: true, required: true },
+       *       age: { type: 'integer', track: true },
+       *       is_active: { type: 'number' }
+       *     }
+       *   }
+       * });
+       * const user = UserMapper.createRecord({
+       *   id: 1,
+       *   name: 'John',
+       *   role: 'admin'
+       * });
+       * user.on('change', function (user, changes) {
+       *   console.log(changes);
+       * });
+       * user.on('change:role', function (user, value) {
+       *   console.log('change:role - ' + value);
+       * });
+       * user.role = 'owner';
+       *
+       * @name Mapper#schema
+       * @see Schema
+       * @since 3.0.0
+       * @type {Schema}
+       */
+      schema: {
+        value: undefined,
+        writable: true
+      }
     })
-  }
 
-  if (this.recordClass) {
-    this.recordClass.mapper = this
+    // Apply user-provided configuration
+    utils.fillIn(this, opts)
+    // Fill in any missing options with the defaults
+    utils.fillIn(this, utils.copy(MAPPER_DEFAULTS))
 
     /**
-     * Functions that should be added to the prototype of {@link Mapper#recordClass}.
+     * The name for this Mapper. This is the minimum amount of meta information
+     * required for a Mapper to be able to execute CRUD operations for a
+     * Resource.
      *
-     * @name Mapper#methods
+     * @name Mapper#name
      * @since 3.0.0
-     * @type {Object}
+     * @type {string}
      */
-    if (utils.isObject(this.methods)) {
-      utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods)
+    if (!this.name) {
+      throw utils.err(`new ${DOMAIN}`, 'opts.name')(400, 'string', this.name)
     }
 
-    // We can only apply the schema to the prototype of this.recordClass if the
-    // class extends Record
-    if (Object.isPrototypeOf.call(Record, this.recordClass) && this.schema && this.schema.apply && this.applySchema) {
-      this.schema.apply(this.recordClass.prototype)
+    // Setup schema, with an empty default schema if necessary
+    if (this.schema) {
+      this.schema.type || (this.schema.type = 'object')
+      if (!(this.schema instanceof Schema)) {
+        this.schema = new Schema(this.schema || { type: 'object' })
+      }
+    }
+
+    // Create a subclass of Record that's tied to this Mapper
+    if (this.recordClass === undefined) {
+      this.recordClass = class TiedRecord extends Record {}
+    }
+
+    if (this.recordClass) {
+      this.recordClass.mapper = this
+
+      /**
+       * Functions that should be added to the prototype of {@link Mapper#recordClass}.
+       *
+       * @name Mapper#methods
+       * @since 3.0.0
+       * @type {Object}
+       */
+      if (utils.isObject(this.methods)) {
+        utils.addHiddenPropsToTarget(this.recordClass.prototype, this.methods)
+      }
+
+      // We can only apply the schema to the prototype of this.recordClass if the
+      // class extends Record
+      if (Object.isPrototypeOf.call(Record, this.recordClass) && this.schema && this.schema.apply && this.applySchema) {
+        this.schema.apply(this.recordClass.prototype)
+      }
     }
   }
-}
-
-export default Component.extend({
-  constructor: Mapper,
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#count}. If this method
@@ -517,7 +504,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterCount: notify2,
+  afterCount = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#create}. If this method
@@ -530,7 +517,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterCreate: notify2,
+  afterCreate = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
@@ -543,7 +530,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterCreateMany: notify2,
+  afterCreateMany = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
@@ -556,7 +543,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterDestroy: notify2,
+  afterDestroy = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
@@ -570,7 +557,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterDestroyAll: notify2,
+  afterDestroyAll = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#find}. If this method
@@ -583,7 +570,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterFind: notify2,
+  afterFind = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
@@ -596,7 +583,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterFindAll: notify2,
+  afterFindAll = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
@@ -609,7 +596,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterSum: notify2,
+  afterSum = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#update}. If this method
@@ -623,7 +610,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterUpdate: notify2,
+  afterUpdate = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
@@ -637,7 +624,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterUpdateAll: notify2,
+  afterUpdateAll = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
@@ -650,7 +637,7 @@ export default Component.extend({
    * @param {*} result The result, if any.
    * @since 3.0.0
    */
-  afterUpdateMany: notify2,
+  afterUpdateMany = notify2
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#create}. If this method
@@ -662,7 +649,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#create}.
    * @since 3.0.0
    */
-  beforeCreate: notify,
+  beforeCreate = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#createMany}. If this method
@@ -674,7 +661,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#createMany}.
    * @since 3.0.0
    */
-  beforeCreateMany: notify,
+  beforeCreateMany = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#count}. If this method
@@ -686,7 +673,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#count}.
    * @since 3.0.0
    */
-  beforeCount: notify,
+  beforeCount = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroy}. If this method
@@ -698,7 +685,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#destroy}.
    * @since 3.0.0
    */
-  beforeDestroy: notify,
+  beforeDestroy = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#destroyAll}. If this method
@@ -710,7 +697,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#destroyAll}.
    * @since 3.0.0
    */
-  beforeDestroyAll: notify,
+  beforeDestroyAll = notify
 
   /**
    * Mappers lifecycle hook called by {@link Mapper#find}. If this method
@@ -722,7 +709,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#find}.
    * @since 3.0.0
    */
-  beforeFind: notify,
+  beforeFind = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#findAll}. If this method
@@ -734,7 +721,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#findAll}.
    * @since 3.0.0
    */
-  beforeFindAll: notify,
+  beforeFindAll = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#sum}. If this method
@@ -747,7 +734,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#sum}.
    * @since 3.0.0
    */
-  beforeSum: notify,
+  beforeSum = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#update}. If this method
@@ -760,7 +747,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#update}.
    * @since 3.0.0
    */
-  beforeUpdate: notify,
+  beforeUpdate = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateAll}. If this method
@@ -773,7 +760,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#updateAll}.
    * @since 3.0.0
    */
-  beforeUpdateAll: notify,
+  beforeUpdateAll = notify
 
   /**
    * Mapper lifecycle hook called by {@link Mapper#updateMany}. If this method
@@ -785,7 +772,7 @@ export default Component.extend({
    * @param {object} opts The `opts` argument passed to {@link Mapper#updateMany}.
    * @since 3.0.0
    */
-  beforeUpdateMany: notify,
+  beforeUpdateMany = notify
 
   /**
    * This method is called at the end of most lifecycle methods. It does the
@@ -817,7 +804,7 @@ export default Component.extend({
       }
     }
     return result
-  },
+  }
 
   /**
    * Define a belongsTo relationship. Only useful if you're managing your
@@ -850,7 +837,7 @@ export default Component.extend({
    */
   belongsTo (relatedMapper, opts) {
     return belongsTo(relatedMapper, opts)(this)
-  },
+  }
 
   /**
    * Select records according to the `query` argument and return the count.
@@ -881,7 +868,7 @@ export default Component.extend({
    */
   count (query, opts) {
     return this.crud('count', query, opts)
-  },
+  }
 
   /**
    * Fired during {@link Mapper#create}. See
@@ -967,10 +954,7 @@ export default Component.extend({
    * @returns {Promise} Resolves with the created record.
    * @since 3.0.0
    */
-  create (props, opts) {
-    // Default values for arguments
-    props || (props = {})
-    opts || (opts = {})
+  create (props = {}, opts = {}) {
     const originalRecord = props
     let parentRelationMap = {}
     let adapterResponse = {}
@@ -1010,7 +994,7 @@ export default Component.extend({
       opts.op = 'afterCreate'
       return this._runHook(opts.op, props, opts, result)
     })
-  },
+  }
 
   _commitChanges (recordOrRecords, newValues) {
     if (utils.isArray(recordOrRecords)) {
@@ -1024,7 +1008,7 @@ export default Component.extend({
     }
 
     return recordOrRecords
-  },
+  }
 
   /**
    * Use {@link Mapper#createRecord} instead.
@@ -1038,7 +1022,7 @@ export default Component.extend({
    */
   createInstance (props, opts) {
     return this.createRecord(props, opts)
-  },
+  }
 
   /**
    * Creates parent record for relation types like BelongsTo or HasMany with localKeys
@@ -1069,7 +1053,7 @@ export default Component.extend({
         return map
       }, {})
     })
-  },
+  }
 
   /**
    * Creates child record for relation types like HasOne or HasMany with foreignKey
@@ -1109,7 +1093,7 @@ export default Component.extend({
 
     return utils.Promise.all(tasks)
       .then(() => props)
-  },
+  }
 
   /**
    * Fired during {@link Mapper#createMany}. See
@@ -1200,10 +1184,7 @@ export default Component.extend({
    * @since 3.0.0
    * @tutorial ["http://www.js-data.io/v3.0/docs/saving-data","Saving data"]
    */
-  createMany (records, opts) {
-    // Default values for arguments
-    records || (records = [])
-    opts || (opts = {})
+  createMany (records = [], opts = {}) {
     const originalRecords = records
     let adapterResponse
 
@@ -1291,7 +1272,7 @@ export default Component.extend({
       opts.op = 'afterCreateMany'
       return this._runHook(opts.op, records, opts, result)
     })
-  },
+  }
 
   /**
    * Create an unsaved, uncached instance of this Mapper's
@@ -1385,7 +1366,7 @@ export default Component.extend({
     const RecordCtor = this.recordClass
 
     return (!RecordCtor || props instanceof RecordCtor) ? props : new RecordCtor(props, opts)
-  },
+  }
 
   /**
    * Lifecycle invocation method. You probably won't call this method directly.
@@ -1447,7 +1428,7 @@ export default Component.extend({
         return _result === undefined ? result : _result
       })
     })
-  },
+  }
 
   /**
    * Fired during {@link Mapper#destroy}. See
@@ -1534,7 +1515,7 @@ export default Component.extend({
    */
   destroy (id, opts) {
     return this.crud('destroy', id, opts)
-  },
+  }
 
   /**
    * Fired during {@link Mapper#destroyAll}. See
@@ -1635,7 +1616,7 @@ export default Component.extend({
    */
   destroyAll (query, opts) {
     return this.crud('destroyAll', query, opts)
-  },
+  }
 
   /**
    * Fired during {@link Mapper#find}. See
@@ -1724,7 +1705,7 @@ export default Component.extend({
    */
   find (id, opts) {
     return this.crud('find', id, opts)
-  },
+  }
 
   /**
    * Fired during {@link Mapper#findAll}. See
@@ -1817,7 +1798,7 @@ export default Component.extend({
    */
   findAll (query, opts) {
     return this.crud('findAll', query, opts)
-  },
+  }
 
   /**
    * Return the registered adapter with the given name or the default adapter if
@@ -1836,7 +1817,7 @@ export default Component.extend({
       throw utils.err(`${DOMAIN}#getAdapter`, 'name')(400, 'string', name)
     }
     return this.getAdapters()[adapter]
-  },
+  }
 
   /**
    * Return the name of a registered adapter based on the given name or options,
@@ -1848,13 +1829,12 @@ export default Component.extend({
    * @since 3.0.0
    * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
-  getAdapterName (opts) {
-    opts || (opts = {})
+  getAdapterName (opts = {}) {
     if (utils.isString(opts)) {
       opts = { adapter: opts }
     }
     return opts.adapter || opts.defaultAdapter
-  },
+  }
 
   /**
    * Get the object of registered adapters for this Mapper.
@@ -1866,7 +1846,7 @@ export default Component.extend({
    */
   getAdapters () {
     return this._adapters
-  },
+  }
 
   /**
    * Returns this Mapper's {@link Schema}.
@@ -1878,7 +1858,7 @@ export default Component.extend({
    */
   getSchema () {
     return this.schema
-  },
+  }
 
   /**
    * Defines a hasMany relationship. Only useful if you're managing your
@@ -1898,7 +1878,7 @@ export default Component.extend({
    */
   hasMany (relatedMapper, opts) {
     return hasMany(relatedMapper, opts)(this)
-  },
+  }
 
   /**
    * Defines a hasOne relationship. Only useful if you're managing your Mappers
@@ -1918,7 +1898,7 @@ export default Component.extend({
    */
   hasOne (relatedMapper, opts) {
     return hasOne(relatedMapper, opts)(this)
-  },
+  }
 
   /**
    * Return whether `record` is an instance of this Mapper's recordClass.
@@ -1939,7 +1919,7 @@ export default Component.extend({
   is (record) {
     const recordClass = this.recordClass
     return recordClass ? record instanceof recordClass : false
-  },
+  }
 
   /**
    * Register an adapter on this Mapper under the given name.
@@ -1953,21 +1933,20 @@ export default Component.extend({
    * @since 3.0.0
    * @tutorial ["http://www.js-data.io/v3.0/docs/connecting-to-a-data-source","Connecting to a data source"]
    */
-  registerAdapter (name, adapter, opts) {
-    opts || (opts = {})
+  registerAdapter (name, adapter, opts = {}) {
     this.getAdapters()[name] = adapter
     // Optionally make it the default adapter for the target.
     if (opts === true || opts.default) {
       this.defaultAdapter = name
     }
-  },
+  }
 
   _runHook (hookName, ...hookArgs) {
     const defaultValueIndex = hookName.indexOf('after') === 0 ? hookArgs.length - 1 : 0
 
     return utils.resolve(this[hookName](...hookArgs))
       .then((overridenResult) => overridenResult === undefined ? hookArgs[defaultValueIndex] : overridenResult)
-  },
+  }
 
   _invokeAdapterMethod (method, propsOrRecords, opts) {
     const conversionOptions = { with: opts.pass || [] }
@@ -1982,7 +1961,7 @@ export default Component.extend({
     }
 
     return this.getAdapter(opts.adapter)[method](this, object, opts)
-  },
+  }
 
   /**
    * Select records according to the `query` argument, and aggregate the sum
@@ -2014,7 +1993,7 @@ export default Component.extend({
    */
   sum (field, query, opts) {
     return this.crud('sum', field, query, opts)
-  },
+  }
 
   /**
    * Return a plain object representation of the given record. Relations can
@@ -2060,9 +2039,8 @@ export default Component.extend({
    * @returns {Object|Object[]} POJO representation of the record or records.
    * @since 3.0.0
    */
-  toJSON (records, opts) {
+  toJSON (records, opts = {}) {
     let record
-    opts || (opts = {})
     if (utils.isArray(records)) {
       return records.map((record) => this.toJSON(record, opts))
     } else {
@@ -2105,7 +2083,7 @@ export default Component.extend({
       })
     }
     return json
-  },
+  }
 
   /**
    * Fired during {@link Mapper#update}. See
@@ -2194,7 +2172,7 @@ export default Component.extend({
    */
   update (id, props, opts) {
     return this.crud('update', id, props, opts)
-  },
+  }
 
   /**
    * Fired during {@link Mapper#updateAll}. See
@@ -2285,7 +2263,7 @@ export default Component.extend({
    */
   updateAll (props, query, opts) {
     return this.crud('updateAll', props, query, opts)
-  },
+  }
 
   /**
    * Fired during {@link Mapper#updateMany}. See
@@ -2370,7 +2348,7 @@ export default Component.extend({
    */
   updateMany (records, opts) {
     return this.crud('updateMany', records, opts)
-  },
+  }
 
   /**
    * Validate the given record or records according to this Mapper's
@@ -2401,8 +2379,7 @@ export default Component.extend({
    * @returns {Object[]} Array of errors or `undefined` if no errors.
    * @since 3.0.0
    */
-  validate (record, opts) {
-    opts || (opts = {})
+  validate (record, opts = {}) {
     const schema = this.getSchema()
     if (!schema) {
       return
@@ -2414,7 +2391,7 @@ export default Component.extend({
       return errors.some(Boolean) ? errors : undefined
     }
     return schema.validate(record, _opts)
-  },
+  }
 
   /**
    * Method used to wrap data returned by an adapter with this Mapper's
@@ -2456,7 +2433,7 @@ export default Component.extend({
    */
   wrap (data, opts) {
     return this.createRecord(data, opts)
-  },
+  }
 
   /**
    * @ignore
@@ -2482,7 +2459,7 @@ export default Component.extend({
       })
     })
   }
-})
+}
 
 /**
  * Create a subclass of this Mapper:

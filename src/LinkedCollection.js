@@ -19,29 +19,19 @@ const DOMAIN = 'LinkedCollection'
  * @param {object} [opts] Configuration options. See {@link Collection}.
  * @returns {Mapper}
  */
-function LinkedCollection (records, opts) {
-  utils.classCallCheck(this, LinkedCollection)
+export default class LinkedCollection extends Collection {
   // Make sure this collection has somewhere to store "added" timestamps
-  Object.defineProperties(this, {
-    _added: {
-      value: {}
-    },
-    datastore: {
-      writable: true,
-      value: undefined
+  // _added = {}
+
+  constructor (records, opts) {
+    super(records, opts)
+    // Make sure this collection has somewhere to store "added" timestamps
+
+    // Make sure this collection has a reference to a datastore
+    if (!this.datastore) {
+      throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', this.datastore)
     }
-  })
-
-  Collection.call(this, records, opts)
-
-  // Make sure this collection has a reference to a datastore
-  if (!this.datastore) {
-    throw utils.err(`new ${DOMAIN}`, 'opts.datastore')(400, 'DataStore', this.datastore)
   }
-}
-
-export default Collection.extend({
-  constructor: LinkedCollection,
 
   _addMeta (record, timestamp) {
     // Track when this record was added
@@ -50,14 +40,14 @@ export default Collection.extend({
     if (utils.isFunction(record._set)) {
       record._set('$', timestamp)
     }
-  },
+  }
 
   _clearMeta (record) {
     delete this._added[this.recordId(record)]
     if (utils.isFunction(record._set)) {
       record._set('$') // unset
     }
-  },
+  }
 
   _onRecordEvent (...args) {
     Collection.prototype._onRecordEvent.apply(this, args)
@@ -67,7 +57,7 @@ export default Collection.extend({
     if (utils.isString(event) && event.indexOf('change') === 0) {
       this.updateIndexes(args[1])
     }
-  },
+  }
 
   add (records, opts) {
     const mapper = this.mapper
@@ -77,7 +67,7 @@ export default Collection.extend({
     if (singular) {
       records = [records]
     }
-    records = Collection.prototype.add.call(this, records, opts)
+    records = super.add(records, opts)
 
     if (mapper.relationList.length && records.length) {
       // Check the currently visited record for relations that need to be
@@ -90,11 +80,11 @@ export default Collection.extend({
     records.forEach((record) => this._addMeta(record, timestamp))
 
     return singular ? records[0] : records
-  },
+  }
 
   remove (idOrRecord, opts) {
     const mapper = this.mapper
-    const record = Collection.prototype.remove.call(this, idOrRecord, opts)
+    const record = super.remove(idOrRecord, opts)
     if (record) {
       this._clearMeta(record)
     }
@@ -106,11 +96,11 @@ export default Collection.extend({
     }
 
     return record
-  },
+  }
 
   removeAll (query, opts) {
     const mapper = this.mapper
-    const records = Collection.prototype.removeAll.call(this, query, opts)
+    const records = super.removeAll(query, opts)
     records.forEach(this._clearMeta, this)
 
     if (mapper.relationList.length && records.length) {
@@ -121,7 +111,7 @@ export default Collection.extend({
 
     return records
   }
-})
+}
 
 /**
  * Create a subclass of this LinkedCollection:

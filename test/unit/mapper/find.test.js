@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#find', function () {
-  it('should be an instance method', function () {
+describe('Mapper#find', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.find, 'function')
     assert.strictEqual(mapper.find, Mapper.prototype.find)
   })
-  it('should find', async function () {
+  it('should find', async () => {
     const id = 1
     const props = { id, name: 'John' }
     let findCalled = false
@@ -18,7 +18,7 @@ describe('Mapper#find', function () {
     User.registerAdapter('mock', {
       find (mapper, _id, Opts) {
         findCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.deepEqual(_id, id, 'should pass in the id')
           assert.equal(Opts.raw, false, 'Opts are provided')
@@ -31,7 +31,7 @@ describe('Mapper#find', function () {
     assert.objectsEqual(user, props, 'user should have been found')
     assert(user instanceof User.recordClass, 'user is a record')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const id = 1
     const props = { id, name: 'John' }
     let findCalled = false
@@ -43,7 +43,7 @@ describe('Mapper#find', function () {
     User.registerAdapter('mock', {
       find (mapper, _id, Opts) {
         findCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Model')
           assert.deepEqual(_id, id, 'should pass in the id')
           assert.equal(Opts.raw, true, 'Opts are provided')

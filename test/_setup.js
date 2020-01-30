@@ -329,8 +329,8 @@ after(function () { // eslint-disable-line
   var duration = 0
   var passed = 0
   var failed = 0
-  this.test.parent.suites.forEach(function (suite) {
-    suite.tests.forEach(function (test) {
+  this.test.parent.suites.forEach((suite) => {
+    suite.tests.forEach((test) => {
       if (test.state !== 'passed' && test.state !== 'failed') {
         return
       }

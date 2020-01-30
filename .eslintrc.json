@@ -1,3 +1,10 @@
 {
-  "extends": "standard"
+  "extends": "standard",
+  "parser": "babel-eslint",
+  "env": {
+    "mocha": true
+  },
+  "rules": {
+    "prefer-arrow-callback": "error"
+  }
 }

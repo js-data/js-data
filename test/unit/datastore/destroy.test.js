@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('DataStore#destroy', function () {
-  it('should be an instance method', function () {
+describe('DataStore#destroy', () => {
+  it('should be an instance method', () => {
     const DataStore = JSData.DataStore
     const store = new DataStore()
     assert.equal(typeof store.destroy, 'function')

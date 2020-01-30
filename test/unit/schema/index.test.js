@@ -1,8 +1,8 @@
 import { assert, JSData } from '../../_setup'
 import { productSchema } from './_productSchema'
 
-describe('Schema', function () {
-  it('has the right exports', function () {
+describe('Schema', () => {
+  it('has the right exports', () => {
     assert.equal(typeof JSData.Schema, 'function')
     assert.equal(typeof JSData.Schema.validate, 'function')
     assert(JSData.Schema.types)
@@ -10,7 +10,7 @@ describe('Schema', function () {
     assert(JSData.Schema.typeGroupValidators)
   })
 
-  it('should recursively instantiate schemas', function () {
+  it('should recursively instantiate schemas', () => {
     const schemaDef = JSData.utils.plainCopy(productSchema)
     schemaDef.properties.things = {
       type: 'array',
@@ -54,7 +54,7 @@ describe('Schema', function () {
     assert(ProductSchema.properties.oneFoo.oneOf[1] instanceof JSData.Schema)
   })
 
-  it('should validate', function () {
+  it('should validate', () => {
     const ProductSchema = new JSData.Schema(productSchema)
 
     let errors = ProductSchema.validate({

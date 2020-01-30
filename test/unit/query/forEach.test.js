@@ -1,6 +1,6 @@
 import { assert } from '../../_setup'
 
-describe('Query#forEach', function () {
+describe('Query#forEach', () => {
   it('should work', function () {
     const collection = this.PostCollection
     const p1 = this.data.p1
@@ -11,7 +11,7 @@ describe('Query#forEach', function () {
 
     this.store.add('post', [p1, p2, p3, p4, p5])
     let count = 0
-    collection.query().forEach(function () {
+    collection.query().forEach(() => {
       count++
     }).run()
     assert.equal(count, 5)

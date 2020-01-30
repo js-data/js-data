@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Container#getAdapter', function () {
-  it('should get an adapter', function () {
+describe('Container#getAdapter', () => {
+  it('should get an adapter', () => {
     const Container = JSData.Container
     const store = new Container()
     assert.equal(typeof store.getAdapter, 'function')

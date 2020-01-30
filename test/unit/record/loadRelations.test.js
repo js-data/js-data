@@ -1,6 +1,6 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Record#changes', function () {
+describe('Record#changes', () => {
   const makeAdapter = function () {
     const self = this
     return {
@@ -26,7 +26,7 @@ describe('Record#changes', function () {
     }
   }
 
-  it('should be an instance method', function () {
+  it('should be an instance method', () => {
     const Record = JSData.Record
     const record = new Record()
     assert.equal(typeof record.loadRelations, 'function')
@@ -82,7 +82,7 @@ describe('Record#changes', function () {
     assert.strictEqual(user.organization, store.get('organization', user.organizationId))
   })
 
-  it('should load relations with custom load method', async function () {
+  it('should load relations with custom load method', async () => {
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
       relations: {

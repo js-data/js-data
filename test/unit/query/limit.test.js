@@ -1,6 +1,6 @@
 import { assert } from '../../_setup'
 
-describe('Query#limit', function () {
+describe('Query#limit', () => {
   it('should correctly apply "limit" predicates', function () {
     const p1 = this.data.p1
     const p2 = this.data.p2

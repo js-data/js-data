@@ -1,7 +1,7 @@
 import { assert, JSData } from '../_setup'
 
-describe('Mapper#update', function () {
-  it('should update', async function () {
+describe('Mapper#update', () => {
+  it('should update', async () => {
     const id = 1
     const props = { name: 'John' }
     const propsUpdate = { name: 'Bill', foo: undefined }
@@ -19,7 +19,7 @@ describe('Mapper#update', function () {
     store.registerAdapter('mock', {
       update (mapper, _id, _props, Opts) {
         updateCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the Mapper')
           assert.deepEqual(_id, id, 'should pass in the id')
           assert.deepEqual(_props, propsUpdate, 'should pass in the props')
@@ -31,7 +31,7 @@ describe('Mapper#update', function () {
       },
       create (mapper, _props, Opts) {
         createCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
           assert.objectsEqual(_props, props, 'should pass in the props')
           assert(!Opts.raw, 'Opts are provided')

@@ -1,13 +1,13 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Mapper#create', function () {
-  it('should be an instance method', function () {
+describe('Mapper#create', () => {
+  it('should be an instance method', () => {
     const Mapper = JSData.Mapper
     const mapper = new Mapper({ name: 'foo' })
     assert.equal(typeof mapper.create, 'function')
     assert.strictEqual(mapper.create, Mapper.prototype.create)
   })
-  it('should create', async function () {
+  it('should create', async () => {
     const props = { name: 'John' }
     let createCalled = false
     const User = new JSData.Mapper({
@@ -17,7 +17,7 @@ describe('Mapper#create', function () {
     User.registerAdapter('mock', {
       create (mapper, _props, Opts) {
         createCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
           assert.objectsEqual(_props, props, 'should pass in the props')
           assert(!Opts.raw, 'Opts are provided')
@@ -31,7 +31,7 @@ describe('Mapper#create', function () {
     assert(user[User.idAttribute], 'new user has an id')
     assert(user instanceof User.recordClass, 'user is a record')
   })
-  it('should create with defaults', async function () {
+  it('should create with defaults', async () => {
     const props = { name: 'John' }
     let createCalled = false
     const User = new JSData.Mapper({
@@ -47,7 +47,7 @@ describe('Mapper#create', function () {
     User.registerAdapter('mock', {
       create (mapper, _props, Opts) {
         createCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
           assert.objectsEqual(_props, props, 'should pass in the props')
           assert(!Opts.raw, 'Opts are provided')
@@ -62,7 +62,7 @@ describe('Mapper#create', function () {
     assert(user instanceof User.recordClass, 'user is a record')
     assert.equal(user.role, 'viewer', 'user should have default value')
   })
-  it('should create without wrapping', async function () {
+  it('should create without wrapping', async () => {
     const props = { name: 'John' }
     let createCalled = false
     const User = new JSData.Mapper({
@@ -73,7 +73,7 @@ describe('Mapper#create', function () {
     User.registerAdapter('mock', {
       create (mapper, _props, Opts) {
         createCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
           assert.objectsEqual(_props, props, 'should pass in the props')
           assert(!Opts.raw, 'Opts are provided')
@@ -87,7 +87,7 @@ describe('Mapper#create', function () {
     assert(user[User.idAttribute], 'new user has an id')
     assert(!(user instanceof User.recordClass), 'user is NOT a record')
   })
-  it('should return raw', async function () {
+  it('should return raw', async () => {
     const props = { name: 'John' }
     let createCalled = false
     const User = new JSData.Mapper({
@@ -98,7 +98,7 @@ describe('Mapper#create', function () {
     User.registerAdapter('mock', {
       create (mapper, _props, Opts) {
         createCalled = true
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
           assert.strictEqual(mapper, User, 'should pass in the JSData.Mapper')
           assert.objectsEqual(_props, props, 'should pass in the props')
           assert(Opts.raw, 'Opts are provided')
@@ -140,7 +140,7 @@ describe('Mapper#create', function () {
       },
       createMany (mapper, _props, Opts) {
         incCreate(mapper.name)
-        _props.forEach(function (__props) {
+        _props.forEach((__props) => {
           __props[mapper.idAttribute] = new Date().getTime()
         })
         return Promise.resolve(_props)
@@ -328,10 +328,10 @@ describe('Mapper#create', function () {
       create (mapper, _props, Opts) {
         incCreate(mapper.name)
         _props[mapper.idAttribute] = new Date().getTime()
-        mapper.relationFields.forEach(function (field) {
+        mapper.relationFields.forEach((field) => {
           if (_props[field]) {
             if (utils.isArray(_props[field])) {
-              _props[field].forEach(function (item) {
+              _props[field].forEach((item) => {
                 item.id = new Date().getTime()
               })
             } else if (utils.isObject(_props[field])) {
@@ -343,7 +343,7 @@ describe('Mapper#create', function () {
       },
       createMany (mapper, _props, Opts) {
         incCreate(mapper.name)
-        _props.forEach(function (__props) {
+        _props.forEach((__props) => {
           __props[mapper.idAttribute] = new Date().getTime()
         })
         return Promise.resolve(_props)
@@ -524,10 +524,10 @@ describe('Mapper#create', function () {
       create (mapper, _props, Opts) {
         incCreate(mapper.name)
         _props[mapper.idAttribute] = new Date().getTime()
-        mapper.relationFields.forEach(function (field) {
+        mapper.relationFields.forEach((field) => {
           if (_props[field]) {
             if (utils.isArray(_props[field])) {
-              _props[field].forEach(function (item) {
+              _props[field].forEach((item) => {
                 item.id = new Date().getTime()
               })
             } else if (utils.isObject(_props[field])) {
@@ -539,7 +539,7 @@ describe('Mapper#create', function () {
       },
       createMany (mapper, _props, Opts) {
         incCreate(mapper.name)
-        _props.forEach(function (__props) {
+        _props.forEach((__props) => {
           __props[mapper.idAttribute] = new Date().getTime()
         })
         return Promise.resolve(_props)
@@ -696,7 +696,7 @@ describe('Mapper#create', function () {
     assert.equal(createCalledCount.profile, 2)
     assert(!createCalledCount.organization)
   })
-  it('should validate', async function () {
+  it('should validate', async () => {
     const props = { name: 1234, age: false }
     let createCalled = false
     let user
@@ -737,7 +737,7 @@ describe('Mapper#create', function () {
     assert.equal(user, undefined, 'user was not created')
     assert.equal(props[User.idAttribute], undefined, 'props does NOT have an id')
   })
-  it('should validate required', async function () {
+  it('should validate required', async () => {
     const props = {}
     let createCalled = false
     let user
@@ -778,7 +778,7 @@ describe('Mapper#create', function () {
     assert.equal(user, undefined, 'user was not created')
     assert.equal(props[User.idAttribute], undefined, 'props does NOT have an id')
   })
-  it('should disallow extra props', async function () {
+  it('should disallow extra props', async () => {
     const props = {
       name: 'John',
       age: 30,

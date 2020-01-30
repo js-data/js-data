@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('DataStore#createMany', function () {
-  it('should be an instance method', function () {
+describe('DataStore#createMany', () => {
+  it('should be an instance method', () => {
     const DataStore = JSData.DataStore
     const store = new DataStore()
     assert.equal(typeof store.createMany, 'function')

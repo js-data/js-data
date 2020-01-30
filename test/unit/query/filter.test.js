@@ -1,6 +1,6 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Query#filter', function () {
+describe('Query#filter', () => {
   it('should work', function () {
     const collection = this.PostCollection
     const p1 = this.data.p1
@@ -278,11 +278,11 @@ describe('Query#filter', function () {
     const p4 = this.data.p4
     this.store.add('post', [p1, p2, p3, p4])
 
-    assert.objectsEqual(this.store.query('post').filter(function (item) {
+    assert.objectsEqual(this.store.query('post').filter((item) => {
       return item.author === 'John' || item.age % 30 === 1
     }).run(), [p1, p2], 'should keep p1 and p2')
   })
-  it('should filter by nested keys', function () {
+  it('should filter by nested keys', () => {
     const store = new JSData.DataStore()
     store.defineMapper('thing')
     const things = [

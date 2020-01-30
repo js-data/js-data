@@ -1,12 +1,12 @@
 import { assert, JSData, sinon } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.eventify', function () {
-  it('should be a static method', function () {
+describe('utils.eventify', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.eventify, 'function', 'has the eventify method')
   })
 
-  it('adds on, off, emit events to the specified target', function () {
+  it('adds on, off, emit events to the specified target', () => {
     const user = { name: 'John' }
     assert.isUndefined(user.on)
     assert.isUndefined(user.emit)

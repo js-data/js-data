@@ -1,6 +1,6 @@
 import { assert } from '../../_setup'
 
-describe('Query#skip', function () {
+describe('Query#skip', () => {
   it('should correctly apply "skip" predicates', function () {
     const p1 = this.data.p1
     const p2 = this.data.p2

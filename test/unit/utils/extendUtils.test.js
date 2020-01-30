@@ -1,12 +1,12 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.fillIn', function () {
-  it('should be a static method', function () {
+describe('utils.fillIn', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.fillIn, 'function', 'has the fillIn method')
   })
 
-  it('Copy properties from `source` that are missing from `dest`', function () {
+  it('Copy properties from `source` that are missing from `dest`', () => {
     const dest = { name: 'John', age: 90, friend: { name: 'Sara' } }
     const src = { name: 'John', age: 0, spy: true, friend: { name: 'Sara', age: 20 } }
     const expected = { name: 'John', age: 90, spy: true, friend: { name: 'Sara' } }
@@ -18,12 +18,12 @@ describe('utils.fillIn', function () {
   })
 })
 
-describe('utils.deepFillIn', function () {
-  it('should be a static method', function () {
+describe('utils.deepFillIn', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.deepFillIn, 'function', 'has the deepFillIn method')
   })
 
-  it('Recursivly copies properties from `source` that are missing on `dest`', function () {
+  it('Recursivly copies properties from `source` that are missing on `dest`', () => {
     const dest = { name: 'John', age: 90, friend: { name: 'Sara' } }
     const src = { name: 'John', age: 0, spy: true, friend: { name: 'Sara', age: 20 } }
     const expected = { name: 'John', age: 90, spy: true, friend: { name: 'Sara', age: 20 } }
@@ -37,12 +37,12 @@ describe('utils.deepFillIn', function () {
   })
 })
 
-describe('utils.deepMixIn', function () {
-  it('should be a static method', function () {
+describe('utils.deepMixIn', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.deepMixIn, 'function', 'has the deepMixIn decorator')
   })
 
-  it('Recursively shallow copies properties from `source` to `dest`', function () {
+  it('Recursively shallow copies properties from `source` to `dest`', () => {
     const dest = { name: 'John', age: 90, friend: { name: 'Sara' } }
     const src = { name: 'John', age: 0, spy: true, friend: { name: 'Sara', age: 20 } }
     const expected = { name: 'John', age: 0, spy: true, friend: { name: 'Sara', age: 20 } }
@@ -56,44 +56,12 @@ describe('utils.deepMixIn', function () {
   })
 })
 
-describe('utils.extend', function () {
-  it('should be a static method', function () {
-    assert.equal(typeof utils.extend, 'function', 'has the extend method')
-  })
-
-  it('extend can be used to make a subclass', function () {
-    function Foo (name) {
-      this.name = name
-      this.whatsMyName = () => {
-        return this.name
-      }
-    }
-    Foo.extend = utils.extend
-    const Bar = Foo.extend({ bar: 'bar' }, { onlyOnBar: true })
-    const barInstance = new Bar('FooBar')
-    const fooInstance = new Foo('Foo')
-    assert.isFunction(Bar, 'Bar is a function')
-
-    assert.instanceOf(fooInstance, Foo, 'fooInstance is instance of Foo')
-    assert.notInstanceOf(fooInstance, Bar, 'fooInstance is not an instance of Bar')
-    assert.equal(Foo, utils.getSuper(barInstance, false), 'barInstance inherits from Foo')
-
-    assert.instanceOf(barInstance, Bar, 'barInstance is instance of Bar')
-    assert.instanceOf(barInstance, Foo, 'barInstance is instance of Foo')
-
-    assert.equal('FooBar', barInstance.name, 'Bar inherits properties from Foo')
-    assert.equal('FooBar', barInstance.whatsMyName(), 'Bar inherits methods from Foo')
-
-    assert(typeof Foo.onlyOnBar === 'undefined' && typeof Bar.onlyOnBar === 'boolean', 'Bar contains properties not on Super (Foo)')
-  })
-})
-
-describe('utils.getSuper', function () {
-  it('should be a static method', function () {
+describe('utils.getSuper', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.getSuper, 'function', 'has the getSuper method')
   })
 
-  it('getSuper returns base class with ES2015 classes', function () {
+  it('getSuper returns base class with ES2015 classes', () => {
     class Foo {}
 
     class Bar extends Foo {}
@@ -108,39 +76,20 @@ describe('utils.getSuper', function () {
     }
   })
 
-  it('getSuper returns base class with utils.extend', function () {
+  it('getSuper returns base class with utils.extend', () => {
     function Foo () {}
-    Foo.extend = utils.extend
-    const Bar = Foo.extend()
+    class Bar extends Foo {}
     const barInstance = new Bar()
     assert.strictEqual(Foo, utils.getSuper(barInstance, false), 'barInstance inherited from Foo')
   })
 })
 
-describe('utils.classCallCheck', function () {
-  it('should be a static method', function () {
-    assert.equal(typeof utils.classCallCheck, 'function', 'has the classCallCheck method')
-  })
-
-  it('ensure instance is of a specified type', function () {
-    class Foo { }
-
-    class Bar extends Foo { }
-
-    const barInstance = new Bar()
-
-    utils.classCallCheck(barInstance, Foo)
-    utils.classCallCheck(barInstance, Bar)
-    assert.throws(() => utils.classCallCheck(barInstance, String), Error)
-  })
-})
-
-describe('utils.addHiddenPropsToTarget', function () {
-  it('should be a static method', function () {
+describe('utils.addHiddenPropsToTarget', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.addHiddenPropsToTarget, 'function', 'has the addHiddenPropsToTarget method')
   })
 
-  it('adds hidden properties to target', function () {
+  it('adds hidden properties to target', () => {
     const target = { name: 'John' }
     utils.addHiddenPropsToTarget(target, { age: 103 })
     assert.isFalse(Object.propertyIsEnumerable.call(target, 'age'), 'age on target is not enumerable.')

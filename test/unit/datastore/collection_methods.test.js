@@ -1,6 +1,6 @@
-import { assert } from '../../_setup'
+import { assert, JSData, sinon } from '../../_setup'
 
-describe('DataStore collection methods', function () {
+describe('DataStore collection methods', () => {
   it('add should work', function () {
     const user = this.store.add('user', { id: 1, name: 'John' })
     assert.objectsEqual(user, { id: 1, name: 'John' })
@@ -141,5 +141,25 @@ describe('DataStore collection methods', function () {
       .then((users) => {
         assert.equal(callCount, 4)
       })
+  })
+  it('should proxy Collection Methods', () => {
+    const store = new JSData.SimpleStore()
+    store.defineMapper('user')
+    const collection = store.getCollection('user')
+
+    sinon.replace(collection, 'createIndex', sinon.fake())
+    store.createIndex('user', 'statusAndRole', ['status', 'role'])
+    assert(collection.createIndex.calledWithMatch('statusAndRole', ['status', 'role']),
+      '[Collection.createIndex] called with wrong arguments')
+
+    sinon.replace(collection, 'between', sinon.fake())
+    store.between('user', [18], [30], { index: 'age' })
+    assert(collection.between.calledWithMatch([18], [30], { index: 'age' }),
+      '[Collection.between] called with wrong arguments')
+
+    sinon.replace(collection, 'toJSON', sinon.fake())
+    store.toJSON('user', { id: 1 })
+    assert(collection.toJSON.calledWithMatch({ id: 1 }),
+      '[Collection.toJSON] called with wrong arguments')
   })
 })

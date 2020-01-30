@@ -2,8 +2,8 @@
 import { assert, JSData } from '../../_setup'
 const utils = JSData.utils
 
-describe('utils.toJson', function () {
-  it('should be a static method', function () {
+describe('utils.toJson', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.toJson, 'function', 'has the toJson method')
   })
 
@@ -19,8 +19,8 @@ describe('utils.toJson', function () {
   })
 })
 
-describe('utils.fromJson', function () {
-  it('should be a static method', function () {
+describe('utils.fromJson', () => {
+  it('should be a static method', () => {
     assert.equal(typeof utils.fromJson, 'function', 'has the fromJson method')
   })
   it('can deserialize an object', function () {

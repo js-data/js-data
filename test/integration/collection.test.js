@@ -1,7 +1,7 @@
 import { assert, JSData, sinon } from '../_setup'
 
-describe('Collection integration tests', function () {
-  it('should emit add events', function (done) {
+describe('Collection integration tests', () => {
+  it('should emit add events', (done) => {
     const mapper = new JSData.Mapper({ name: 'user' })
     const data = [
       mapper.createRecord({ id: 2, age: 19 }),
@@ -24,7 +24,7 @@ describe('Collection integration tests', function () {
     }, 30)
   })
 
-  it('should not emit add events', function (done) {
+  it('should not emit add events', (done) => {
     const mapper = new JSData.Mapper({ name: 'user' })
     const data = [
       mapper.createRecord({ id: 2, age: 19 }),
@@ -47,7 +47,7 @@ describe('Collection integration tests', function () {
     }, 30)
   })
 
-  it('should emit remove events', function (done) {
+  it('should emit remove events', (done) => {
     const mapper = new JSData.Mapper({ name: 'user' })
     const data = mapper.createRecord({ id: 2, age: 19 })
     const collection = new JSData.Collection([], {
@@ -68,7 +68,7 @@ describe('Collection integration tests', function () {
     }, 30)
   })
 
-  it('should bubble up record events', function (done) {
+  it('should bubble up record events', (done) => {
     const mapper = new JSData.Mapper({ name: 'user' })
     const data = [
       mapper.createRecord({ id: 2, age: 19 }),
@@ -91,7 +91,7 @@ describe('Collection integration tests', function () {
     }, 30)
   })
 
-  it('should not bubble up record events', function (done) {
+  it('should not bubble up record events', (done) => {
     const mapper = new JSData.Mapper({ name: 'user' })
     const data = [
       mapper.createRecord({ id: 2, age: 19 }),
@@ -113,7 +113,7 @@ describe('Collection integration tests', function () {
     }, 30)
   })
 
-  it('should bubble up change events (assignment operator)', function (done) {
+  it('should bubble up change events (assignment operator)', (done) => {
     let changed = false
     const store = new JSData.DataStore()
     store.defineMapper('foo', {
@@ -139,7 +139,7 @@ describe('Collection integration tests', function () {
     foo.bar = 'baz'
   })
 
-  it('should bubble up change events (setter method)', function (done) {
+  it('should bubble up change events (setter method)', (done) => {
     let changed = false
     const store = new JSData.DataStore()
     store.defineMapper('foo', {

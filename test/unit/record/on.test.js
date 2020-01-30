@@ -1,8 +1,8 @@
 import { assert, JSData, sinon } from '../../_setup'
 const { Record } = JSData
 
-describe('Record#on("change")', function () {
-  it('Tracking changes to a single property', function (done) {
+describe('Record#on("change")', () => {
+  it('Tracking changes to a single property', (done) => {
     const Store = new JSData.DataStore()
     const Foo = Store.defineMapper('foo', {
       schema: {
@@ -18,7 +18,7 @@ describe('Record#on("change")', function () {
     foo.name = 'new foo'
     const secondSpec = function () {
       foo.name = 'updated foo'
-      setTimeout(function () {
+      setTimeout(() => {
         const [record, changes] = listener.args[1]
         assert.equal(foo, record, "on 'change' listener called with record which was modified")
         assert.isTrue(listener.calledTwice, "on 'change' listener was called when modifying a property")
@@ -28,7 +28,7 @@ describe('Record#on("change")', function () {
         done()
       }, 5)
     }
-    setTimeout(function () {
+    setTimeout(() => {
       const [record, changes] = listener.args[0]
       assert.equal(foo, record, "on 'change' listener called with record which was modified")
       assert.isTrue(listener.calledOnce, "on 'change' listener was called when modifying a property")
@@ -39,7 +39,7 @@ describe('Record#on("change")', function () {
     }, 5)
   })
 
-  it('keepChangeHistory: false', function (done) {
+  it('keepChangeHistory: false', (done) => {
     const Store = new JSData.DataStore()
 
     class FooRecord extends Record {
@@ -76,7 +76,7 @@ describe('Record#on("change")', function () {
     bar.on('change', listener)
     foo.name = 'new foo'
     bar.name = 'new bar'
-    setTimeout(function () {
+    setTimeout(() => {
       assert.isTrue(listener.calledTwice, "on 'change' listener was called when modifying properties")
       assert.deepEqual(foo.changeHistory(), [], 'no changeHistory was stored if keepChangeHistory: false is set')
       assert.equal(bar.changeHistory().length, 1, 'if keepChangeHistory is true by default changeHistory is present')

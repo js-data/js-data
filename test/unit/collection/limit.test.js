@@ -1,15 +1,15 @@
 import { assert, JSData, TYPES_EXCEPT_NUMBER } from '../../_setup'
 
-describe('Collection#limit', function () {
-  it('should limit', function () {
+describe('Collection#limit', () => {
+  it('should limit', () => {
     const data = [
       { id: 2 },
       { id: 3 },
       { id: 1 }
     ]
     const collection = new JSData.Collection(data)
-    TYPES_EXCEPT_NUMBER.forEach(function (value) {
-      assert.throws(function () {
+    TYPES_EXCEPT_NUMBER.forEach((value) => {
+      assert.throws(() => {
         collection.limit(value)
       }, Error, `[Query#limit:num] expected: number, found: ${typeof value}\nhttp://www.js-data.io/v3.0/docs/errors#400`)
     })

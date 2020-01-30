@@ -1,14 +1,14 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Record#save', function () {
-  it('should be an instance method', function () {
+describe('Record#save', () => {
+  it('should be an instance method', () => {
     const Record = JSData.Record
     const record = new Record()
     assert.equal(typeof record.save, 'function')
     assert.strictEqual(record.save, Record.prototype.save)
   })
 
-  it('can create itself', async function () {
+  it('can create itself', async () => {
     let id = 1
     const store = new JSData.DataStore()
     const mockAdapter = {
@@ -35,7 +35,7 @@ describe('Record#save', function () {
     assert(createdBar instanceof BarMapper.recordClass)
   })
 
-  it('can update itself', async function () {
+  it('can update itself', async () => {
     const store = new JSData.DataStore()
     const mockAdapter = {
       update (mapper, id, props, opts) {
@@ -61,7 +61,7 @@ describe('Record#save', function () {
     assert(updatedBar instanceof BarMapper.recordClass)
   })
 
-  it('can update itself with changes only', async function () {
+  it('can update itself with changes only', async () => {
     const mockAdapter = {
       update (mapper, id, props, opts) {
         assert.objectsEqual(props, { bar: 'bar', bing: 'bang', beep: null })

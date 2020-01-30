@@ -1,6 +1,6 @@
 import { assert } from '../../_setup'
 
-describe('Query#map', function () {
+describe('Query#map', () => {
   it('should work', function () {
     const collection = this.PostCollection
     const p1 = this.data.p1
@@ -10,7 +10,7 @@ describe('Query#map', function () {
     const p5 = this.data.p5
 
     this.store.add('post', [p1, p2, p3, p4, p5])
-    const ids = collection.query().map(function (post) {
+    const ids = collection.query().map((post) => {
       return post.id
     }).run()
     assert.deepEqual(ids, [5, 6, 7, 8, 9])

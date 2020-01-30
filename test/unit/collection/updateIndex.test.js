@@ -1,7 +1,7 @@
 import { assert, JSData } from '../../_setup'
 
-describe('Collection#updateIndex', function () {
-  it('should update record in a single index', function () {
+describe('Collection#updateIndex', () => {
+  it('should update record in a single index', () => {
     const data = [
       { id: 2, age: 19 },
       { id: 1, age: 27 }
