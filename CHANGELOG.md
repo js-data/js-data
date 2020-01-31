@@ -1,3 +1,7 @@
+##### 4.0.0-beta.1 - 31 January 2020
+
+- [#560] - Typescript migration
+
 ##### 3.0.5 - 2 December 2018
 
 ###### Bug fixes
