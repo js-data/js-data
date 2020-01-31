@@ -1,8 +1,0 @@
-{
-  "name": "js-data",
-  "version": false,
-  "main": "./dist/js-data.d.ts",
-  "ambientDependencies": {
-    "es6-shim": "registry:dt/es6-shim"
-  }
-}

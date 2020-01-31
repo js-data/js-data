@@ -1,28 +1,14 @@
-import babel from 'rollup-plugin-babel'
+import typescript from '@rollup/plugin-typescript'
 
-export default {
+export default commandLineArgs => ({
   output: {
     amd: {
       id: 'js-data'
     },
     name: 'JSData'
   },
-  plugins: [
-    babel({
-      babelrc: false,
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            modules: false,
-            targets: {
-              browsers: ['last 2 versions', 'safari >= 7', '> 1%', 'IE 11']
-            }
-          }
-        ]
-      ],
-      plugins: ['@babel/plugin-proposal-class-properties'],
-      exclude: 'node_modules/**'
-    })
-  ]
-}
+  plugins: [typescript({
+    tsconfig: './tsconfig.json',
+    target: commandLineArgs.format === 'umd' ? 'es5' : 'es2015'
+  })]
+})

@@ -11,7 +11,7 @@
   "license": "MIT",
   "main": "./dist/js-data.js",
   "jsnext:main": "dist/js-data.es2015.js",
-  "typings": "./dist/js-data.d.ts",
+  "module": "./src/index.ts",
   "files": [
     "dist/",
     "lib/",
@@ -34,7 +34,7 @@
     "localstorage"
   ],
   "standard": {
-    "parser": "babel-eslint",
+    "parser": "@typescript-eslint/parser",
     "globals": [
       "beforeEach",
       "after",
@@ -45,68 +45,51 @@
   "scripts": {
     "banner": "node scripts/banner.js",
     "build": "npm run lint && npm run bundle && npm run min && npm run banner",
-    "bundle:es5": "rollup src/index.js -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
-    "bundle:next": "rollup src/index.js -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es",
+    "bundle:es5": "rollup src/index.ts -c -o dist/js-data.js -m dist/js-data.js.map -f umd",
+    "bundle:next": "rollup src/index.ts -c -o dist/js-data.es2015.js -m dist/js-data.es2015.js.map -f es",
     "bundle": "npm run bundle:es5 && npm run bundle:next && repo-tools write-version dist/js-data.js dist/js-data.es2015.js",
-    "cover": "nyc --require @babel/register --require @babel/polyfill --cache mocha  --recursive -R dot && nyc report --reporter=html",
-    "doc": "jsdoc -c conf.json src && node scripts/cleanup.js",
+    "cover": "nyc npm run mocha && nyc report --reporter=html",
+    "doc": "typedoc --out doc src",
     "gzip": "echo gzipped size: $(cat dist/js-data.min.js | gzip -f9 | wc -c)kb",
-    "lint": "eslint --fix src/**/*.js && standard --fix 'src/**/*.js' 'test/**/*.js' 'scripts/*.js' 'lib/**/*.js' '*.config.js'",
+    "lint": "eslint --fix 'src/**/*.ts' 'test/**/*.ts' && standard --fix 'scripts/*.js' '*.config.js'",
     "min": "uglifyjs -o dist/js-data.min.js --source-map url=js-data.min.map -v -m -c --keep-fnames --screw-ie8 -- dist/js-data.js",
-    "mocha": "mocha -b --recursive -R dot -r @babel/register -r @babel/polyfill",
+    "mocha": "mocha --recursive -t 20000 -R dot -r ts-node/register './**/*.test.ts'",
     "precommit": "lint-staged && npm run lint",
     "prepush": "npm test",
     "release": "npm test && npm run doc && repo-tools updates && repo-tools changelog && repo-tools authors",
     "test": "npm run build && npm run cover"
   },
   "lint-staged": {
-    "linters": {
-      "src/**/*.js": [
-        "prettier-standard",
-        "git add"
-      ]
-    }
+    "{src,test}/**/*.ts": "eslint --fix"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.3",
-    "@babel/core": "^7.8.3",
-    "@babel/node": "^7.8.3",
-    "@babel/plugin-external-helpers": "^7.8.3",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/plugin-transform-modules-umd": "^7.8.3",
-    "@babel/plugin-transform-regenerator": "^7.8.3",
-    "@babel/polyfill": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
     "@js-data/repo-tools": "^1.0.1",
-    "babel-eslint": "^10.0.3",
+    "@rollup/plugin-typescript": "^2.1.0",
+    "@types/chai": "^4.2.7",
+    "@types/mocha": "^5.2.7",
+    "@types/sinon": "^7.5.1",
+    "@typescript-eslint/eslint-plugin": "^2.17.0",
     "chai": "^4.2.0",
-    "docdash": "^1.1.1",
     "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
+    "eslint-config-standard-with-typescript": "^12.0.1",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "husky": "^4.2.1",
-    "jsdoc": "^3.6.3",
-    "karma": "^4.4.1",
-    "karma-babel-preprocessor": "^8.0.1",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-mocha": "^1.3.0",
-    "karma-phantomjs-launcher": "^1.0.4",
-    "karma-sauce-launcher": "^2.0.2",
-    "karma-sinon": "^1.0.5",
+    "husky": "^0.14.3",
+    "ink-docstrap": "git+https://github.com/js-data/docstrap.git#cfbe45fa313e1628c493076d5e15d2b855dfbf2c",
     "lint-staged": "^10.0.2",
     "lodash": "^4.17.15",
     "mocha": "^7.0.0",
     "nyc": "15.0.0",
-    "phantomjs-prebuilt": "^2.1.16",
-    "prettier-standard": "^16.1.0",
+    "prettier-standard": "^8.0.1",
     "rollup": "^1.29.0",
-    "rollup-plugin-babel": "^4.3.3",
     "sinon": "^8.1.0",
-    "standard": "14.3.1",
-    "uglify-js": "^3.7.6"
+    "standard": "11.0.1",
+    "ts-node": "^8.6.2",
+    "tslib": "^1.10.0",
+    "typedoc": "^0.16.9",
+    "typescript": "^3.7.5",
+    "uglify-js": "3.4.7"
   }
 }

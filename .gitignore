@@ -25,8 +25,8 @@ junit/
 jsconfig.json
 
 .nyc_output
-coverage/
-doc/
 node_modules/
 typings
 yarn.lock
+package-lock.json
+build

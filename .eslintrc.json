@@ -1,10 +1,33 @@
 {
-  "extends": "standard",
-  "parser": "babel-eslint",
-  "env": {
-    "mocha": true
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "standard-with-typescript"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
   },
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "rules": {
-    "prefer-arrow-callback": "error"
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/restrict-plus-operands": "off",
+    "@typescript-eslint/restrict-template-expressions": "off",
+    "@typescript-eslint/promise-function-async": "off",
+    "@typescript-eslint/no-dynamic-delete": "off",
+    "@typescript-eslint/consistent-type-assertions": "off",
+    "@typescript-eslint/no-this-alias": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-extraneous-class": "off",
+    "@typescript-eslint/no-floating-promises": "off",
+    "new-cap": "off",
+    "no-dupe-class-members": "off",
+    "no-unused-vars": "off",
+    "no-void": "off",
+    "no-prototype-builtins": "off"
   }
 }
