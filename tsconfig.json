@@ -3,8 +3,6 @@
     "module": "commonjs",
     "target": "es2015",
     "sourceMap": true,
-    "outDir": "./build",
-    "declaration": true,
     "allowJs": true
   },
   "exclude": [
