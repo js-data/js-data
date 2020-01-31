@@ -8,7 +8,7 @@ export default commandLineArgs => ({
     name: 'JSData'
   },
   plugins: [typescript({
-    tsconfig: './tsconfig.json',
+    module: 'es2015',
     target: commandLineArgs.format === 'umd' ? 'es5' : 'es2015'
   })]
 })
