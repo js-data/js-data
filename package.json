@@ -11,12 +11,10 @@
   "license": "MIT",
   "main": "./dist/js-data.js",
   "jsnext:main": "dist/js-data.es2015.js",
-  "module": "./src/index.ts",
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist/",
     "lib/",
-    "src/",
     "AUTHORS",
     "CONTRIBUTORS",
     "typings.json"
@@ -65,7 +63,6 @@
   },
   "devDependencies": {
     "@js-data/repo-tools": "^1.0.1",
-    "@rollup/plugin-typescript": "^3.0.0",
     "@types/chai": "^4.2.8",
     "@types/mocha": "^7.0.1",
     "@types/sinon": "^7.5.1",
@@ -85,6 +82,7 @@
     "nyc": "15.0.0",
     "prettier-standard": "^16.1.0",
     "rollup": "^1.31.0",
+    "rollup-plugin-typescript2": "^0.25.3",
     "sinon": "^8.1.0",
     "standard": "^14.3.1",
     "ts-node": "^8.6.2",
