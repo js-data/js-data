@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 4.0.0-beta.1 - Homepage <http://www.js-data.io/>
+* @version 4.0.0-beta.3 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -701,6 +701,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`;
     get(object, prop) {
         if (!prop) {
             return;
+        }
+        /* if prop is function, get the property by calling a function, passing an object as a parameter */
+        if (utils.isFunction(prop)) {
+            return prop(object);
         }
         const parts = prop.split('.');
         const last = parts.pop();
@@ -1427,6 +1431,21 @@ http://www.js-data.io/v3.0/docs/errors#${code}`;
             }
         }
         object[last] = undefined;
+    },
+    /**
+     * Gets default locale for the js-data context.
+     *
+     * @example
+     * import { utils } from 'js-data';
+     *
+     *
+     * utils.getDefaultLocale();
+     *
+     * @method utils.getDefaultLocale
+     * @since 4.0.0
+     */
+    getDefaultLocale() {
+        return 'en';
     }
 };
 const safeSetProp = (record, field, value) => {
@@ -1549,7 +1568,8 @@ const reserved = {
     orderBy: '',
     skip: '',
     sort: '',
-    where: ''
+    where: '',
+    locale: ''
 };
 // Used by our JavaScript implementation of the LIKE operator
 const escapeRegExp = /([.*+?^=!:${}()|[\]/\\])/g;
@@ -1762,7 +1782,7 @@ class Query extends Component {
      * 1 if `a` should preceed `b`.
      * @since 3.0.0
      */
-    compare(orderBy, index, a, b) {
+    compare(orderBy, index, a, b, compare) {
         const def = orderBy[index];
         let cA = utils.get(a, def[0]);
         let cB = utils.get(b, def[0]);
@@ -1783,15 +1803,18 @@ class Query extends Component {
             cB = cA;
             cA = temp;
         }
-        if (cA < cB) {
-            return -1;
-        }
-        else if (cA > cB) {
-            return 1;
+        /* Fix: compare by using collator */
+        // let isNumeric = false
+        // if (utils.isNumber(cA) || utils.isNumber(cB)) {
+        //   isNumeric = true
+        // }
+        const n = compare(cA, cB);
+        if (n === -1 || n === 1) {
+            return n;
         }
         else {
             if (index < orderBy.length - 1) {
-                return this.compare(orderBy, index + 1, a, b);
+                return this.compare(orderBy, index + 1, a, b, compare);
             }
             else {
                 return 0;
@@ -1959,6 +1982,7 @@ class Query extends Component {
          * @property {number} [skip] Alias for {@link query.offset}.
          * @property {string|Array[]} [sort] Alias for {@link query.orderBy}.
          * @property {Object} [where] See {@link query.where}.
+         * @property {String} [locale] See {@link query.locale}.
          * @since 3.0.0
          * @tutorial ["http://www.js-data.io/v3.0/docs/query-syntax","JSData's Query Syntax"]
          */
@@ -2062,7 +2086,42 @@ class Query extends Component {
                         orderBy[i] = [def, 'ASC'];
                     }
                 });
-                this.data.sort((a, b) => this.compare(orderBy, index, a, b));
+                let locale = utils.getDefaultLocale();
+                if (utils.isString(query.locale)) {
+                    locale = query.locale;
+                }
+                /** The locale params has to be explicitly set for the collator.compare to work.
+                *
+                * @example <caption>Order posts with specific locale, defaults to 'en'</caption>
+                * const JSData = require('js-data');
+                * const { DataStore } = JSData;
+                * console.log('Using JSData v' + JSData.version.full);
+                *
+                * const store = new DataStore();
+                * store.defineMapper('post')
+                * const posts = [
+                *   { author: 'คลอน', age: 30, id: 5 },
+                *   { author: 'กลอน', age: 31, id: 6 },
+                *   { author: 'สาระ', age: 32, id: 7 },
+                *   { author: 'ศาลา', age: 33, id: 8 },
+                *   { author: 'จักรพรรณ', age: 33, id: 9 }
+                * ];
+                * store.add('post', posts);
+                * const results = store.filter('post', {
+                *     orderBy:[['author','ASC'],['id','DESC']],
+                *     locale: 'th'
+                * });
+                * console.log(results);
+                *
+                * @name query.locale
+                * @type {string}
+                * @see http://www.js-data.io/v4.0/docs/query-syntax
+                * @since 4.0.0
+                */
+                const collator = new Intl.Collator(locale, {
+                    numeric: true
+                });
+                this.data.sort((a, b) => this.compare(orderBy, index, a, b, collator.compare));
             }
             /**
              * Number of records to skip.
@@ -12329,8 +12388,8 @@ class DataStore extends SimpleStore {
  * @type {Object}
  */
 const version = {
-  beta: 1,
-  full: '4.0.0-beta.1',
+  beta: 3,
+  full: '4.0.0-beta.3',
   major: 4,
   minor: 0,
   patch: 0

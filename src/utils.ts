@@ -716,6 +716,10 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     if (!prop) {
       return
     }
+    /* if prop is function, get the property by calling a function, passing an object as a parameter */
+    if (utils.isFunction(prop)) {
+      return prop(object)
+    }
     const parts = prop.split('.')
     const last = parts.pop()
 
@@ -1467,6 +1471,21 @@ http://www.js-data.io/v3.0/docs/errors#${code}`
     }
 
     object[last] = undefined
+  },
+  /**
+   * Gets default locale for the js-data context.
+   *
+   * @example
+   * import { utils } from 'js-data';
+   *
+   *
+   * utils.getDefaultLocale();
+   *
+   * @method utils.getDefaultLocale
+   * @since 4.0.0
+   */
+  getDefaultLocale () {
+    return 'en'
   }
 }
 

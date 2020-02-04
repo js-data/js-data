@@ -151,6 +151,101 @@ describe('Query#orderBy', () => {
       ]
     )
   })
+  it('should work with sorting de locality', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('item')
+    const items = [
+      { test: 'a' },
+      { test: 'z' },
+      { test: 'ä' }
+    ]
+    store.add('item', items)
+    const params: any = {}
+    params.orderBy = [
+      ['test', 'ASC']
+    ]
+    // should work without locale param with best fit criteria
+    objectsEqual(store.query('item').filter(params).run(), [
+      items[0],
+      items[2],
+      items[1]
+    ])
+    // should work with locale param
+    params.locale = 'de'
+    objectsEqual(store.query('item').filter(params).run(), [
+      items[0],
+      items[2],
+      items[1]
+    ])
+  })
+  // it('should work with sorting sv locality', function () {
+  //   const store = new JSData.DataStore()
+  //   store.defineMapper('item')
+  //   const items = [
+  //     { test: 'a' },
+  //     { test: 'z' },
+  //     { test: 'ä' }
+  //   ]
+  //   store.add('item', items)
+  //   const params: any = {}
+  //   params.orderBy = [
+  //     ['test', 'ASC']
+  //   ]
+  //   params.locale = 'sv'
+  //   objectsEqual(store.query('item').filter(params).run(), [
+  //     items[0],
+  //     items[1],
+  //     items[2]
+  //   ])
+  // })
+  it('should work with sorting thai locality', function () {
+    const store = new JSData.DataStore()
+    store.defineMapper('item')
+    const items = [
+      { test: 'คลอน' },
+      { test: 'กลอน' },
+      { test: 'สาระ' },
+      { test: 'ศาลา' },
+      { test: 'จักรพรรณ' },
+      { test: 'จักรพรรดิ' },
+      { test: 'เก๋ง' },
+      { test: 'เก้ง' },
+      { test: 'เก็ง' },
+      { test: 'เก่ง' }
+    ]
+    store.add('item', items)
+    const params: any = {}
+    params.orderBy = [
+      ['test', 'ASC']
+    ]
+    // should work without locale param with best fit criteria
+    objectsEqual(store.query('item').filter(params).run(), [
+      items[1],
+      items[8],
+      items[9],
+      items[7],
+      items[6],
+      items[0],
+      items[4],
+      items[5],
+      items[3],
+      items[2]
+    ])
+    // should work with locale param
+    params.locale = 'th'
+    objectsEqual(store.query('item').filter(params).run(), [
+      items[1],
+      items[8],
+      items[9],
+      items[7],
+      items[6],
+      items[0],
+      items[4],
+      items[5],
+      items[3],
+      items[2]
+    ])
+  })
   it('should order by nested keys', () => {
     const store = new JSData.DataStore()
     store.defineMapper('thing')
@@ -206,6 +301,74 @@ describe('Query#orderBy', () => {
         .run(),
       [things[0], things[2], things[3], things[1]],
       'should order by a nested key'
+    )
+  })
+  it('puts null and undefined values at the end of result', () => {
+    const store = new JSData.DataStore()
+
+    store.defineMapper('nilOrderBy')
+
+    const items = [
+      {
+        id: 0,
+        count: 1
+      },
+      {
+        id: 1,
+        count: null
+      },
+      {
+        id: 2,
+        count: 0
+      },
+      {
+        id: 3,
+        count: undefined
+      },
+      {
+        id: 4,
+        count: 2
+      },
+      {
+        id: 5,
+        count: undefined
+      },
+      {
+        id: 6,
+        count: null
+      },
+      {
+        id: 7,
+        count: 10
+      }
+    ]
+
+    store.add('nilOrderBy', items)
+
+    const paramsAsc = {
+      orderBy: [['count', 'ASC']]
+    }
+
+    objectsEqual(
+      store
+        .query('nilOrderBy')
+        .filter(paramsAsc)
+        .run(),
+      [items[2], items[0], items[4], items[7], items[1], items[6], items[3], items[5]],
+      'should order by a key ASC'
+    )
+
+    const paramsDesc = {
+      orderBy: [['count', 'DESC']]
+    }
+
+    objectsEqual(
+      store
+        .query('nilOrderBy')
+        .filter(paramsDesc)
+        .run(),
+      [items[3], items[5], items[1], items[6], items[7], items[4], items[0], items[2]],
+      'should order by a key DESC'
     )
   })
 })
