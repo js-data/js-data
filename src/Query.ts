@@ -11,7 +11,8 @@ const reserved = {
   orderBy: '',
   skip: '',
   sort: '',
-  where: ''
+  where: '',
+  locale: ''
 }
 
 // Used by our JavaScript implementation of the LIKE operator
@@ -241,7 +242,7 @@ export default class Query extends Component {
    * 1 if `a` should preceed `b`.
    * @since 3.0.0
    */
-  compare (orderBy, index, a, b) {
+  compare (orderBy, index, a, b, compare) {
     const def = orderBy[index]
     let cA = utils.get(a, def[0])
     let cB = utils.get(b, def[0])
@@ -262,13 +263,17 @@ export default class Query extends Component {
       cB = cA
       cA = temp
     }
-    if (cA < cB) {
-      return -1
-    } else if (cA > cB) {
-      return 1
+    /* Fix: compare by using collator */
+    // let isNumeric = false
+    // if (utils.isNumber(cA) || utils.isNumber(cB)) {
+    //   isNumeric = true
+    // }
+    const n = compare(cA, cB)
+    if (n === -1 || n === 1) {
+      return n
     } else {
       if (index < orderBy.length - 1) {
-        return this.compare(orderBy, index + 1, a, b)
+        return this.compare(orderBy, index + 1, a, b, compare)
       } else {
         return 0
       }
@@ -436,6 +441,7 @@ export default class Query extends Component {
      * @property {number} [skip] Alias for {@link query.offset}.
      * @property {string|Array[]} [sort] Alias for {@link query.orderBy}.
      * @property {Object} [where] See {@link query.where}.
+     * @property {String} [locale] See {@link query.locale}.
      * @since 3.0.0
      * @tutorial ["http://www.js-data.io/v3.0/docs/query-syntax","JSData's Query Syntax"]
      */
@@ -544,7 +550,43 @@ export default class Query extends Component {
             orderBy[i] = [def, 'ASC']
           }
         })
-        this.data.sort((a, b) => this.compare(orderBy, index, a, b))
+        let locale: string = utils.getDefaultLocale()
+        if (utils.isString(query.locale)) {
+          locale = query.locale
+        }
+        /** The locale params has to be explicitly set for the collator.compare to work.
+        *
+        * @example <caption>Order posts with specific locale, defaults to 'en'</caption>
+        * const JSData = require('js-data');
+        * const { DataStore } = JSData;
+        * console.log('Using JSData v' + JSData.version.full);
+        *
+        * const store = new DataStore();
+        * store.defineMapper('post')
+        * const posts = [
+        *   { author: 'คลอน', age: 30, id: 5 },
+        *   { author: 'กลอน', age: 31, id: 6 },
+        *   { author: 'สาระ', age: 32, id: 7 },
+        *   { author: 'ศาลา', age: 33, id: 8 },
+        *   { author: 'จักรพรรณ', age: 33, id: 9 }
+        * ];
+        * store.add('post', posts);
+        * const results = store.filter('post', {
+        *     orderBy:[['author','ASC'],['id','DESC']],
+        *     locale: 'th'
+        * });
+        * console.log(results);
+        *
+        * @name query.locale
+        * @type {string}
+        * @see http://www.js-data.io/v4.0/docs/query-syntax
+        * @since 4.0.0
+        */
+        const collator = new Intl.Collator(locale, {
+          numeric: true
+        })
+
+        this.data.sort((a, b) => this.compare(orderBy, index, a, b, collator.compare))
       }
 
       /**

@@ -18,6 +18,13 @@ describe('utils.get', () => {
     assert.equal(john.friend.name, utils.get(john, 'friend.name'))
     assert.equal(undefined, utils.get(john, ''), 'null prop name returns undefined')
   })
+  it('returns a given property by callback', function () {
+    const john = { name: 'John', age: 20, friend: { name: 'Sara' } }
+    const callback = (prop) => {
+      return john[prop]
+    }
+    assert.equal(john.name, utils.get('name', callback))
+  })
 })
 
 describe('utils.findIndex', () => {
@@ -177,5 +184,13 @@ describe('utils.noDupeAdd', () => {
     utils.noDupeAdd(colors, 'blue', color => color === 'blue')
     assert.equal('blue', colors[3], 'added blue to end of array')
     assert.lengthOf(colors, 4, 'added blue to array')
+  })
+})
+describe('utils.getDefaultLocale', function () {
+  it('should be a static method', function () {
+    assert.equal(typeof utils.getDefaultLocale, 'function', 'has the getDefaultLocale method')
+  })
+  it('Default locale should be "en"', function () {
+    assert.equal('en', utils.getDefaultLocale())
   })
 })
