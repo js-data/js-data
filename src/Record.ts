@@ -766,7 +766,7 @@ export default class Record extends Settable {
    * @since 3.0.0
    */
   toJSON (opts?) {
-    const mapper = (this.constructor as any).mapper
+    const mapper = (this.constructor as typeof Record).mapper
     if (mapper) {
       return mapper.toJSON(this, opts)
     } else {
