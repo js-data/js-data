@@ -1,3 +1,7 @@
+##### 4.0.0-beta.4 - 9 February 2020
+
+- Use babel in roll-up
+
 ##### 4.0.0-beta.1 - 31 January 2020
 
 - [#560] - Typescript migration
