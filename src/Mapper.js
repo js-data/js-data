@@ -980,7 +980,9 @@ export default Component.extend({
     opts.adapter = this.getAdapterName(opts)
 
     opts.op = 'beforeCreate'
-    return this._runHook(opts.op, props, opts).then((props) => {
+    return this._runHook(opts.op, props, opts).then((_value) => {
+      // Allow for re-assignment from lifecycle hook
+      props = _value !== undefined ? _value : props
       opts.with || (opts.with = [])
       return this._createParentRecordIfRequired(props, opts)
     }).then((relationMap) => {
@@ -1213,7 +1215,9 @@ export default Component.extend({
 
     // beforeCreateMany lifecycle hook
     opts.op = 'beforeCreateMany'
-    return this._runHook(opts.op, records, opts).then((records) => {
+    return this._runHook(opts.op, records, opts).then((_recordValues) => {
+      // Allow for re-assignment from lifecycle hook
+      records = _recordValues !== undefined ? _recordValues : records
       // Deep pre-create belongsTo relations
       const belongsToRelationData = {}
       opts.with || (opts.with = [])

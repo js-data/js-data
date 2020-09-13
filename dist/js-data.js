@@ -8506,7 +8506,9 @@
 
       opts.adapter = this.getAdapterName(opts);
       opts.op = 'beforeCreate';
-      return this._runHook(opts.op, props, opts).then(function (props) {
+      return this._runHook(opts.op, props, opts).then(function (_value) {
+        // Allow for re-assignment from lifecycle hook
+        props = _value !== undefined ? _value : props;
         opts.with || (opts.with = []);
         return _this2._createParentRecordIfRequired(props, opts);
       }).then(function (relationMap) {
@@ -8747,7 +8749,9 @@
       opts.adapter = this.getAdapterName(opts); // beforeCreateMany lifecycle hook
 
       opts.op = 'beforeCreateMany';
-      return this._runHook(opts.op, records, opts).then(function (records) {
+      return this._runHook(opts.op, records, opts).then(function (_recordValues) {
+        // Allow for re-assignment from lifecycle hook
+        records = _recordValues !== undefined ? _recordValues : records;
         // Deep pre-create belongsTo relations
         var belongsToRelationData = {};
         opts.with || (opts.with = []);

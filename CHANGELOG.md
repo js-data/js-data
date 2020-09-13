@@ -1,3 +1,8 @@
+##### 3.0.7 - 3 September 2019
+
+###### Bug fixes
+- Fix beforeCreate & beforeCreateMany lifecycle hook re-assignment of props
+
 ##### 3.0.5 - 2 December 2018
 
 ###### Bug fixes
