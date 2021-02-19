@@ -2,8 +2,8 @@ import utils from '../utils'
 import { Relation } from '../Relation'
 
 export const HasOneRelation = Relation.extend({
-  findExistingLinksFor (relatedMapper, record) {
-    const recordId = utils.get(record, relatedMapper.idAttribute)
+  findExistingLinksFor (record) {
+    const recordId = utils.get(record, this.mapper.idAttribute)
     const records = this.findExistingLinksByForeignKey(recordId)
 
     if (records && records.length) {
