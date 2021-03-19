@@ -70,6 +70,10 @@ const mkdirP = function (object, path) {
   return object
 }
 
+const isPrototypePolluted = function (key) {
+  return ['__proto__', 'prototype', 'constructor'].includes(key)
+}
+
 const utils = {
   /**
    * Reference to the Promise constructor used by JSData. Defaults to
@@ -446,6 +450,7 @@ const utils = {
   deepMixIn (dest, source) {
     if (source) {
       for (var key in source) {
+        if (isPrototypePolluted(key)) continue
         const value = source[key]
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
