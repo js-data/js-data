@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.6 - Homepage <http://www.js-data.io/>
+* @version 3.0.9 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -8,6 +8,8 @@
 * @overview js-data is a framework-agnostic, datastore-agnostic ORM/ODM for Node.js and the Browser.
 */
 function _typeof(obj) {
+  "@babel/helpers - typeof";
+
   if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
     _typeof = function (obj) {
       return typeof obj;
@@ -37,23 +39,36 @@ function _defineProperty(obj, key, value) {
 }
 
 function _toConsumableArray(arr) {
-  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
 }
 
 function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-    return arr2;
-  }
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
 }
 
 function _iterableToArray(iter) {
-  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+  return arr2;
 }
 
 function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance");
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
 
 /**
@@ -126,6 +141,10 @@ var mkdirP = function mkdirP(object, path) {
     object = object[key];
   });
   return object;
+};
+
+var isPrototypePolluted = function isPrototypePolluted(key) {
+  return ['__proto__', 'prototype', 'constructor'].includes(key);
 };
 
 var utils = {
@@ -480,6 +499,7 @@ var utils = {
   deepMixIn: function deepMixIn(dest, source) {
     if (source) {
       for (var key in source) {
+        if (isPrototypePolluted(key)) continue;
         var value = source[key];
         var existing = dest[key];
 
@@ -8745,8 +8765,8 @@ var Mapper$1 = Component$1.extend({
     opts.op = 'beforeCreateMany';
     return this._runHook(opts.op, records, opts).then(function (_recordValues) {
       // Allow for re-assignment from lifecycle hook
-      records = _recordValues !== undefined ? _recordValues : records;
-      // Deep pre-create belongsTo relations
+      records = _recordValues !== undefined ? _recordValues : records; // Deep pre-create belongsTo relations
+
       var belongsToRelationData = {};
       opts.with || (opts.with = []);
       var tasks = [];
@@ -14518,10 +14538,10 @@ var DataStore$1 = SimpleStore$1.extend(props$2);
  */
 
 var version = {
-  full: '3.0.6',
+  full: '3.0.9',
   major: 3,
   minor: 0,
-  patch: 6
+  patch: 9
 };
 
 export { Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, SimpleStore$1 as SimpleStore, belongsTo, belongsToType, hasMany, hasManyType, hasOne, hasOneType, utils, version };
