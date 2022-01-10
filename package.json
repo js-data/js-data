@@ -68,26 +68,26 @@
     }
   },
   "devDependencies": {
-    "@babel/cli": "^7.13.10",
-    "@babel/core": "^7.13.10",
-    "@babel/node": "^7.8.3",
-    "@babel/plugin-external-helpers": "^7.8.3",
-    "@babel/plugin-transform-modules-umd": "^7.13.0",
-    "@babel/plugin-transform-regenerator": "^7.12.13",
+    "@babel/cli": "^7.16.7",
+    "@babel/core": "^7.16.7",
+    "@babel/node": "^7.16.7",
+    "@babel/plugin-external-helpers": "^7.16.7",
+    "@babel/plugin-transform-modules-umd": "^7.16.7",
+    "@babel/plugin-transform-regenerator": "^7.16.7",
     "@babel/polyfill": "^7.8.3",
-    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-env": "^7.16.7",
     "@js-data/repo-tools": "^1.0.1",
     "babel-eslint": "^10.0.3",
     "chai": "^4.3.4",
     "docdash": "^1.1.1",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-standard": "^4.1.0",
     "husky": "^4.3.8",
-    "jsdoc": "^3.6.3",
+    "jsdoc": "^3.6.7",
     "karma": "^4.4.1",
     "karma-babel-preprocessor": "^8.0.1",
     "karma-chai": "^0.1.0",
@@ -106,6 +106,6 @@
     "rollup-plugin-babel": "^4.4.0",
     "sinon": "^8.1.0",
     "standard": "14.3.1",
-    "uglify-js": "^3.13.2"
+    "uglify-js": "^3.14.5"
   }
 }
