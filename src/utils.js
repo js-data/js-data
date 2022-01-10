@@ -62,6 +62,7 @@ const mkdirP = function (object, path) {
   }
   const parts = path.split('.')
   parts.forEach(function (key) {
+    if (isPrototypePolluted(key)) return
     if (!object[key]) {
       object[key] = {}
     }
@@ -419,6 +420,7 @@ const utils = {
   deepFillIn (dest, source) {
     if (source) {
       utils.forOwn(source, function (value, key) {
+        if (isPrototypePolluted(key)) return
         const existing = dest[key]
         if (isPlainObject(value) && isPlainObject(existing)) {
           utils.deepFillIn(existing, value)
