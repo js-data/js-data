@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.9 - Homepage <http://www.js-data.io/>
+* @version 3.0.10 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -140,6 +140,8 @@
 
     var parts = path.split('.');
     parts.forEach(function (key) {
+      if (isPrototypePolluted(key)) return;
+
       if (!object[key]) {
         object[key] = {};
       }
@@ -472,6 +474,7 @@
     deepFillIn: function deepFillIn(dest, source) {
       if (source) {
         utils.forOwn(source, function (value, key) {
+          if (isPrototypePolluted(key)) return;
           var existing = dest[key];
 
           if (isPlainObject(value) && isPlainObject(existing)) {
@@ -14544,10 +14547,10 @@
    */
 
   var version = {
-  full: '3.0.9',
+  full: '3.0.10',
   major: 3,
   minor: 0,
-  patch: 9
+  patch: 10
 };
 
   exports.Collection = Collection$1;

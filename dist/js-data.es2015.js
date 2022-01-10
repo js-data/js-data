@@ -1,6 +1,6 @@
 /*!
 * js-data
-* @version 3.0.9 - Homepage <http://www.js-data.io/>
+* @version 3.0.10 - Homepage <http://www.js-data.io/>
 * @author js-data project authors
 * @copyright (c) 2014-2016 js-data project authors
 * @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>
@@ -134,6 +134,8 @@ var mkdirP = function mkdirP(object, path) {
 
   var parts = path.split('.');
   parts.forEach(function (key) {
+    if (isPrototypePolluted(key)) return;
+
     if (!object[key]) {
       object[key] = {};
     }
@@ -466,6 +468,7 @@ var utils = {
   deepFillIn: function deepFillIn(dest, source) {
     if (source) {
       utils.forOwn(source, function (value, key) {
+        if (isPrototypePolluted(key)) return;
         var existing = dest[key];
 
         if (isPlainObject(value) && isPlainObject(existing)) {
@@ -14538,10 +14541,10 @@ var DataStore$1 = SimpleStore$1.extend(props$2);
  */
 
 var version = {
-  full: '3.0.9',
+  full: '3.0.10',
   major: 3,
   minor: 0,
-  patch: 9
+  patch: 10
 };
 
 export { Collection$1 as Collection, Component$1 as Component, Container, DataStore$1 as DataStore, Index, LinkedCollection$1 as LinkedCollection, Mapper$1 as Mapper, Query$1 as Query, Record$1 as Record, Schema$1 as Schema, Settable, SimpleStore$1 as SimpleStore, belongsTo, belongsToType, hasMany, hasManyType, hasOne, hasOneType, utils, version };
