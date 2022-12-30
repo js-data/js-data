@@ -98,7 +98,7 @@
     "karma-sinon": "^1.0.5",
     "lint-staged": "^10.5.4",
     "lodash": "^4.17.21",
-    "mocha": "^7.2.0",
+    "mocha": "^10.2.0",
     "nyc": "15.0.0",
     "phantomjs-prebuilt": "^2.1.16",
     "prettier-standard": "^16.4.1",
